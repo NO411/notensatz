@@ -22,10 +22,32 @@ class Ui_AboutBox(object):
         icon.addPixmap(QtGui.QPixmap("../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
         AboutBox.setWindowIcon(icon)
         AboutBox.setModal(True)
+        self.verticalLayout = QtWidgets.QVBoxLayout(AboutBox)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.textBrowser = QtWidgets.QTextBrowser(AboutBox)
+        self.textBrowser.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.textBrowser.setAcceptDrops(False)
+        self.textBrowser.setLineWidth(0)
+        self.textBrowser.setObjectName("textBrowser")
+        self.verticalLayout.addWidget(self.textBrowser)
+        self.pushButton = QtWidgets.QPushButton(AboutBox)
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.pushButton)
 
         self.retranslateUi(AboutBox)
+        self.pushButton.clicked.connect(AboutBox.close)
         QtCore.QMetaObject.connectSlotsByName(AboutBox)
 
     def retranslateUi(self, AboutBox):
         _translate = QtCore.QCoreApplication.translate
         AboutBox.setWindowTitle(_translate("AboutBox", "Über uns"))
+        self.textBrowser.setHtml(_translate("AboutBox", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+"<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
+"p, li { white-space: pre-wrap; }\n"
+"</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:14pt; color:#06a0ff;\">Notensatzprogramm</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Author: Noah Weiler</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Version: 0.0.1</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
+        self.pushButton.setText(_translate("AboutBox", "OK"))
