@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>523</width>
-    <height>329</height>
+    <width>601</width>
+    <height>466</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,8 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <selectedon>../assets/icon.png</selectedon>
-   </iconset>
+    <normaloff>../assets/icon.png</normaloff>../assets/icon.png</iconset>
   </property>
   <property name="windowOpacity">
    <double>1.000000000000000</double>
@@ -27,7 +26,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>523</width>
+     <width>601</width>
      <height>21</height>
     </rect>
    </property>
@@ -52,7 +51,6 @@
    <addaction name="menu_file"/>
    <addaction name="menuHilfe"/>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
   <action name="action_new">
    <property name="text">
     <string>Neu...</string>
