@@ -56,7 +56,18 @@ def new_page():
 
 def delete_page():
     global current_page
-    # really?? dialog
+    
+    warning_box = QMessageBox()
+    warning_box.setWindowTitle("Seite Löschen")
+    warning_box.setText("Wollen Sie die Seite " + str(current_page + 1) + " wirklich löschen?")
+    warning_box.setIcon(QMessageBox.Warning)
+    warning_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    warning_box.setDefaultButton(QMessageBox.Yes)
+    result = warning_box.exec_()
+
+    if (result == QMessageBox.No):
+        return
+
     pages.pop(current_page)
     current_page -= 1
     if (current_page < 0):
