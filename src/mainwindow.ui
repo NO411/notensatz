@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>573</width>
-    <height>649</height>
+    <height>580</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -62,20 +62,29 @@
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout_3">
         <item>
-         <widget class="QFrame" name="frame">
+         <widget class="QScrollArea" name="scrollArea">
           <property name="frameShape">
-           <enum>QFrame::StyledPanel</enum>
+           <enum>QFrame::NoFrame</enum>
           </property>
           <property name="frameShadow">
-           <enum>QFrame::Raised</enum>
+           <enum>QFrame::Plain</enum>
           </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QScrollBar" name="verticalScrollBar">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
+          <property name="lineWidth">
+           <number>0</number>
           </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="scrollAreaWidgetContents">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>551</width>
+             <height>431</height>
+            </rect>
+           </property>
+          </widget>
          </widget>
         </item>
        </layout>

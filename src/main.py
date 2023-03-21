@@ -28,13 +28,24 @@ new_doc_dialog = QDialog()
 
 ui = Ui_MainWindow()
 ui.setupUi(window)
+# to be sure this is really called
+ui.scrollArea.setWidgetResizable(True)
 
-ui.label = QLabel(ui.frame)
-ui.label.setPixmap(QPixmap("../assets/icon.png"))
-ui.label.move(10, 10)
+# A4 layout
+scene = QGraphicsScene(0, 0, 2480, 3508)
+# white background
+scene.setBackgroundBrush(QBrush(Qt.white))
 
-def triggerwhatever():
-    ui.label.move(0, ui.verticalScrollBar.value())
+# example how to add something to a scene
+pixmap = QPixmap("../assets/icon.png")
+scene.addPixmap(pixmap)
+textitem = scene.addText("QGraphics is (not) fun!")
+textitem.setPos(100, 100)
+
+# object which is needed to render the scene, attached to the scroll area
+# view can change when the scene changes (new page), but setWidget will never be called again
+view = QGraphicsView(scene)
+ui.scrollArea.setWidget(view)
 
 # setup dialog ui
 aboutbox_ui = Ui_AboutBox()
@@ -45,8 +56,6 @@ new_doc_dialog_ui.setupUi(new_doc_dialog)
 # menubar actions
 ui.action_about.triggered.connect(aboutbox.show)
 ui.action_new.triggered.connect(new_doc_dialog.show)
-ui.verticalScrollBar.valueChanged.connect(triggerwhatever)
-ui.verticalScrollBar.setRange(0, 100)
 
 window.show()
 app.exec()
