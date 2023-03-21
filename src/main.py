@@ -29,23 +29,29 @@ new_doc_dialog = QDialog()
 ui = Ui_MainWindow()
 ui.setupUi(window)
 # to be sure this is really called
-ui.scrollArea.setWidgetResizable(True)
+ui.scroll_area.setWidgetResizable(True)
 
 # A4 layout
-scene = QGraphicsScene(0, 0, 2480, 3508)
+width = 2480
+height = 3508
+scene = QGraphicsScene(0, 0, width, height)
 # white background
-scene.setBackgroundBrush(QBrush(Qt.white))
+rect = QGraphicsRectItem(0, 0, width, height)
+rect.setBrush(QBrush(Qt.white))
+scene.addItem(rect)
 
 # example how to add something to a scene
 pixmap = QPixmap("../assets/icon.png")
 scene.addPixmap(pixmap)
-textitem = scene.addText("QGraphics is (not) fun!")
+textitem = scene.addText("Test text ...")
 textitem.setPos(100, 100)
+textitem.setDefaultTextColor(Qt.black)
 
 # object which is needed to render the scene, attached to the scroll area
 # view can change when the scene changes (new page), but setWidget will never be called again
 view = QGraphicsView(scene)
-ui.scrollArea.setWidget(view)
+view.scale(0.3, 0.3)
+ui.scroll_area.setWidget(view)
 
 # setup dialog ui
 aboutbox_ui = Ui_AboutBox()
