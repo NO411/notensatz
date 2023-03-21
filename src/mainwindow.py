@@ -81,6 +81,7 @@ class Ui_MainWindow(object):
         self.zoom_slider = QtWidgets.QSlider(self.bottom_frame)
         self.zoom_slider.setMinimumSize(QtCore.QSize(100, 0))
         self.zoom_slider.setMaximumSize(QtCore.QSize(100, 16777215))
+        self.zoom_slider.setMinimum(1)
         self.zoom_slider.setMaximum(100)
         self.zoom_slider.setOrientation(QtCore.Qt.Horizontal)
         self.zoom_slider.setObjectName("zoom_slider")
