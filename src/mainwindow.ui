@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>725</width>
+    <width>584</width>
     <height>589</height>
    </rect>
   </property>
@@ -101,30 +101,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QScrollArea" name="scroll_area">
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="lineWidth">
-       <number>0</number>
-      </property>
-      <property name="widgetResizable">
-       <bool>true</bool>
-      </property>
-      <widget class="QWidget" name="scrollAreaWidgetContents">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>725</width>
-         <height>403</height>
-        </rect>
-       </property>
-      </widget>
-     </widget>
+     <widget class="QGraphicsView" name="view"/>
     </item>
     <item>
      <widget class="Line" name="bottom_line">
@@ -293,16 +270,16 @@
    </layout>
    <zorder>bottom_frame</zorder>
    <zorder>top_line</zorder>
-   <zorder>scroll_area</zorder>
    <zorder>top_frame</zorder>
    <zorder>bottom_line</zorder>
+   <zorder>view</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>725</width>
+     <width>584</width>
      <height>21</height>
     </rect>
    </property>

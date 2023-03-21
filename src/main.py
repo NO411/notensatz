@@ -20,8 +20,8 @@ __author__ = "Noah Weiler"
 
 def apply_zoom():
     new_zoom = ui.zoom_slider.value() / 100
-    view.resetTransform()
-    view.scale(new_zoom, new_zoom)
+    ui.view.resetTransform()
+    ui.view.scale(new_zoom, new_zoom)
     ui.zoom_label.setText(str(int(new_zoom * 100)) + " %")
 
 def zoom(change):
@@ -64,17 +64,11 @@ scene.addItem(rect)
 pixmap = QPixmap("../assets/icon.png")
 scene.addPixmap(pixmap)
 
-# object which is needed to render the scene, attached to the scroll area
+# object which is needed to render the scene
 # view can change when the scene changes (new page), but setWidget will never be called again
-view = QGraphicsView(scene)
+ui.view.setScene(scene)
 ui.zoom_slider.setValue(int(start_zoom * 100))
 apply_zoom()
-
-# set up scroll area which holds the view
-# the scrollbars are actually fromn the view widget
-ui.scroll_area.setWidget(view)
-ui.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-ui.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
 # setup dialog ui
 aboutbox_ui = Ui_AboutBox()
