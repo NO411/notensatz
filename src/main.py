@@ -69,6 +69,8 @@ scene.addPixmap(pixmap)
 ui.view.setScene(scene)
 ui.zoom_slider.setValue(int(start_zoom * 100))
 apply_zoom()
+ui.view.verticalScrollBar().setValue(ui.view.verticalScrollBar().minimum())
+ui.view.horizontalScrollBar().setValue(ui.view.horizontalScrollBar().minimum())
 
 # setup dialog ui
 aboutbox_ui = Ui_AboutBox()
