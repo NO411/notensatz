@@ -10,11 +10,10 @@
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 
-
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(584, 589)
+        MainWindow.resize(626, 589)
         MainWindow.setMinimumSize(QtCore.QSize(584, 589))
         MainWindow.setWindowTitle("Notensatz")
         icon = QtGui.QIcon()
@@ -38,6 +37,10 @@ class Ui_MainWindow(object):
         self.top_frame.setFrameShadow(QtWidgets.QFrame.Plain)
         self.top_frame.setLineWidth(0)
         self.top_frame.setObjectName("top_frame")
+        self.pushButton = QtWidgets.QPushButton(self.top_frame)
+        self.pushButton.setGeometry(QtCore.QRect(0, 0, 21, 21))
+        self.pushButton.setText("")
+        self.pushButton.setObjectName("pushButton")
         self.verticalLayout.addWidget(self.top_frame)
         self.top_line = QtWidgets.QFrame(self.centralwidget)
         self.top_line.setSizeIncrement(QtCore.QSize(0, 0))
@@ -113,7 +116,7 @@ class Ui_MainWindow(object):
         self.view.raise_()
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 584, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 626, 21))
         self.menubar.setObjectName("menubar")
         self.menu_file = QtWidgets.QMenu(self.menubar)
         self.menu_file.setObjectName("menu_file")
@@ -152,10 +155,10 @@ class Ui_MainWindow(object):
         self.zoom_label.setText(_translate("MainWindow", "0%"))
         self.zoom_in_button.setText(_translate("MainWindow", "+"))
         self.zoom_out_button.setText(_translate("MainWindow", "-"))
-        self.previous_page_button.setToolTip(_translate("MainWindow", "<html><head/><body><p>Vorherige Seite</p></body></html>"))
+        self.previous_page_button.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#000000;\">Vorherige Seite</span></p></body></html>"))
         self.previous_page_button.setText(_translate("MainWindow", "<"))
         self.current_page_label.setText(_translate("MainWindow", "Seite 1 von 1"))
-        self.next_page_button.setToolTip(_translate("MainWindow", "<html><head/><body><p>Nächste Seite</p></body></html>"))
+        self.next_page_button.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#000000;\">Nächste Seite</span></p></body></html>"))
         self.next_page_button.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
         self.next_page_button.setText(_translate("MainWindow", ">"))
         self.new_page_button.setText(_translate("MainWindow", "Neue Seite"))

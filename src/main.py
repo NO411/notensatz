@@ -57,11 +57,7 @@ def new_page():
 def delete_page():
     global current_page
     
-    warning_box = QMessageBox()
-    warning_box.setWindowTitle("Seite Löschen")
-    warning_box.setText("Wollen Sie die Seite " + str(current_page + 1) + " wirklich löschen?")
-    warning_box.setIcon(QMessageBox.Warning)
-    warning_box.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+    warning_box = QMessageBox(QMessageBox.Warning, "Seite Löschen", "Wollen Sie die Seite " + str(current_page + 1) + " wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
     warning_box.setDefaultButton(QMessageBox.Yes)
     result = warning_box.exec_()
 
@@ -98,7 +94,7 @@ app = QApplication([])
 # apply the dark theme to the app
 qdarktheme.setup_theme()
 # see <https://pyqtdarktheme.readthedocs.io/en/latest/reference/theme_color.html>
-#qdarktheme.setup_theme(corner_shape="sharp")
+qdarktheme.setup_theme(corner_shape="sharp")
 #qdarktheme.setup_theme(custom_colors={"primary": "#ff4a6b"})
 
 window = QMainWindow()
@@ -113,13 +109,27 @@ width = 2480
 height = 3508
 start_zoom = 0.3
 
-# table of pages (scenes)
+# table of pages (QGraphicsScene)
 pages = [create_empty_page()]
 current_page = 0
 
-# example how to add something to a scene
-pixmap = QPixmap("../assets/icon.png")
-pages[0].addPixmap(pixmap)
+# Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
+font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/Bravura.otf")
+
+# check wether font loaded
+if font_loaded == -1:
+    print("Failed to load musicfont")
+
+font = QFont("Bravura", 100)
+text_item = QGraphicsTextItem(str(chr(int("1D11A", 16))*10 + str(chr(int("E030", 16)))), parent=None)
+text_item.setDefaultTextColor(Qt.black)
+text_item.setFont(font)
+pages[0].addItem(text_item)
+
+text_item = QGraphicsTextItem(str(chr(int("E099", 16))), parent=None)
+text_item.setDefaultTextColor(Qt.black)
+text_item.setFont(font)
+pages[0].addItem(text_item)
 
 # object which is needed to render the scene
 # view can change when the scene changes (new page), but setWidget will never be called again
