@@ -114,7 +114,20 @@
      </widget>
     </item>
     <item>
-     <widget class="QGraphicsView" name="view"/>
+     <widget class="QGraphicsView" name="view">
+      <property name="autoFillBackground">
+       <bool>false</bool>
+      </property>
+      <property name="backgroundBrush">
+       <brush brushstyle="SolidPattern">
+        <color alpha="255">
+         <red>40</red>
+         <green>44</green>
+         <blue>52</blue>
+        </color>
+       </brush>
+      </property>
+     </widget>
     </item>
     <item>
      <widget class="Line" name="bottom_line">
@@ -194,7 +207,7 @@
           <number>1</number>
          </property>
          <property name="maximum">
-          <number>100</number>
+          <number>200</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
@@ -203,6 +216,11 @@
        </item>
        <item row="0" column="8">
         <widget class="QPushButton" name="zoom_in_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>+</string>
          </property>
@@ -213,6 +231,11 @@
        </item>
        <item row="0" column="6">
         <widget class="QPushButton" name="zoom_out_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="text">
           <string>-</string>
          </property>
@@ -235,11 +258,19 @@
        </item>
        <item row="0" column="1">
         <widget class="QPushButton" name="previous_page_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Vorherige Seite&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>&lt;</string>
+          <string>🡠</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -252,6 +283,11 @@
        </item>
        <item row="0" column="2">
         <widget class="QPushButton" name="next_page_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
          <property name="toolTip">
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Nächste Seite&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
@@ -259,7 +295,10 @@
           <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
          <property name="text">
-          <string>&gt;</string>
+          <string>🡢</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
          </property>
         </widget>
        </item>
@@ -268,12 +307,21 @@
          <property name="text">
           <string>Neue Seite</string>
          </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item row="0" column="4">
         <widget class="QPushButton" name="delete_page_button">
          <property name="text">
           <string>Lösche Seite</string>
+         </property>
+         <property name="autoDefault">
+          <bool>false</bool>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
          </property>
         </widget>
        </item>

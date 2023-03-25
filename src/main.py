@@ -16,6 +16,11 @@ from new_document import Ui_NewDocumentDialog
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
 
+
+"""
+LOAD FONT IMAGES VIA THE METADATA JSON FILE!!!!
+"""
+
 __author__ = "Noah Weiler"
 
 def apply_zoom():
@@ -23,6 +28,7 @@ def apply_zoom():
     ui.view.resetTransform()
     ui.view.scale(new_zoom, new_zoom)
     ui.zoom_label.setText(str(int(new_zoom * 100)) + " %")
+    update_zoom_buttons_colors()
 
 def zoom_in():
     ui.zoom_slider.setValue(ui.zoom_slider.value() + 1)
@@ -40,8 +46,9 @@ def create_empty_page():
     new_page.addItem(rect)
     return new_page
 
-def update_page_info_text():
+def update_page_info_and_button_text():
     ui.current_page_label.setText("Seite " + str(current_page + 1) + " von " + str(len(pages)))
+    update_page_change_buttons_colors()
 
 def new_page():
     global current_page
@@ -52,13 +59,17 @@ def new_page():
         pages.insert(current_page + 1, new_page)
     current_page += 1
     ui.view.setScene(pages[current_page])
-    update_page_info_text()
+    update_page_info_and_button_text()
 
 def delete_page():
     global current_page
     
-    warning_box = QMessageBox(QMessageBox.Warning, "Seite Löschen", "Wollen Sie die Seite " + str(current_page + 1) + " wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
+    warning_box = QMessageBox(QMessageBox.Warning, "Seite Löschen", f"Wollen Sie die Seite {current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
     warning_box.setDefaultButton(QMessageBox.Yes)
+    warning_box.button(QMessageBox.Yes).setText("Ja")
+    warning_box.button(QMessageBox.No).setText("Nein")
+    warning_box.setCheckBox(QCheckBox("Nicht mehr nachfragen", warning_box))
+
     result = warning_box.exec_()
 
     if (result == QMessageBox.No):
@@ -72,30 +83,70 @@ def delete_page():
         pages.append(create_empty_page())
 
     ui.view.setScene(pages[current_page])
-    update_page_info_text()
+    update_page_info_and_button_text()
     
 def next_page():
     global current_page
     if (current_page + 1 < len(pages)):
         current_page += 1
         ui.view.setScene(pages[current_page])
-        update_page_info_text()
+        update_page_info_and_button_text()
 
 def previous_page():
     global current_page
     if (current_page > 0):
         current_page -= 1
         ui.view.setScene(pages[current_page])
-        update_page_info_text()
+        update_page_info_and_button_text()
+
+def update_page_change_buttons_colors():
+    if (current_page == 0):
+        ui.previous_page_button.setStyleSheet("QPushButton {color: #474a4f}")
+        ui.previous_page_button.setEnabled(False)
+    else:
+        ui.previous_page_button.setStyleSheet(f"QPushButton {{color: {primary_color}}}")
+        ui.previous_page_button.setEnabled(True)
+    if (current_page + 1 == len(pages)):
+        ui.next_page_button.setStyleSheet("QPushButton {color: #474a4f}")
+        ui.next_page_button.setEnabled(False)
+    else:
+        ui.next_page_button.setStyleSheet(f"QPushButton {{color: {primary_color}}}")
+        ui.next_page_button.setEnabled(True)
+
+def update_zoom_buttons_colors():
+    current_zoom = ui.zoom_slider.value()
+    if (current_zoom == ui.zoom_slider.minimum()):
+        ui.zoom_out_button.setStyleSheet("QPushButton {color: #474a4f}")
+        ui.zoom_out_button.setEnabled(False)
+    else:
+        ui.zoom_out_button.setStyleSheet(f"QPushButton {{color: {primary_color}}}")
+        ui.zoom_out_button.setEnabled(True)
+    if (current_zoom == ui.zoom_slider.maximum()):
+        ui.zoom_in_button.setStyleSheet("QPushButton {color: #474a4f}")
+        ui.zoom_in_button.setEnabled(False)
+    else:
+        ui.zoom_in_button.setStyleSheet(f"QPushButton {{color: {primary_color}}}")
+        ui.zoom_in_button.setEnabled(True)
 
 qdarktheme.enable_hi_dpi()
 app = QApplication([])
 
 # apply the dark theme to the app
-qdarktheme.setup_theme()
 # see <https://pyqtdarktheme.readthedocs.io/en/latest/reference/theme_color.html>
-qdarktheme.setup_theme(corner_shape="sharp")
-#qdarktheme.setup_theme(custom_colors={"primary": "#ff4a6b"})
+primary_color = "#528bff"
+qdarktheme.setup_theme(
+    custom_colors = {
+        "primary": primary_color,
+        "background": "#21252b",
+        "border": "#474a4f",
+        "foreground": "#d7d7d5",
+        "scrollbar.background": "#282c34",
+        "scrollbarSlider.background": "#3b414d",
+        "scrollbarSlider.disabledBackground": "#3b414d",
+        "scrollbarSlider.activeBackground": "#4e5563",
+        "scrollbarSlider.hoverBackground": "#414855",
+    }
+)
 
 window = QMainWindow()
 aboutbox = QDialog()
@@ -112,6 +163,8 @@ start_zoom = 0.3
 # table of pages (QGraphicsScene)
 pages = [create_empty_page()]
 current_page = 0
+update_page_change_buttons_colors()
+update_zoom_buttons_colors()
 
 # Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
 font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/Bravura.otf")
@@ -126,7 +179,7 @@ text_item.setDefaultTextColor(Qt.black)
 text_item.setFont(font)
 pages[0].addItem(text_item)
 
-text_item = QGraphicsTextItem(str(chr(int("E099", 16))), parent=None)
+text_item = QGraphicsTextItem(str(chr(int("E099", 16))) + str(chr(int("EC46", 16))) + str(chr(int("EC62", 16))) + str(chr(int("E4E5", 16))) + str(chr(int("E0A2", 16))), parent=None)
 text_item.setDefaultTextColor(Qt.black)
 text_item.setFont(font)
 pages[0].addItem(text_item)
@@ -149,12 +202,12 @@ new_doc_dialog_ui.setupUi(new_doc_dialog)
 ui.action_about.triggered.connect(aboutbox.show)
 ui.action_new.triggered.connect(new_doc_dialog.show)
 ui.zoom_slider.valueChanged.connect(apply_zoom)
-ui.zoom_in_button.pressed.connect(zoom_in)
-ui.zoom_out_button.pressed.connect(zoom_out)
-ui.new_page_button.pressed.connect(new_page)
-ui.delete_page_button.pressed.connect(delete_page)
-ui.next_page_button.pressed.connect(next_page)
-ui.previous_page_button.pressed.connect(previous_page)
+ui.zoom_in_button.clicked.connect(zoom_in)
+ui.zoom_out_button.clicked.connect(zoom_out)
+ui.new_page_button.clicked.connect(new_page)
+ui.delete_page_button.clicked.connect(delete_page)
+ui.next_page_button.clicked.connect(next_page)
+ui.previous_page_button.clicked.connect(previous_page)
 
 window.show()
 app.exec()
