@@ -6,6 +6,7 @@ main.py: Notensatzprogramm, grundlegende Programmstruktur
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
+from PyQt5.QtPrintSupport import QPrinter
 
 # window / dialog imports
 from mainwindow import Ui_MainWindow
@@ -15,13 +16,32 @@ from new_document import Ui_NewDocumentDialog
 # other imports
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
-
-
-"""
-LOAD FONT IMAGES VIA THE METADATA JSON FILE!!!!
-"""
+import json
 
 __author__ = "Noah Weiler"
+
+# symbols that will be implemented
+# map of the symbols shown on the buttons in the symbols box
+# indexes MUST match with the indexes in the designer
+symbols = [
+    # notes
+    ["noteWhole", "noteHalfUp", "noteQuarterUp", "note8thUp", "note16thUp", "note32ndUp", "note64thUp"],
+    # articulation
+    ["articAccentAbove", "articStaccatoAbove", "articTenutoAbove", "keyboardPedalPed", "keyboardPedalUp"],
+    # dynamics
+    ["dynamicMP", "dynamicPiano", "dynamicPP", "dynamicPPP", "dynamicPF", "dynamicFortePiano", "dynamicForte", "dynamicFF", "dynamicFFF", "dynamicCrescendoHairpin", "dynamicDiminuendoHairpin"],
+    # rests
+    ["restWholeLegerLine", "restHalfLegerLine", "restQuarter", "rest8th", "rest16th", "rest32nd", "rest64th"],
+    # accidentals
+    ["accidentalSharp", "accidentalFlat", "accidentalDoubleSharp", "accidentalNatural", "accidentalDoubleFlat"],
+    # time signatures
+    ["timeSigCommon", "timeSigCutCommon"],
+    # misc
+    ["repeatRight", "gClef", "cClef", "fClef", "controlBeginBeam"],
+]
+
+def get_symbol(smufl_name):
+    return str(chr(int(font_metadata[smufl_name][2:], 16)))
 
 def apply_zoom():
     new_zoom = ui.zoom_slider.value() / 100
@@ -61,19 +81,26 @@ def new_page():
     ui.view.setScene(pages[current_page])
     update_page_info_and_button_text()
 
+show_warning_box = True
 def delete_page():
-    global current_page
+    global current_page, show_warning_box
     
-    warning_box = QMessageBox(QMessageBox.Warning, "Seite Löschen", f"Wollen Sie die Seite {current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
-    warning_box.setDefaultButton(QMessageBox.Yes)
-    warning_box.button(QMessageBox.Yes).setText("Ja")
-    warning_box.button(QMessageBox.No).setText("Nein")
-    warning_box.setCheckBox(QCheckBox("Nicht mehr nachfragen", warning_box))
+    if (show_warning_box):
+        warning_box = QMessageBox(QMessageBox.Warning, "Seite Löschen", f"Wollen Sie die Seite {current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
+        warning_box.setDefaultButton(QMessageBox.Yes)
+        warning_box.button(QMessageBox.Yes).setText("Ja")
+        warning_box.button(QMessageBox.No).setText("Nein")
+        check_box = QCheckBox("Nicht mehr nachfragen", warning_box)
+        warning_box.setCheckBox(check_box)
 
-    result = warning_box.exec_()
+        result = warning_box.exec_()
 
-    if (result == QMessageBox.No):
-        return
+        if (result == QMessageBox.No):
+            return
+        
+        if (check_box.isChecked()):
+            show_warning_box = False
+
 
     pages.pop(current_page)
     current_page -= 1
@@ -128,8 +155,49 @@ def update_zoom_buttons_colors():
         ui.zoom_in_button.setStyleSheet(f"QPushButton {{color: {primary_color}}}")
         ui.zoom_in_button.setEnabled(True)
 
+def export_to_pdf(path):
+    printer = QPrinter (QPrinter.HighResolution)
+    printer.setPageSize(QPrinter.A4)
+    printer.setOrientation(QPrinter.Portrait)
+    printer.setOutputFormat(QPrinter.PdfFormat)
+    printer.setOutputFileName(path + "/test.pdf")
+
+    printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
+    printer.setColorMode(QPrinter.Color)
+    printer.setResolution(300)
+    printer.setOutputFormat(QPrinter.PdfFormat)
+    printer.setPaperSize(QPrinter.A4)
+    printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
+
+    p = QPainter(printer)
+    pen = QPen(Qt.transparent)
+    p.setPen(pen)
+
+    for i, scene in enumerate(pages):
+        scene.render(p)
+        if i != len(pages) - 1:
+            printer.newPage()
+    p.end()
+
+def save():
+    export_to_pdf("../src")
+
 qdarktheme.enable_hi_dpi()
 app = QApplication([])
+
+# Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
+font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/Bravura.otf")
+
+# check wether font loaded
+if font_loaded == -1:
+    print("Failed to load musicfont")
+
+# needed for symbol unicodes
+font_metadata_file = open("../assets/bravura_font/unicodes_list.json")
+font_metadata = json.load(font_metadata_file)
+# example:
+# print(font_metadata["noteHalfUp"])
+font_metadata_file.close()
 
 # apply the dark theme to the app
 # see <https://pyqtdarktheme.readthedocs.io/en/latest/reference/theme_color.html>
@@ -145,7 +213,8 @@ qdarktheme.setup_theme(
         "scrollbarSlider.disabledBackground": "#3b414d",
         "scrollbarSlider.activeBackground": "#4e5563",
         "scrollbarSlider.hoverBackground": "#414855",
-    }
+    },
+    corner_shape="rounded"
 )
 
 window = QMainWindow()
@@ -166,20 +235,13 @@ current_page = 0
 update_page_change_buttons_colors()
 update_zoom_buttons_colors()
 
-# Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
-font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/Bravura.otf")
-
-# check wether font loaded
-if font_loaded == -1:
-    print("Failed to load musicfont")
-
 font = QFont("Bravura", 100)
 text_item = QGraphicsTextItem(str(chr(int("1D11A", 16))*10 + str(chr(int("E030", 16)))), parent=None)
 text_item.setDefaultTextColor(Qt.black)
 text_item.setFont(font)
 pages[0].addItem(text_item)
 
-text_item = QGraphicsTextItem(str(chr(int("E099", 16))) + str(chr(int("EC46", 16))) + str(chr(int("EC62", 16))) + str(chr(int("E4E5", 16))) + str(chr(int("E0A2", 16))), parent=None)
+text_item = QGraphicsTextItem(str(chr(int("E1D7", 16))) + str(chr(int("EC46", 16))) + str(chr(int("EC62", 16))) + str(chr(int("E4E5", 16))) + str(chr(int("E0A2", 16))), parent=None)
 text_item.setDefaultTextColor(Qt.black)
 text_item.setFont(font)
 pages[0].addItem(text_item)
@@ -192,6 +254,40 @@ apply_zoom()
 ui.view.verticalScrollBar().setValue(ui.view.verticalScrollBar().minimum())
 ui.view.horizontalScrollBar().setValue(ui.view.horizontalScrollBar().minimum())
 
+
+################
+# experimental #
+################
+
+ui.symbols_box_buttons = []
+ui.box_tabs_layouts = []
+
+for i, symbol_class in enumerate(symbols):
+    ui.symbols_box_buttons.insert(0, [])
+    
+    tab_widget = ui.symbols_box.widget(i)
+    ui.box_tabs_layouts.insert(i, QHBoxLayout(tab_widget))
+    ui.box_tabs_layouts[i].setContentsMargins(3, 3, 3, 3)
+    ui.box_tabs_layouts[i].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+    for name in symbol_class:
+        box_button = QPushButton(tab_widget)
+        box_button.setObjectName(name + "Button")
+        box_button.setFixedSize(35, 60)
+        box_button.setFlat(True)
+        box_button.setCheckable(True)
+        label = QLabel(get_symbol(name), box_button)
+        font = QFont("Bravura", 20)
+        label.setFont(font)
+        label.setAlignment(Qt.AlignHCenter)
+        label.setGeometry(0, -20, box_button.width(), 100)
+
+        ui.box_tabs_layouts[i].addWidget(box_button)
+        ui.symbols_box_buttons[i].append(box_button)
+
+################
+
+ui.zoom_out_button.setFixedWidth(ui.zoom_out_button.height())
+
 # setup dialog ui
 aboutbox_ui = Ui_AboutBox()
 aboutbox_ui.setupUi(aboutbox)
@@ -199,6 +295,7 @@ new_doc_dialog_ui = Ui_NewDocumentDialog()
 new_doc_dialog_ui.setupUi(new_doc_dialog)
 
 # menubar actions
+ui.action_save.triggered.connect(save)
 ui.action_about.triggered.connect(aboutbox.show)
 ui.action_new.triggered.connect(new_doc_dialog.show)
 ui.zoom_slider.valueChanged.connect(apply_zoom)
