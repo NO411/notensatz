@@ -187,6 +187,9 @@ app = QApplication([])
 
 # Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
 font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/Bravura.otf")
+# Times New Roman font, see <https://freefontsfamily.com/times-new-roman-font-free/#google_vignette>
+# (should be included in Windows anyways)
+text_font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/times new roman.ttf")
 
 # check wether font loaded
 if font_loaded == -1:
@@ -245,6 +248,14 @@ text_item = QGraphicsTextItem(str(chr(int("E1D7", 16))) + str(chr(int("EC46", 16
 text_item.setDefaultTextColor(Qt.black)
 text_item.setFont(font)
 pages[0].addItem(text_item)
+
+text_item = QGraphicsTextItem("Titel hinzufügen")
+text_item.setFont(QFont("Times New Roman", 150))
+text_item.setDefaultTextColor(Qt.black)
+pages[0].addItem(text_item)
+text_item.setPos(pages[0].sceneRect().width() / 2.0 - 100, 100)
+text_item.setTextInteractionFlags(Qt.TextEditorInteraction)
+
 
 # object which is needed to render the scene
 # view can change when the scene changes (new page), but setWidget will never be called again
