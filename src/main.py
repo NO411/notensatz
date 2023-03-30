@@ -25,20 +25,72 @@ __author__ = "Noah Weiler"
 # indexes MUST match with the indexes in the designer
 symbols = [
     # notes
-    ["noteWhole", "noteHalfUp", "noteQuarterUp", "note8thUp", "note16thUp", "note32ndUp", "note64thUp"],
+    [# [unicode key, tooltip text]
+        ["noteWhole", "ganze Note"],
+        ["noteHalfUp", "halbe Note"],
+        ["noteQuarterUp", "viertel Note"],
+        ["note8thUp", "achtel Note"],
+        ["note16thUp", "sechszehntel Note"],
+        ["note32ndUp", "zweiunddreißigstel Note"],
+        ["note64thUp", "vierundsechszigstel Note"],
+        ["metAugmentationDot", "Punktierung"],
+    ],
     # articulation
-    ["articAccentAbove", "articStaccatoAbove", "articTenutoAbove", "keyboardPedalPed", "keyboardPedalUp"],
+    [
+        ["articAccentAbove", "Akzent"],
+        ["articStaccatoAbove", "Staccato"],
+        ["articTenutoAbove", "Tenuto"],
+        ["keyboardPedalPed", "Pedal"],
+        ["keyboardPedalUp", "Pedal loslassen"],
+    ],
     # dynamics
-    ["dynamicMP", "dynamicPiano", "dynamicPP", "dynamicPPP", "dynamicPF", "dynamicFortePiano", "dynamicForte", "dynamicFF", "dynamicFFF", "dynamicCrescendoHairpin", "dynamicDiminuendoHairpin"],
+    [
+        ["dynamicMP", "mezzopiano"],
+        ["dynamicPiano", "piano"],
+        ["dynamicPP", "pianissimo"],
+        ["dynamicPPP", "pianopianissimo"],
+        ["dynamicPF", "pianoforte"],
+        ["dynamicFortePiano", "fortepiano"],
+        ["dynamicMF", "mezzoforte"],
+        ["dynamicForte", "forte"],
+        ["dynamicFF", "fortissimo"],
+        ["dynamicFFF", "fortefortissimo"],
+        ["dynamicCrescendoHairpin", "crescendo"],
+        ["dynamicDiminuendoHairpin", "decrescendo"],
+    ],
     # rests
-    ["restWholeLegerLine", "restHalfLegerLine", "restQuarter", "rest8th", "rest16th", "rest32nd", "rest64th"],
+    [
+        ["restWholeLegerLine", "ganze Pause"],
+        ["restHalfLegerLine", "halbe pause"],
+        ["restQuarter", "viertel Pause"],
+        ["rest8th", "achtel Pause"],
+        ["rest16th", "sechszehntel Pause"],
+        ["rest32nd", "zweiunddreißigstel Pause"],
+        ["rest64th", "vierundsechszigstel Pause"],
+        ["metAugmentationDot", "Punktierung"],
+    ],
     # accidentals
-    ["accidentalSharp", "accidentalFlat", "accidentalDoubleSharp", "accidentalNatural", "accidentalDoubleFlat"],
+    [
+        ["accidentalSharp", "Kreuz"],
+        ["accidentalFlat", "b"],
+        ["accidentalDoubleSharp", "Doppelkreuz"],
+        ["accidentalNatural", "Auflösung"],
+        ["accidentalDoubleFlat", "doppel b"],
+    ],
     # time signatures
-    ["timeSigCommon", "timeSigCutCommon"],
+    [
+        ["timeSigCommon", "Viervierteltakt"],
+        ["timeSigCutCommon", "Zweivierteltakt"],
+    ],
     # misc
-    ["repeatRight", "gClef", "cClef", "fClef", "controlBeginBeam"],
+    [
+        ["repeatRight", "Wiederholung"],
+        ["gClef", "Violinchlüssel"],
+        ["cClef", "C-Schlüssel"],
+        ["fClef", "Bassschlüssel"],
+    ],
 ]
+
 
 def get_symbol(smufl_name):
     return str(chr(int(font_metadata[smufl_name][2:], 16)))
@@ -84,7 +136,7 @@ def new_page():
 show_warning_box = True
 def delete_page():
     global current_page, show_warning_box
-    
+
     if (show_warning_box):
         warning_box = QMessageBox(QMessageBox.Warning, "Seite Löschen", f"Wollen Sie die Seite {current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
         warning_box.setDefaultButton(QMessageBox.Yes)
@@ -97,7 +149,7 @@ def delete_page():
 
         if (result == QMessageBox.No):
             return
-        
+
         if (check_box.isChecked()):
             show_warning_box = False
 
@@ -111,7 +163,7 @@ def delete_page():
 
     ui.view.setScene(pages[current_page])
     update_page_info_and_button_text()
-    
+
 def next_page():
     global current_page
     if (current_page + 1 < len(pages)):
@@ -156,6 +208,9 @@ def update_zoom_buttons_colors():
         ui.zoom_in_button.setEnabled(True)
 
 def export_to_pdf(path):
+    # fix black border!!
+    # maybe with small upscale to hide them
+
     printer = QPrinter (QPrinter.HighResolution)
     printer.setPageSize(QPrinter.A4)
     printer.setOrientation(QPrinter.Portrait)
@@ -165,13 +220,8 @@ def export_to_pdf(path):
     printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
     printer.setColorMode(QPrinter.Color)
     printer.setResolution(300)
-    printer.setOutputFormat(QPrinter.PdfFormat)
-    printer.setPaperSize(QPrinter.A4)
-    printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
 
     p = QPainter(printer)
-    pen = QPen(Qt.transparent)
-    p.setPen(pen)
 
     for i, scene in enumerate(pages):
         scene.render(p)
@@ -275,18 +325,22 @@ ui.box_tabs_layouts = []
 
 for i, symbol_class in enumerate(symbols):
     ui.symbols_box_buttons.insert(0, [])
-    
+
     tab_widget = ui.symbols_box.widget(i)
     ui.box_tabs_layouts.insert(i, QHBoxLayout(tab_widget))
     ui.box_tabs_layouts[i].setContentsMargins(3, 3, 3, 3)
     ui.box_tabs_layouts[i].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
     for name in symbol_class:
+        # name[0]: unicode key
+        # name[1]: tooltip text
         box_button = QPushButton(tab_widget)
-        box_button.setObjectName(name + "Button")
+        box_button.setObjectName(name[0] + "Button")
         box_button.setFixedSize(35, 60)
         box_button.setFlat(True)
         box_button.setCheckable(True)
-        label = QLabel(get_symbol(name), box_button)
+        box_button.setToolTip(name[1])
+        box_button.setStyleSheet("QToolTip {color: black}")
+        label = QLabel(get_symbol(name[0]), box_button)
         font = QFont("Bravura", 20)
         label.setFont(font)
         label.setAlignment(Qt.AlignHCenter)
