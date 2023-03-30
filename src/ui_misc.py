@@ -43,3 +43,9 @@ def update_zoom_buttons_colors():
     else:
         app.ui.zoom_in_button.setStyleSheet(f"QPushButton {{color: {app.primary_color}}}")
         app.ui.zoom_in_button.setEnabled(True)
+
+def unselect_buttons(n_class, index):
+    for c, _ in enumerate(app.symbols):
+        for i, symbol_button in enumerate(app.ui.symbols_box_buttons[c]):
+            if (i != index and c != n_class and symbol_button.isChecked()):
+                symbol_button.setChecked(False)

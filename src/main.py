@@ -34,6 +34,10 @@ def main():
     app.ui.next_page_button.clicked.connect(page_handling.next_page)
     app.ui.previous_page_button.clicked.connect(page_handling.previous_page)
 
+    for n_class, _ in enumerate(app.symbols):
+        for i, symbol_button in enumerate(app.ui.symbols_box_buttons[n_class]):
+            app.ui.symbols_box_buttons[n_class][i].clicked.connect(lambda n_class=n_class, index=i: ui_misc.unselect_buttons(n_class, index))
+
     app.window.show()
     app.app.exec()
 
