@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'aboutbox.ui'
+# Form implementation generated from reading ui file 'pyqt5_designer_uis/aboutbox.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -19,7 +19,7 @@ class Ui_AboutBox(object):
         AboutBox.setMinimumSize(QtCore.QSize(300, 200))
         AboutBox.setMaximumSize(QtCore.QSize(300, 200))
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
+        icon.addPixmap(QtGui.QPixmap("pyqt5_designer_uis\\../../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
         AboutBox.setWindowIcon(icon)
         AboutBox.setModal(True)
         self.verticalLayout = QtWidgets.QVBoxLayout(AboutBox)

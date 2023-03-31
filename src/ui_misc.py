@@ -22,7 +22,7 @@ def update_page_change_buttons_colors():
     else:
         app.ui.previous_page_button.setStyleSheet(f"QPushButton {{color: {app.primary_color}}}")
         app.ui.previous_page_button.setEnabled(True)
-    if (app.current_page + 1 == len(app.pages)):
+    if (app.current_page + 1 == len(app.document_ui.pages)):
         app.ui.next_page_button.setStyleSheet("QPushButton {color: #474a4f}")
         app.ui.next_page_button.setEnabled(False)
     else:

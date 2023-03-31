@@ -13,7 +13,17 @@ from new_document import Ui_NewDocumentDialog
 # intern imports
 from fonts import load_fonts, get_symbol
 
+class DocumentUi:
+    def __init__(self):
+        # table of QGraphicsScenes
+        self.pages = None
+
+        # all objects with the following structure, to be able to access them in the pages list instead of creating a copy
+        # [page index, item index]
+        self.title = None
+
 app = None
+document_ui = None
 
 symbols = None
 show_warning_box = None
@@ -22,8 +32,6 @@ current_page = None
 width = None
 height = None
 start_zoom = None
-
-pages = []
 
 primary_color = None
 
@@ -63,7 +71,7 @@ def init_symbol_buttons():
 
 # will be called in main.py
 def init():
-    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, pages
+    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui
 
     qdarktheme.enable_hi_dpi()
     
@@ -87,6 +95,9 @@ def init():
         },
         corner_shape="rounded"
     )
+
+    document_ui = DocumentUi()
+    document_ui.pages = []
 
     # symbols that will be implemented
     # map of the symbols shown on the buttons in the symbols box

@@ -30,7 +30,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <selectedon>../assets/icon.png</selectedon>
+    <selectedon>../../assets/icon.png</selectedon>
    </iconset>
   </property>
   <property name="sizeGripEnabled">

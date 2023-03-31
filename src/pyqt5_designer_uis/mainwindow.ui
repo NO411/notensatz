@@ -27,7 +27,7 @@
   <property name="windowIcon">
    <iconset>
     <normaloff>../assets/icon.png</normaloff>
-    <selectedon>../assets/icon.png</selectedon>../assets/icon.png</iconset>
+    <selectedon>../../assets/icon.png</selectedon>../assets/icon.png</iconset>
   </property>
   <property name="windowOpacity">
    <double>1.000000000000000</double>
@@ -387,6 +387,8 @@
     <addaction name="action_open"/>
     <addaction name="separator"/>
     <addaction name="action_save"/>
+    <addaction name="action_save_as"/>
+    <addaction name="action_export"/>
     <addaction name="separator"/>
     <addaction name="action_close"/>
    </widget>
@@ -402,12 +404,12 @@
   </widget>
   <action name="action_new">
    <property name="text">
-    <string>Neu...</string>
+    <string>Neu</string>
    </property>
   </action>
   <action name="action_open">
    <property name="text">
-    <string>Öffnen...</string>
+    <string>Öffnen</string>
    </property>
   </action>
   <action name="action_save">
@@ -428,6 +430,16 @@
   <action name="action_about">
    <property name="text">
     <string>Über uns</string>
+   </property>
+  </action>
+  <action name="action_save_as">
+   <property name="text">
+    <string>Speichern unter</string>
+   </property>
+  </action>
+  <action name="action_export">
+   <property name="text">
+    <string>Exportieren</string>
    </property>
   </action>
  </widget>

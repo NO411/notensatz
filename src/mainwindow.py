@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mainwindow.ui'
+# Form implementation generated from reading ui file 'pyqt5_designer_uis/mainwindow.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.4
 #
@@ -21,8 +21,8 @@ class Ui_MainWindow(object):
         MainWindow.setFont(font)
         MainWindow.setWindowTitle("Notensatz")
         icon = QtGui.QIcon()
-        icon.addPixmap(QtGui.QPixmap("../assets/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        icon.addPixmap(QtGui.QPixmap("../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
+        icon.addPixmap(QtGui.QPixmap("pyqt5_designer_uis\\../assets/icon.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        icon.addPixmap(QtGui.QPixmap("pyqt5_designer_uis\\../../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
         MainWindow.setWindowIcon(icon)
         MainWindow.setWindowOpacity(1.0)
         MainWindow.setAnimated(True)
@@ -175,10 +175,16 @@ class Ui_MainWindow(object):
         self.action_doc.setObjectName("action_doc")
         self.action_about = QtWidgets.QAction(MainWindow)
         self.action_about.setObjectName("action_about")
+        self.action_save_as = QtWidgets.QAction(MainWindow)
+        self.action_save_as.setObjectName("action_save_as")
+        self.action_export = QtWidgets.QAction(MainWindow)
+        self.action_export.setObjectName("action_export")
         self.menu_file.addAction(self.action_new)
         self.menu_file.addAction(self.action_open)
         self.menu_file.addSeparator()
         self.menu_file.addAction(self.action_save)
+        self.menu_file.addAction(self.action_save_as)
+        self.menu_file.addAction(self.action_export)
         self.menu_file.addSeparator()
         self.menu_file.addAction(self.action_close)
         self.menu_help.addAction(self.action_doc)
@@ -213,9 +219,11 @@ class Ui_MainWindow(object):
         self.new_page_button.setText(_translate("MainWindow", "Neue Seite"))
         self.menu_file.setTitle(_translate("MainWindow", "Datei"))
         self.menu_help.setTitle(_translate("MainWindow", "Hilfe"))
-        self.action_new.setText(_translate("MainWindow", "Neu..."))
-        self.action_open.setText(_translate("MainWindow", "Öffnen..."))
+        self.action_new.setText(_translate("MainWindow", "Neu"))
+        self.action_open.setText(_translate("MainWindow", "Öffnen"))
         self.action_save.setText(_translate("MainWindow", "Speichern"))
         self.action_close.setText(_translate("MainWindow", "Beenden"))
         self.action_doc.setText(_translate("MainWindow", "Dokumentation"))
         self.action_about.setText(_translate("MainWindow", "Über uns"))
+        self.action_save_as.setText(_translate("MainWindow", "Speichern unter"))
+        self.action_export.setText(_translate("MainWindow", "Exportieren"))

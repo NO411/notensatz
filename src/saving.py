@@ -1,8 +1,9 @@
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtGui import QPainter
+from PyQt5.QtWidgets import QFileDialog
 import app
 
-def export_to_pdf(path):
+def export_to_pdf(filename):
     # fix black border!!
     # maybe with small upscale to hide them
 
@@ -10,7 +11,7 @@ def export_to_pdf(path):
     printer.setPageSize(QPrinter.A4)
     printer.setOrientation(QPrinter.Portrait)
     printer.setOutputFormat(QPrinter.PdfFormat)
-    printer.setOutputFileName(path + "/test.pdf")
+    printer.setOutputFileName(filename)
 
     printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
     printer.setColorMode(QPrinter.Color)
@@ -18,11 +19,13 @@ def export_to_pdf(path):
 
     p = QPainter(printer)
 
-    for i, scene in enumerate(app.pages):
+    for i, scene in enumerate(app.document_ui.pages):
         scene.render(p)
-        if i != len(app.pages) - 1:
+        if i != len(app.document_ui.pages) - 1:
             printer.newPage()
     p.end()
 
-def save():
-    export_to_pdf("../src")
+def export():
+    filename, _ = QFileDialog.getSaveFileName(app.ui.centralwidget, "Notensatz exportieren", "notensatz.pdf", "*.pdf")
+    if filename:
+        export_to_pdf(filename)
