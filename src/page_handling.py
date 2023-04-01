@@ -3,57 +3,8 @@ from PyQt5.QtGui import QBrush, QFont
 from PyQt5.QtCore import Qt
 
 import app
+from document_text import DocumentTextitem
 from ui_misc import update_page_change_buttons_colors
-
-class DocumentTextitem(QGraphicsTextItem):
-    def __init__(self, text: str, fontSize: float, y: float, alignment: str, bold: bool):
-        """
-        `alignment`: "right", "center"
-        """
-        super().__init__()
-
-        # text
-        self.setPlainText(text)
-        font = QFont("Times New Roman", fontSize)
-        font.setBold(bold)
-        self.setFont(font)
-        self.setDefaultTextColor(Qt.black)
-
-        # interaction
-        self.setTextInteractionFlags(Qt.TextEditorInteraction | Qt.NoTextInteraction)
-        self.document().setMaximumBlockCount(1)
-
-        # alignment and positioning
-        self.alignment = alignment
-        self._y = y
-        self.align()
-        self.document().contentsChanged.connect(self.align)
-
-    def crop_text(self):
-        # set maximum width
-        while (self.boundingRect().width() > (app.width - 2 * app.margin)):
-            self.document().blockSignals(True)
-            cursor = self.textCursor()
-            old_cursor_pos = cursor.position()
-            # remove character which was added by the user at the cursor position
-            self.setPlainText(self.toPlainText()[:old_cursor_pos - 1] + self.toPlainText()[old_cursor_pos:])
-            cursor.setPosition(old_cursor_pos - 1)
-            self.setTextCursor(cursor)
-            self.document().blockSignals(False)
-
-    def align(self):
-        if (self.alignment == "right"):
-            self.crop_text()
-            self.setPos(app.width - app.margin - self.boundingRect().width(), self._y)
-        elif (self.alignment == "center"):
-            self.crop_text()
-            self.setPos(app.width / 2 - self.boundingRect().width() / 2, self._y)
-
-    def remove_highlight(self):
-        # work around to remove highlighted text
-        cursor = self.textCursor()
-        cursor.setPosition(len(self.toPlainText()))
-        self.setTextCursor(cursor)
 
 def create_empty_page(new_first_page):
     new_page = QGraphicsScene(0, 0, app.width, app.height)
@@ -64,11 +15,15 @@ def create_empty_page(new_first_page):
 
     if (new_first_page):
         # the font sizes were roughly measured using an example
-        title = DocumentTextitem("Titel", app.width * 0.6 / 21, app.margin, "center", True)
-        composer = DocumentTextitem("Komponist", app.width * 0.3 / 21, title.y() + title.boundingRect().height(), "right", True)
+        heading = DocumentTextitem("Partitur", app.width * 0.6 / 21, app.margin, "center", True)
+        subheading = DocumentTextitem("Unterüberschrift", app.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
+        composer = DocumentTextitem("Komponist / Arrangeur", app.width * 0.3 / 21, subheading.y() + subheading.boundingRect().height(), "right", True)
 
-        new_page.addItem(title)
-        app.document_ui.title = title
+        new_page.addItem(heading)
+        app.document_ui.heading = heading
+
+        new_page.addItem(subheading)
+        app.document_ui.subheading = subheading
 
         new_page.addItem(composer)
         app.document_ui.composer = composer

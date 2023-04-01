@@ -1,8 +1,10 @@
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtGui import QPainter
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
 from PyQt5.QtCore import Qt
+
 import app
+from document_text import DocumentTextitem
 
 def export_to_pdf(filename):
     # fix black border!!
@@ -21,8 +23,10 @@ def export_to_pdf(filename):
     p = QPainter(printer)
 
     # remove highlights (they would appear gray in the pdf)
-    app.document_ui.title.remove_highlight()
-    app.document_ui.composer.remove_highlight()
+    for scene in app.document_ui.pages:
+        for item in scene.items():
+            if (type(item) == DocumentTextitem or type(item) == QGraphicsTextItem):
+                item.remove_highlight()
 
     for i, scene in enumerate(app.document_ui.pages):
         scene.render(p)

@@ -20,7 +20,8 @@ class DocumentUi:
 
         # references of the objects stored in the scene to be able to access them
         # because it is not always possible to determine the index of the item in the pages[x].items() list
-        self.title = None
+        self.heading = None
+        self.subheading = None
         self.composer = None
 
 app = None

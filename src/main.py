@@ -26,7 +26,7 @@ def main():
     app.ui.action_export.triggered.connect(saving.export)
     app.ui.action_about.triggered.connect(app.aboutbox.show)
     app.ui.action_new.triggered.connect(app.new_doc_dialog.show)
-    app.ui.action_edit_title.triggered.connect(app.document_ui.title.setFocus)
+    app.ui.action_edit_title.triggered.connect(app.document_ui.heading.setFocus)
     app.ui.action_edit_composer.triggered.connect(app.document_ui.composer.setFocus)
 
     # buttons and other gui elements
