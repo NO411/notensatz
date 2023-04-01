@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>626</width>
+    <width>827</width>
     <height>589</height>
    </rect>
   </property>
@@ -375,7 +375,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>626</width>
+     <width>827</width>
      <height>21</height>
     </rect>
    </property>
@@ -403,8 +403,9 @@
     <property name="title">
      <string>Bearbeiten</string>
     </property>
-    <addaction name="action_edit_title"/>
+    <addaction name="action_edit_heading"/>
     <addaction name="action_edit_composer"/>
+    <addaction name="action_edit_subheading"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_help"/>
@@ -450,7 +451,7 @@
     <string>Exportieren</string>
    </property>
   </action>
-  <action name="action_edit_title">
+  <action name="action_edit_heading">
    <property name="text">
     <string>Titel ändern</string>
    </property>
@@ -458,6 +459,11 @@
   <action name="action_edit_composer">
    <property name="text">
     <string>Komponist ändern</string>
+   </property>
+  </action>
+  <action name="action_edit_subheading">
+   <property name="text">
+    <string>Unterüberschrift ändern</string>
    </property>
   </action>
  </widget>
