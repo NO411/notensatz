@@ -1,6 +1,7 @@
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtCore import Qt
 import app
 
 def export_to_pdf(filename):
@@ -18,6 +19,10 @@ def export_to_pdf(filename):
     printer.setResolution(300)
 
     p = QPainter(printer)
+
+    # remove highlights (they would appear gray in the pdf)
+    app.document_ui.title.remove_highlight()
+    app.document_ui.composer.remove_highlight()
 
     for i, scene in enumerate(app.document_ui.pages):
         scene.render(p)

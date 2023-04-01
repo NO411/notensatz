@@ -18,9 +18,10 @@ class DocumentUi:
         # table of QGraphicsScenes
         self.pages = None
 
-        # all objects with the following structure, to be able to access them in the pages list instead of creating a copy
-        # [page index, item index]
+        # references of the objects stored in the scene to be able to access them
+        # because it is not always possible to determine the index of the item in the pages[x].items() list
         self.title = None
+        self.composer = None
 
 app = None
 document_ui = None
@@ -32,6 +33,7 @@ current_page = None
 width = None
 height = None
 start_zoom = None
+margin = None
 
 primary_color = None
 
@@ -71,7 +73,7 @@ def init_symbol_buttons():
 
 # will be called in main.py
 def init():
-    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui
+    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui, margin
 
     qdarktheme.enable_hi_dpi()
     
@@ -175,8 +177,11 @@ def init():
     width = 2480
     height = 3508
     start_zoom = 0.3
-
-    pages = []
+    # default margin: ca. 1.54 cm
+    # default paper width: 21 cm
+    # margin / width = [default margin] / [default paper width]
+    # -> margin = width * [default margin] / [default paper width]
+    margin = width * 1.54 / 21
 
     window = QMainWindow()
     aboutbox = QDialog()

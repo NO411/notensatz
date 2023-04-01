@@ -399,8 +399,16 @@
     <addaction name="action_doc"/>
     <addaction name="action_about"/>
    </widget>
+   <widget class="QMenu" name="menu_edit">
+    <property name="title">
+     <string>Bearbeiten</string>
+    </property>
+    <addaction name="action_edit_title"/>
+    <addaction name="action_edit_composer"/>
+   </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_help"/>
+   <addaction name="menu_edit"/>
   </widget>
   <action name="action_new">
    <property name="text">
@@ -440,6 +448,16 @@
   <action name="action_export">
    <property name="text">
     <string>Exportieren</string>
+   </property>
+  </action>
+  <action name="action_edit_title">
+   <property name="text">
+    <string>Titel ändern</string>
+   </property>
+  </action>
+  <action name="action_edit_composer">
+   <property name="text">
+    <string>Komponist ändern</string>
    </property>
   </action>
  </widget>
