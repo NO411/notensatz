@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QFontMetrics
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
@@ -42,6 +42,7 @@ window = None
 aboutbox = None
 new_doc_dialog = None
 ui = None
+in_welcome_screen = None
 
 def init_symbol_buttons():
     global ui, symbols
@@ -72,9 +73,16 @@ def init_symbol_buttons():
             ui.box_tabs_layouts[i].addWidget(box_button)
             ui.symbols_box_buttons[i].append(box_button)
 
+def window_resize(event):
+    if (in_welcome_screen):
+        ui.welcome_label.move((window.width() - ui.welcome_label.width()) / 2, (window.height() - ui.welcome_label.height()) / 2)
+        ui.welcome_button_new.move((window.width() - ui.welcome_button_new.width()) / 2 + ui.welcome_button_new.width() / 2 + 10, ui.welcome_label.y() + ui.welcome_label.height() + 20)
+        ui.welcome_button_open.move((window.width() - ui.welcome_button_open.width()) / 2 - ui.welcome_button_open.width() / 2 - 10, ui.welcome_label.y() + ui.welcome_label.height() + 20)
+
+    
 # will be called in main.py
 def init():
-    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui, margin
+    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui, margin, in_welcome_screen
 
     qdarktheme.enable_hi_dpi()
     
@@ -198,10 +206,50 @@ def init():
     ui.symbols_box_buttons = []
     ui.box_tabs_layouts = []
 
+    # welcome screen:
+    in_welcome_screen = True
+    ui.blur_effect = QGraphicsBlurEffect()
+    ui.blur_effect.setBlurRadius(10)
+    ui.centralwidget.setGraphicsEffect(ui.blur_effect)
+    ui.centralwidget.setEnabled(False)
+    ui.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+    ui.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+    label_font = QFont()
+    label_font.setPointSize(20)
+    label_font.setBold(True)
+
+    ui.welcome_label = QLabel("Willkommen!", window)
+    ui.welcome_label.setFont(label_font)
+    ui.welcome_label.setStyleSheet(f"color: {primary_color}; background-color: transparent")
+
+    font_metrics = QFontMetrics(ui.welcome_label.font())
+    text_width = font_metrics.boundingRect(ui.welcome_label.text()).width() + 10
+    text_height = font_metrics.boundingRect(ui.welcome_label.text()).height()
+    ui.welcome_label.setFixedSize(text_width, text_height)
+    window.resizeEvent = window_resize
+
+    ui.welcome_button_new = QPushButton("Neue Datei", window)
+    ui.welcome_button_new.setDefault(True)
+
+    ui.welcome_button_open = QPushButton("Datei Öffnen", window)
+    ui.welcome_button_new.setDefault(True)
+
+    edit_menu = ui.menubar.findChild(QMenu, "menu_edit")
+    edit_menu.setEnabled(False)
+
+    ui.action_save.setEnabled(False)
+    ui.action_save_as.setEnabled(False)
+    ui.action_export.setEnabled(False)
+
     # setup dialog ui
     aboutbox_ui = Ui_AboutBox()
     aboutbox_ui.setupUi(aboutbox)
     new_doc_dialog_ui = Ui_NewDocumentDialog()
     new_doc_dialog_ui.setupUi(new_doc_dialog)
+
+    # remove standard ?-help hymbol
+    new_doc_dialog.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
+    aboutbox.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
 
     init_symbol_buttons()

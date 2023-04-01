@@ -44,6 +44,9 @@ def main():
         for i, symbol_button in enumerate(app.ui.symbols_box_buttons[n_class]):
             symbol_button.clicked.connect(lambda n_class=n_class, index=i: ui_misc.unselect_buttons(n_class, index))
 
+    # welcome screen buttons:
+    app.ui.welcome_button_new.clicked.connect(app.new_doc_dialog.show)
+
     app.window.show()
     app.app.exec()
 

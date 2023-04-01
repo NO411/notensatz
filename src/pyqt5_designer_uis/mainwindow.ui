@@ -404,12 +404,12 @@
      <string>Bearbeiten</string>
     </property>
     <addaction name="action_edit_heading"/>
-    <addaction name="action_edit_composer"/>
     <addaction name="action_edit_subheading"/>
+    <addaction name="action_edit_composer"/>
    </widget>
    <addaction name="menu_file"/>
-   <addaction name="menu_help"/>
    <addaction name="menu_edit"/>
+   <addaction name="menu_help"/>
   </widget>
   <action name="action_new">
    <property name="text">

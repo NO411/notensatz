@@ -198,11 +198,11 @@ class Ui_MainWindow(object):
         self.menu_help.addAction(self.action_doc)
         self.menu_help.addAction(self.action_about)
         self.menu_edit.addAction(self.action_edit_heading)
-        self.menu_edit.addAction(self.action_edit_composer)
         self.menu_edit.addAction(self.action_edit_subheading)
+        self.menu_edit.addAction(self.action_edit_composer)
         self.menubar.addAction(self.menu_file.menuAction())
-        self.menubar.addAction(self.menu_help.menuAction())
         self.menubar.addAction(self.menu_edit.menuAction())
+        self.menubar.addAction(self.menu_help.menuAction())
 
         self.retranslateUi(MainWindow)
         self.symbols_box.setCurrentIndex(0)
