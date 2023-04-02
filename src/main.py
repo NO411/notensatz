@@ -27,10 +27,6 @@ def main():
     app.ui.action_about.triggered.connect(app.aboutbox.show)
     app.ui.action_new.triggered.connect(app.new_doc_dialog.show)
 
-    app.ui.action_edit_heading.triggered.connect(app.document_ui.heading.setFocus)
-    app.ui.action_edit_subheading.triggered.connect(app.document_ui.subheading.setFocus)
-    app.ui.action_edit_composer.triggered.connect(app.document_ui.composer.setFocus)
-
     # buttons and other gui elements
     app.ui.zoom_slider.valueChanged.connect(ui_misc.apply_zoom)
     app.ui.zoom_in_button.clicked.connect(ui_misc.zoom_in)
@@ -46,6 +42,9 @@ def main():
 
     # welcome screen buttons:
     app.ui.welcome_button_new.clicked.connect(app.new_doc_dialog.show)
+
+    # new document
+    app.new_doc_dialog_ui.ok_button.clicked.connect(page_handling.create_new_document)
 
     app.window.show()
     app.app.exec()

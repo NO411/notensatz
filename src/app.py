@@ -21,7 +21,7 @@ class DocumentUi:
         # references of the objects stored in the scene to be able to access them
         # because it is not always possible to determine the index of the item in the pages[x].items() list
         self.heading = None
-        self.subheading = None
+        self.sub_heading = None
         self.composer = None
 
 app = None
@@ -43,6 +43,7 @@ aboutbox = None
 new_doc_dialog = None
 ui = None
 in_welcome_screen = None
+new_doc_dialog_ui = None
 
 def init_symbol_buttons():
     global ui, symbols
@@ -82,7 +83,7 @@ def window_resize(event):
     
 # will be called in main.py
 def init():
-    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui, margin, in_welcome_screen
+    global symbols, show_warning_box, current_page, width, height, start_zoom, primary_color, app, window, aboutbox, new_doc_dialog, ui, document_ui, margin, in_welcome_screen, new_doc_dialog_ui
 
     qdarktheme.enable_hi_dpi()
     
@@ -207,9 +208,10 @@ def init():
     ui.box_tabs_layouts = []
 
     # welcome screen:
+    # blur effect:
     in_welcome_screen = True
     ui.blur_effect = QGraphicsBlurEffect()
-    ui.blur_effect.setBlurRadius(10)
+    ui.blur_effect.setBlurRadius(12)
     ui.centralwidget.setGraphicsEffect(ui.blur_effect)
     ui.centralwidget.setEnabled(False)
     ui.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)

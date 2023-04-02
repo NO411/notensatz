@@ -1,12 +1,12 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QMessageBox, QCheckBox, QGraphicsTextItem
-from PyQt5.QtGui import QBrush, QFont
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QMessageBox, QCheckBox, QMenu
+from PyQt5.QtGui import QBrush
+from PyQt5.QtCore import Qt,QPropertyAnimation
 
 import app
 from document_text import DocumentTextitem
 from ui_misc import update_page_change_buttons_colors
 
-def create_empty_page(new_first_page):
+def create_empty_page(new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
     new_page = QGraphicsScene(0, 0, app.width, app.height)
     # white background
     rect = QGraphicsRectItem(0, 0, app.width, app.height)
@@ -14,19 +14,29 @@ def create_empty_page(new_first_page):
     new_page.addItem(rect)
 
     if (new_first_page):
+        if (heading_text == ""):
+            heading_text = "Titel"
+        if (sub_heading_text == ""):
+            sub_heading_text = "Unterüberschrift"
+        if (composer_text == ""):
+            composer_text = "Komponist / Arrangeur"
+
         # the font sizes were roughly measured using an example
-        heading = DocumentTextitem("Partitur", app.width * 0.6 / 21, app.margin, "center", True)
-        subheading = DocumentTextitem("Unterüberschrift", app.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
-        composer = DocumentTextitem("Komponist / Arrangeur", app.width * 0.3 / 21, subheading.y() + subheading.boundingRect().height(), "right", True)
+        heading = DocumentTextitem(heading_text, app.width * 0.6 / 21, app.margin, "center", True)
+        sub_heading = DocumentTextitem(sub_heading_text, app.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
+        composer = DocumentTextitem(composer_text, app.width * 0.3 / 21, sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
 
         new_page.addItem(heading)
-        app.document_ui.heading = heading
-
-        new_page.addItem(subheading)
-        app.document_ui.subheading = subheading
-
+        new_page.addItem(sub_heading)
         new_page.addItem(composer)
+
+        app.document_ui.heading = heading
+        app.document_ui.sub_heading = sub_heading
         app.document_ui.composer = composer
+
+        app.ui.action_edit_heading.triggered.connect(heading.setFocus)
+        app.ui.action_edit_subheading.triggered.connect(sub_heading.setFocus)
+        app.ui.action_edit_composer.triggered.connect(composer.setFocus)
     
     return new_page
 
@@ -82,3 +92,30 @@ def previous_page():
         app.current_page -= 1
         app.ui.view.setScene(app.document_ui.pages[app.current_page])
         update_page_info_and_button_text()
+
+def create_new_document():
+    # disconnect old signals / slots:
+    app.ui.action_edit_heading.triggered.disconnect(app.document_ui.heading.setFocus)
+    app.ui.action_edit_subheading.triggered.disconnect(app.document_ui.sub_heading.setFocus)
+    app.ui.action_edit_composer.triggered.disconnect(app.document_ui.composer.setFocus)
+
+    # remove blur effect and enable centralwidget if still in welcome screen
+    if (app.in_welcome_screen):
+        app.in_welcome_screen = False
+        app.ui.centralwidget.setEnabled(True)
+        app.ui.centralwidget.setGraphicsEffect(None)
+        app.ui.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        app.ui.view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        app.ui.welcome_label.setParent(None)
+        app.window.resizeEvent = None
+        app.ui.welcome_button_new.setParent(None)
+        app.ui.welcome_button_open.setParent(None)
+        edit_menu = app.ui.menubar.findChild(QMenu, "menu_edit")
+        edit_menu.setEnabled(True)
+        app.ui.action_save.setEnabled(True)
+        app.ui.action_save_as.setEnabled(True)
+        app.ui.action_export.setEnabled(True)
+
+    app.document_ui.pages = [create_empty_page(True, app.new_doc_dialog_ui.heading_line_edit.text(), app.new_doc_dialog_ui.sub_heading_line_edit.text(), app.new_doc_dialog_ui.composer_line_edit.text())]
+    app.ui.view.setScene(app.document_ui.pages[0])
+    app.new_doc_dialog.close()

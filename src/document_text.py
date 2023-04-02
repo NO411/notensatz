@@ -19,7 +19,7 @@ class DocumentTextitem(QGraphicsTextItem):
         self.setDefaultTextColor(Qt.black)
 
         # interaction
-        self.setTextInteractionFlags(Qt.TextEditorInteraction | Qt.NoTextInteraction)
+        self.setTextInteractionFlags(Qt.TextEditorInteraction)
         self.document().setMaximumBlockCount(1)
 
         # alignment and positioning
@@ -36,7 +36,9 @@ class DocumentTextitem(QGraphicsTextItem):
             old_cursor_pos = cursor.position()
             # remove character which was added by the user at the cursor position
             self.setPlainText(self.toPlainText()[:old_cursor_pos - 1] + self.toPlainText()[old_cursor_pos:])
-            cursor.setPosition(old_cursor_pos - 1)
+            new_pos = old_cursor_pos - 1
+            if (new_pos >= 0):
+                cursor.setPosition(old_cursor_pos - 1)
             self.setTextCursor(cursor)
             self.document().blockSignals(False)
 
@@ -53,3 +55,8 @@ class DocumentTextitem(QGraphicsTextItem):
         cursor = self.textCursor()
         cursor.setPosition(len(self.toPlainText()))
         self.setTextCursor(cursor)
+
+    # !!
+    # this is really important to avoid a program crash when rightklicking an QGraphicstextItem!
+    def contextMenuEvent(self, event):
+        event.ignore()
