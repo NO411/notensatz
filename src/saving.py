@@ -35,6 +35,6 @@ def export_to_pdf(filename):
     p.end()
 
 def export():
-    filename, _ = QFileDialog.getSaveFileName(app.ui.centralwidget, "Notensatz exportieren", "notensatz.pdf", "*.pdf")
+    filename, _ = QFileDialog.getSaveFileName(app.ui.centralwidget, "Notensatz exportieren", app.document_ui.heading.toPlainText() + ".pdf", "*.pdf")
     if filename:
         export_to_pdf(filename)
