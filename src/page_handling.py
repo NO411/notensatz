@@ -34,9 +34,9 @@ def create_empty_page(new_first_page=False, heading_text="", sub_heading_text=""
         app.document_ui.sub_heading = sub_heading
         app.document_ui.composer = composer
 
-        app.ui.action_edit_heading.triggered.connect(heading.setFocus)
-        app.ui.action_edit_subheading.triggered.connect(sub_heading.setFocus)
-        app.ui.action_edit_composer.triggered.connect(composer.setFocus)
+        app.ui.action_edit_heading.triggered.connect(lambda : edit_text("heading"))
+        app.ui.action_edit_subheading.triggered.connect(lambda : edit_text("sub_heading"))
+        app.ui.action_edit_composer.triggered.connect(lambda : edit_text("composer"))
     
     return new_page
 
@@ -55,6 +55,13 @@ def new_page():
     update_page_info_and_button_text()
 
 def delete_page():
+    if (app.current_page == 0):
+        info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können die erste Seite nicht komplett löschen, da sie den Titel usw. enthält.", QMessageBox.Yes)
+        info_box.setDefaultButton(QMessageBox.Yes)
+        info_box.button(QMessageBox.Yes).setText("OK")
+        result = info_box.exec_()
+        return
+
     if (app.show_warning_box):
         warning_box = QMessageBox(QMessageBox.Information, "Seite Löschen", f"Wollen Sie die Seite {app.current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
         warning_box.setDefaultButton(QMessageBox.Yes)
@@ -95,9 +102,9 @@ def previous_page():
 
 def create_new_document():
     # disconnect old signals / slots:
-    app.ui.action_edit_heading.triggered.disconnect(app.document_ui.heading.setFocus)
-    app.ui.action_edit_subheading.triggered.disconnect(app.document_ui.sub_heading.setFocus)
-    app.ui.action_edit_composer.triggered.disconnect(app.document_ui.composer.setFocus)
+    app.ui.action_edit_heading.triggered.disconnect()
+    app.ui.action_edit_subheading.triggered.disconnect()
+    app.ui.action_edit_composer.triggered.disconnect()
 
     # remove blur effect and enable centralwidget if still in welcome screen
     if (app.in_welcome_screen):
@@ -116,6 +123,19 @@ def create_new_document():
         app.ui.action_save_as.setEnabled(True)
         app.ui.action_export.setEnabled(True)
 
+    app.current_page = 0
     app.document_ui.pages = [create_empty_page(True, app.new_doc_dialog_ui.heading_line_edit.text(), app.new_doc_dialog_ui.sub_heading_line_edit.text(), app.new_doc_dialog_ui.composer_line_edit.text())]
     app.ui.view.setScene(app.document_ui.pages[0])
+    update_page_info_and_button_text()
     app.new_doc_dialog.close()
+
+def edit_text(text_field):
+    app.current_page = 0
+    app.ui.view.setScene(app.document_ui.pages[app.current_page])
+    update_page_info_and_button_text()
+    if (text_field == "heading"):
+        app.document_ui.heading.setFocus()
+    elif (text_field == "sub_heading"):
+        app.document_ui.sub_heading.setFocus()
+    elif (text_field == "composer"):
+        app.document_ui.composer.setFocus()
