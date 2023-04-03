@@ -127,6 +127,12 @@ def create_new_document():
     app.document_ui.pages = [create_empty_page(True, app.new_doc_dialog_ui.heading_line_edit.text(), app.new_doc_dialog_ui.sub_heading_line_edit.text(), app.new_doc_dialog_ui.composer_line_edit.text())]
     app.ui.view.setScene(app.document_ui.pages[0])
     update_page_info_and_button_text()
+
+    if (not app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
+        app.new_doc_dialog_ui.heading_line_edit.setText("")
+        app.new_doc_dialog_ui.sub_heading_line_edit.setText("")
+        app.new_doc_dialog_ui.composer_line_edit.setText("")
+
     app.new_doc_dialog.close()
 
 def edit_text(text_field):

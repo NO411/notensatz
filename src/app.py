@@ -234,7 +234,7 @@ def init():
     ui.welcome_button_new = QPushButton("Neue Datei", window)
     ui.welcome_button_new.setDefault(True)
 
-    ui.welcome_button_open = QPushButton("Datei Öffnen", window)
+    ui.welcome_button_open = QPushButton("Datei öffnen", window)
     ui.welcome_button_new.setDefault(True)
 
     edit_menu = ui.menubar.findChild(QMenu, "menu_edit")
