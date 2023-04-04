@@ -5,6 +5,7 @@ from PyQt5.QtCore import QFileInfo
 
 import app
 from document_text import DocumentTextitem
+import page_handling
 
 import json
 
@@ -24,13 +25,13 @@ def export_to_pdf(filename):
 
 	p = QPainter(printer)
 
-	# remove highlights (they would appear gray in the pdf)
-	for scene in app.document_ui.pages:
+	for i, scene in enumerate(app.document_ui.pages):
+
+		# remove highlights (they would appear gray in the pdf)
 		for item in scene.items():
 			if (type(item) == DocumentTextitem or type(item) == QGraphicsTextItem):
 				item.remove_highlight()
 
-	for i, scene in enumerate(app.document_ui.pages):
 		scene.render(p)
 		if i != len(app.document_ui.pages) - 1:
 			printer.newPage()
@@ -73,8 +74,15 @@ def open_data(filename):
 	with open(filename, "r") as file_:
 		data = json.load(file_)
 
-	# complete this
-	print(len(data["pages"]))
+	app.document_ui.pages = [page_handling.create_empty_page(True, data["heading"], data["sub_heading"], data["composer"])]
+	for x, _ in enumerate(data["pages"]):
+		if (x != 0):
+			app.document_ui.pages.append(page_handling.create_empty_page(False))
+
+	app.current_page = 0
+	app.ui.view.setScene(app.document_ui.pages[0])
+	page_handling.update_page_info_and_button_text()
+		
 
 def open_file():
 	filename, _ = QFileDialog.getOpenFileName(app.ui.centralwidget, "Notensatz öffnen", "", "*." + app.file_extension)
