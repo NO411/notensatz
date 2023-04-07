@@ -4,6 +4,7 @@ class UiMiscHandler():
 	def __init__(self, app:App):
 		self.app = app
 
+	# functionality for the zoom buttons and the slider
 	def apply_zoom(self):
 		new_zoom = self.app.ui.zoom_slider.value() / 100
 		self.app.ui.view.resetTransform()
@@ -48,6 +49,7 @@ class UiMiscHandler():
 			self.app.ui.zoom_in_button.setStyleSheet(f"QPushButton {{color: {self.app.primary_color}}}")
 			self.app.ui.zoom_in_button.setEnabled(True)
 
+	# remove selection from selected button if an other button is pressed
 	def unselect_buttons(self, n_class, index):
 		for c, _ in enumerate(self.app.symbols):
 			for i, symbol_button in enumerate(self.app.ui.symbols_box_buttons[c]):

@@ -16,7 +16,16 @@ from fonts import load_fonts, get_symbol
 class DocumentUi:
 	def __init__(self):
 		# table of QGraphicsScenes
-		self.pages = None
+		self.pages = []
+
+		# A4 layout
+		self.width = 2480
+		self.height = 3508
+		# default margin: ca. 1.54 cm
+		# default paper width: 21 cm
+		# margin / width = [default margin] / [default paper width]
+		# -> margin = width * [default margin] / [default paper width]
+		self.margin = self.width * 1.54 / 21
 
 		# references of the objects stored in the scene to be able to access them
 		# because it is not always possible to determine the index of the item in the pages[x].items() list
@@ -129,7 +138,6 @@ class App(QApplication):
 		)
 
 		self.document_ui = DocumentUi()
-		self.document_ui.pages = []
 
 		# nos stands for NOtenSatz
 		self.file_extension = "nos"
@@ -208,14 +216,6 @@ class App(QApplication):
 		]
 		self.show_warning_box = True
 		self.current_page = 0
-		# A4 layout
-		self.width = 2480
-		self.height = 3508
-		# default margin: ca. 1.54 cm
-		# default paper width: 21 cm
-		# margin / width = [default margin] / [default paper width]
-		# -> margin = width * [default margin] / [default paper width]
-		self.margin = self.width * 1.54 / 21
 
 		self.window = QMainWindow()
 		self.aboutbox = QDialog()

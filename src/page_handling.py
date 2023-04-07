@@ -12,9 +12,9 @@ class PageHandler():
 		self.ui_misc = ui_misc
 
 	def create_empty_page(self, new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
-		new_page = QGraphicsScene(0, 0, self.app.width, self.app.height)
+		new_page = QGraphicsScene(0, 0, self.app.document_ui.width, self.app.document_ui.height)
 		# white background
-		rect = QGraphicsRectItem(0, 0, self.app.width, self.app.height)
+		rect = QGraphicsRectItem(0, 0, self.app.document_ui.width, self.app.document_ui.height)
 		rect.setBrush(QBrush(Qt.white))
 		new_page.addItem(rect)
 
@@ -27,9 +27,9 @@ class PageHandler():
 				composer_text = "Komponist / Arrangeur"
 
 			# the font sizes were roughly measured using an example
-			heading = DocumentTextitem(self.app, heading_text, self.app.width * 0.6 / 21, self.app.margin, "center", True)
-			sub_heading = DocumentTextitem(self.app, sub_heading_text, self.app.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
-			composer = DocumentTextitem(self.app, composer_text, self.app.width * 0.3 / 21, sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
+			heading = DocumentTextitem(self.app, heading_text, self.app.document_ui.width * 0.6 / 21, self.app.document_ui.margin, "center", True)
+			sub_heading = DocumentTextitem(self.app, sub_heading_text, self.app.document_ui.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
+			composer = DocumentTextitem(self.app, composer_text, self.app.document_ui.width * 0.3 / 21, sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
 
 			new_page.addItem(heading)
 			new_page.addItem(sub_heading)

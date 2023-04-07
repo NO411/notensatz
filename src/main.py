@@ -12,18 +12,20 @@ __author__ = "Noah Weiler"
 def main():
 	app = App()
 
+	# modules
 	ui_misc = UiMiscHandler(app)
 	page_handling = PageHandler(app, ui_misc)
 	saving = SavingHander(app, page_handling)
 
 	app.document_ui.pages = [page_handling.create_empty_page(False)]
-	ui_misc.update_page_change_buttons_colors()
-	ui_misc.update_zoom_buttons_colors()
-
 	# object which is needed to render the scene
 	# view can change when the scene changes (new page)
 	app.ui.view.setScene(app.document_ui.pages[0])
+
+	# ui adjustments which need functions of other modules
 	ui_misc.apply_zoom()
+	ui_misc.update_page_change_buttons_colors()
+	ui_misc.update_zoom_buttons_colors()
 	app.ui.view.verticalScrollBar().setValue(app.ui.view.verticalScrollBar().minimum())
 	app.ui.view.horizontalScrollBar().setValue(app.ui.view.horizontalScrollBar().minimum())
 
@@ -55,6 +57,7 @@ def main():
 	# new document
 	app.new_doc_dialog_ui.ok_button.clicked.connect(page_handling.create_new_document)
 
+	# show and execute the app
 	app.window.show()
 	app.app.exec()
 

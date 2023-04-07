@@ -12,42 +12,48 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_AboutBox(object):
-	def setupUi(self, AboutBox):
-		AboutBox.setObjectName("AboutBox")
-		AboutBox.setWindowModality(QtCore.Qt.ApplicationModal)
-		AboutBox.resize(300, 200)
-		AboutBox.setMinimumSize(QtCore.QSize(300, 200))
-		AboutBox.setMaximumSize(QtCore.QSize(300, 200))
-		icon = QtGui.QIcon()
-		icon.addPixmap(QtGui.QPixmap("pyqt5_designer_uis\\../../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
-		AboutBox.setWindowIcon(icon)
-		AboutBox.setModal(True)
-		self.verticalLayout = QtWidgets.QVBoxLayout(AboutBox)
-		self.verticalLayout.setObjectName("verticalLayout")
-		self.textBrowser = QtWidgets.QTextBrowser(AboutBox)
-		self.textBrowser.setFocusPolicy(QtCore.Qt.NoFocus)
-		self.textBrowser.setAcceptDrops(False)
-		self.textBrowser.setLineWidth(0)
-		self.textBrowser.setObjectName("textBrowser")
-		self.verticalLayout.addWidget(self.textBrowser)
-		self.pushButton = QtWidgets.QPushButton(AboutBox)
-		self.pushButton.setObjectName("pushButton")
-		self.verticalLayout.addWidget(self.pushButton)
+    def setupUi(self, AboutBox):
+        AboutBox.setObjectName("AboutBox")
+        AboutBox.setWindowModality(QtCore.Qt.ApplicationModal)
+        AboutBox.resize(300, 200)
+        AboutBox.setMinimumSize(QtCore.QSize(300, 200))
+        AboutBox.setMaximumSize(QtCore.QSize(300, 200))
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap("pyqt5_designer_uis\\../../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
+        AboutBox.setWindowIcon(icon)
+        AboutBox.setModal(True)
+        self.verticalLayout = QtWidgets.QVBoxLayout(AboutBox)
+        self.verticalLayout.setObjectName("verticalLayout")
+        self.textBrowser = QtWidgets.QTextBrowser(AboutBox)
+        self.textBrowser.setFocusPolicy(QtCore.Qt.NoFocus)
+        self.textBrowser.setAcceptDrops(False)
+        self.textBrowser.setFrameShape(QtWidgets.QFrame.StyledPanel)
+        self.textBrowser.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.textBrowser.setLineWidth(0)
+        self.textBrowser.setAcceptRichText(True)
+        self.textBrowser.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByKeyboard|QtCore.Qt.LinksAccessibleByMouse)
+        self.textBrowser.setOpenExternalLinks(True)
+        self.textBrowser.setObjectName("textBrowser")
+        self.verticalLayout.addWidget(self.textBrowser)
+        self.pushButton = QtWidgets.QPushButton(AboutBox)
+        self.pushButton.setObjectName("pushButton")
+        self.verticalLayout.addWidget(self.pushButton)
 
-		self.retranslateUi(AboutBox)
-		self.pushButton.clicked.connect(AboutBox.close)
-		QtCore.QMetaObject.connectSlotsByName(AboutBox)
+        self.retranslateUi(AboutBox)
+        self.pushButton.clicked.connect(AboutBox.close)
+        QtCore.QMetaObject.connectSlotsByName(AboutBox)
 
-	def retranslateUi(self, AboutBox):
-		_translate = QtCore.QCoreApplication.translate
-		AboutBox.setWindowTitle(_translate("AboutBox", "Über uns"))
-		self.textBrowser.setHtml(_translate("AboutBox", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
+    def retranslateUi(self, AboutBox):
+        _translate = QtCore.QCoreApplication.translate
+        AboutBox.setWindowTitle(_translate("AboutBox", "Über uns"))
+        self.textBrowser.setHtml(_translate("AboutBox", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
 "</style></head><body style=\" font-family:\'MS Shell Dlg 2\'; font-size:8.25pt; font-weight:400; font-style:normal;\">\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:11pt; color:#06a0ff;\">Notensatzprogramm</span></p>\n"
-"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-size:11pt; font-weight:600; color:#528bff;\">Notensatzprogramm</span></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:10pt; font-weight:600;\"><br /></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Author: Noah Weiler</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Version: 0.0.1</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Webseite: <a href=\"https://github.com/NO411/notensatz\"><span style=\" font-size:8pt; text-decoration: underline; color:#528bff;\">https://github.com/NO411/notensatz</span></a></p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Erstellt mit PyQt5</p></body></html>"))
-		self.pushButton.setText(_translate("AboutBox", "OK"))
+        self.pushButton.setText(_translate("AboutBox", "OK"))

@@ -30,7 +30,7 @@ class DocumentTextitem(QGraphicsTextItem):
 
 	def crop_text(self, app:App):
 		# set maximum width
-		while (self.boundingRect().width() > (app.width - 2 * app.margin)):
+		while (self.boundingRect().width() > (app.document_ui.width - 2 * app.document_ui.margin)):
 			self.document().blockSignals(True)
 			cursor = self.textCursor()
 			old_cursor_pos = cursor.position()
@@ -45,9 +45,9 @@ class DocumentTextitem(QGraphicsTextItem):
 	def align(self, app:App):
 		self.crop_text(app)
 		if (self.alignment == "right"):
-			self.setPos(app.width - app.margin - self.boundingRect().width(), self._y)
+			self.setPos(app.document_ui.width - app.document_ui.margin - self.boundingRect().width(), self._y)
 		elif (self.alignment == "center"):
-			self.setPos(app.width / 2 - self.boundingRect().width() / 2, self._y)
+			self.setPos(app.document_ui.width / 2 - self.boundingRect().width() / 2, self._y)
 
 	def remove_highlight(self):
 		# work around to remove highlighted text
