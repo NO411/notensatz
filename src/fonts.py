@@ -1,5 +1,5 @@
 from PyQt5.QtGui import QFontDatabase
-import json
+from json import load
 
 font_metadata = None
 
@@ -17,7 +17,7 @@ def load_fonts():
 
 	# needed for symbol unicodes
 	font_metadata_file = open("../assets/bravura_font/unicodes_list.json")
-	font_metadata = json.load(font_metadata_file)
+	font_metadata = load(font_metadata_file)
 	# example:
 	# print(font_metadata["noteHalfUp"])
 	font_metadata_file.close()

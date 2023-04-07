@@ -26,7 +26,7 @@ class DocumentTextitem(QGraphicsTextItem):
 		self.alignment = alignment
 		self._y = y
 		self.align(app)
-		self.document().contentsChanged.connect(self.align)
+		self.document().contentsChanged.connect(lambda : self.align(app))
 
 	def crop_text(self, app:App):
 		# set maximum width
