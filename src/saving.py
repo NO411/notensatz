@@ -3,93 +3,97 @@ from PyQt5.QtGui import QPainter
 from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
 from PyQt5.QtCore import QFileInfo
 
-import app
+from app import App
 from document_text import DocumentTextitem
-import page_handling
+from page_handling import PageHandler
 
 import json
 
-def export_to_pdf(filename):
-	# fix black border!!
-	# maybe with small upscale to hide them
+class SavingHander():
+	def __init__(self, app:App, page_handling:PageHandler):
+		self.app = app
+		self.page_handling = page_handling
 
-	printer = QPrinter (QPrinter.HighResolution)
-	printer.setPageSize(QPrinter.A4)
-	printer.setOrientation(QPrinter.Portrait)
-	printer.setOutputFormat(QPrinter.PdfFormat)
-	printer.setOutputFileName(filename)
+	def export_to_pdf(self, filename):
+		# fix black border!!
+		# maybe with small upscale to hide them
 
-	printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
-	printer.setColorMode(QPrinter.Color)
-	printer.setResolution(300)
+		printer = QPrinter (QPrinter.HighResolution)
+		printer.setPageSize(QPrinter.A4)
+		printer.setOrientation(QPrinter.Portrait)
+		printer.setOutputFormat(QPrinter.PdfFormat)
+		printer.setOutputFileName(filename)
 
-	p = QPainter(printer)
+		printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
+		printer.setColorMode(QPrinter.Color)
+		printer.setResolution(300)
 
-	for i, scene in enumerate(app.document_ui.pages):
+		p = QPainter(printer)
 
-		# remove highlights (they would appear gray in the pdf)
-		for item in scene.items():
-			if (type(item) == DocumentTextitem or type(item) == QGraphicsTextItem):
-				item.remove_highlight()
+		for i, scene in enumerate(self.app.document_ui.pages):
 
-		scene.render(p)
-		if i != len(app.document_ui.pages) - 1:
-			printer.newPage()
-	p.end()
+			# remove highlights (they would appear gray in the pdf)
+			for item in scene.items():
+				if (type(item) == DocumentTextitem or type(item) == QGraphicsTextItem):
+					item.remove_highlight()
 
-def export():
-	filename, _ = QFileDialog.getSaveFileName(app.ui.centralwidget, "Notensatz exportieren", app.document_ui.heading.toPlainText() + ".pdf", "*.pdf")
-	if filename:
-		export_to_pdf(filename)
+			scene.render(p)
+			if i != len(self.app.document_ui.pages) - 1:
+				printer.newPage()
+		p.end()
 
-def save_data(file_name):
-	data = {
-		"heading": app.document_ui.heading.toPlainText(),
-		"sub_heading": app.document_ui.sub_heading.toPlainText(),
-		"composer": app.document_ui.composer.toPlainText(),
-		"pages": [],
-	}
+	def export(self):
+		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz exportieren", self.app.document_ui.heading.toPlainText() + ".pdf", "*.pdf")
+		if filename:
+			self.export_to_pdf(filename)
 
-	for x,_ in enumerate(app.document_ui.pages):
-		data["pages"].append({})
+	def save_data(self,file_name):
+		data = {
+			"heading": self.app.document_ui.heading.toPlainText(),
+			"sub_heading": self.app.document_ui.sub_heading.toPlainText(),
+			"composer": self.app.document_ui.composer.toPlainText(),
+			"pages": [],
+		}
 
-	with open(file_name, "w") as file_:
-		json.dump(data, file_, indent="\t")
+		for x,_ in enumerate(self.app.document_ui.pages):
+			data["pages"].append({})
 
-def save_as():
-	filename, _ = QFileDialog.getSaveFileName(app.ui.centralwidget, "Notensatz speichern", app.document_ui.heading.toPlainText() + "." + app.file_extension, "*." + app.file_extension)
-	if filename:
-		save_data(filename)
-		app.current_file_name = filename
-		app.current_file_saved = True
+		with open(file_name, "w") as file_:
+			json.dump(data, file_, indent="\t")
 
-def save_file():
-	if (QFileInfo(app.current_file_name).exists() or app.current_file_saved):
-		save_data(app.current_file_name)
-	else:
-		save_as()
+	def save_as(self):
+		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.app.document_ui.heading.toPlainText() + "." + self.app.file_extension, "*." + self.app.file_extension)
+		if filename:
+			self.save_data(filename)
+			self.app.current_file_name = filename
+			self.app.current_file_saved = True
 
-def open_data(filename):
-	data = {}
-	with open(filename, "r") as file_:
-		data = json.load(file_)
+	def save_file(self):
+		if (QFileInfo(self.app.current_file_name).exists() or self.app.current_file_saved):
+			self.save_data(self.app.current_file_name)
+		else:
+			self.save_as()
 
-	app.document_ui.pages = [page_handling.create_empty_page(True, data["heading"], data["sub_heading"], data["composer"])]
-	for x, _ in enumerate(data["pages"]):
-		if (x != 0):
-			app.document_ui.pages.append(page_handling.create_empty_page(False))
+	def open_data(self, filename):
+		data = {}
+		with open(filename, "r") as file_:
+			data = json.load(file_)
 
-	app.current_page = 0
-	app.ui.view.setScene(app.document_ui.pages[0])
-	page_handling.update_page_info_and_button_text()
-		
+		self.app.document_ui.pages = [self.page_handling.create_empty_page(True, data["heading"], data["sub_heading"], data["composer"])]
+		for x, _ in enumerate(data["pages"]):
+			if (x != 0):
+				self.app.document_ui.pages.append(self.page_handling.create_empty_page(False))
 
-def open_file():
-	filename, _ = QFileDialog.getOpenFileName(app.ui.centralwidget, "Notensatz öffnen", "", "*." + app.file_extension)
-	if filename:
-		app.current_file_name = filename
-		app.current_file_saved = True
-		open_data(filename)
-		# remove blur effect and enable centralwidget if still in welcome screen
-		if (app.in_welcome_screen):
-			app.end_welcome_screen()
+		self.app.current_page = 0
+		self.app.ui.view.setScene(self.app.document_ui.pages[0])
+		self.page_handling.update_page_info_and_button_text()
+
+	def open_file(self):
+		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + self.app.file_extension)
+		if filename:
+			self.app.current_file_name = filename
+			self.app.current_file_saved = True
+			self.open_data(filename)
+			# remove blur effect and enable centralwidget if still in welcome screen
+			if (self.app.ui.in_welcome_screen):
+				self.app.end_welcome_screen()

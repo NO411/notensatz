@@ -2,10 +2,10 @@ from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsTextItem
 
-import app
+from app import App
 
 class DocumentTextitem(QGraphicsTextItem):
-	def __init__(self, text: str, fontSize: float, y: float, alignment: str, bold: bool):
+	def __init__(self, app:App, text: str, fontSize: float, y: float, alignment: str, bold: bool):
 		"""
 		`alignment`: "right", "center"
 		"""
@@ -25,10 +25,10 @@ class DocumentTextitem(QGraphicsTextItem):
 		# alignment and positioning
 		self.alignment = alignment
 		self._y = y
-		self.align()
+		self.align(app)
 		self.document().contentsChanged.connect(self.align)
 
-	def crop_text(self):
+	def crop_text(self, app:App):
 		# set maximum width
 		while (self.boundingRect().width() > (app.width - 2 * app.margin)):
 			self.document().blockSignals(True)
@@ -42,12 +42,11 @@ class DocumentTextitem(QGraphicsTextItem):
 			self.setTextCursor(cursor)
 			self.document().blockSignals(False)
 
-	def align(self):
+	def align(self, app:App):
+		self.crop_text(app)
 		if (self.alignment == "right"):
-			self.crop_text()
 			self.setPos(app.width - app.margin - self.boundingRect().width(), self._y)
 		elif (self.alignment == "center"):
-			self.crop_text()
 			self.setPos(app.width / 2 - self.boundingRect().width() / 2, self._y)
 
 	def remove_highlight(self):

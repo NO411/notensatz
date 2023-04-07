@@ -1,134 +1,139 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QMessageBox, QCheckBox, QMenu
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QMessageBox, QCheckBox
 from PyQt5.QtGui import QBrush
-from PyQt5.QtCore import Qt,QPropertyAnimation
+from PyQt5.QtCore import Qt
 
-import app
+from app import App
 from document_text import DocumentTextitem
-from ui_misc import update_page_change_buttons_colors
+from ui_misc import UiMiscHandler
 
-def create_empty_page(new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
-	new_page = QGraphicsScene(0, 0, app.width, app.height)
-	# white background
-	rect = QGraphicsRectItem(0, 0, app.width, app.height)
-	rect.setBrush(QBrush(Qt.white))
-	new_page.addItem(rect)
+class PageHandler():
+	def __init__(self, app:App, ui_misc:UiMiscHandler):
+		self.app = app
+		self.ui_misc = ui_misc
 
-	if (new_first_page):
-		if (heading_text == ""):
-			heading_text = "Titel"
-		if (sub_heading_text == ""):
-			sub_heading_text = "Unterüberschrift"
-		if (composer_text == ""):
-			composer_text = "Komponist / Arrangeur"
+	def create_empty_page(self, new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
+		new_page = QGraphicsScene(0, 0, self.app.width, self.app.height)
+		# white background
+		rect = QGraphicsRectItem(0, 0, self.app.width, self.app.height)
+		rect.setBrush(QBrush(Qt.white))
+		new_page.addItem(rect)
 
-		# the font sizes were roughly measured using an example
-		heading = DocumentTextitem(heading_text, app.width * 0.6 / 21, app.margin, "center", True)
-		sub_heading = DocumentTextitem(sub_heading_text, app.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
-		composer = DocumentTextitem(composer_text, app.width * 0.3 / 21, sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
+		if (new_first_page):
+			if (heading_text == ""):
+				heading_text = "Titel"
+			if (sub_heading_text == ""):
+				sub_heading_text = "Unterüberschrift"
+			if (composer_text == ""):
+				composer_text = "Komponist / Arrangeur"
 
-		new_page.addItem(heading)
-		new_page.addItem(sub_heading)
-		new_page.addItem(composer)
+			# the font sizes were roughly measured using an example
+			heading = DocumentTextitem(self.app, heading_text, self.app.width * 0.6 / 21, self.app.margin, "center", True)
+			sub_heading = DocumentTextitem(self.app, sub_heading_text, self.app.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
+			composer = DocumentTextitem(self.app, composer_text, self.app.width * 0.3 / 21, sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
 
-		app.document_ui.heading = heading
-		app.document_ui.sub_heading = sub_heading
-		app.document_ui.composer = composer
+			new_page.addItem(heading)
+			new_page.addItem(sub_heading)
+			new_page.addItem(composer)
 
-		app.ui.action_edit_heading.triggered.connect(lambda : edit_text("heading"))
-		app.ui.action_edit_subheading.triggered.connect(lambda : edit_text("sub_heading"))
-		app.ui.action_edit_composer.triggered.connect(lambda : edit_text("composer"))
-	
-	return new_page
+			self.app.document_ui.heading = heading
+			self.app.document_ui.sub_heading = sub_heading
+			self.app.document_ui.composer = composer
 
-def update_page_info_and_button_text():
-	app.ui.current_page_label.setText("Seite " + str(app.current_page + 1) + " von " + str(len(app.document_ui.pages)))
-	update_page_change_buttons_colors()
+			self.app.ui.action_edit_heading.triggered.connect(lambda : self.edit_text("heading"))
+			self.app.ui.action_edit_subheading.triggered.connect(lambda : self.edit_text("sub_heading"))
+			self.app.ui.action_edit_composer.triggered.connect(lambda : self.edit_text("composer"))
+		
+		return new_page
 
-def new_page():
-	new_page = create_empty_page(False)
-	if (len(app.document_ui.pages) == app.current_page + 1):
-		app.document_ui.pages.append(new_page)
-	else:
-		app.document_ui.pages.insert(app.current_page + 1, new_page)
-	app.current_page += 1
-	app.ui.view.setScene(app.document_ui.pages[app.current_page])
-	update_page_info_and_button_text()
+	def update_page_info_and_button_text(self):
+		self.app.ui.current_page_label.setText("Seite " + str(self.app.current_page + 1) + " von " + str(len(self.app.document_ui.pages)))
+		self.ui_misc.update_page_change_buttons_colors()
 
-def delete_page():
-	if (app.current_page == 0):
-		info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können die erste Seite nicht komplett löschen, da sie den Titel usw. enthält.", QMessageBox.Yes)
-		info_box.setDefaultButton(QMessageBox.Yes)
-		info_box.button(QMessageBox.Yes).setText("OK")
-		result = info_box.exec_()
-		return
+	def new_page(self):
+		new_page = self.create_empty_page(False)
+		if (len(self.app.document_ui.pages) == self.app.current_page + 1):
+			self.app.document_ui.pages.append(new_page)
+		else:
+			self.app.document_ui.pages.insert(self.app.current_page + 1, new_page)
+		self.app.current_page += 1
+		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+		self.update_page_info_and_button_text()
 
-	if (app.show_warning_box):
-		warning_box = QMessageBox(QMessageBox.Information, "Seite Löschen", f"Wollen Sie die Seite {app.current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
-		warning_box.setDefaultButton(QMessageBox.Yes)
-		warning_box.button(QMessageBox.Yes).setText("Ja")
-		warning_box.button(QMessageBox.No).setText("Nein")
-		check_box = QCheckBox("Nicht mehr nachfragen", warning_box)
-		warning_box.setCheckBox(check_box)
-
-		result = warning_box.exec_()
-
-		if (result == QMessageBox.No):
+	def delete_page(self):
+		if (self.app.current_page == 0):
+			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können die erste Seite nicht komplett löschen, da sie den Titel usw. enthält.", QMessageBox.Yes)
+			info_box.setDefaultButton(QMessageBox.Yes)
+			info_box.button(QMessageBox.Yes).setText("OK")
+			result = info_box.exec_()
 			return
 
-		if (check_box.isChecked()):
-			app.show_warning_box = False
+		if (self.app.show_warning_box):
+			warning_box = QMessageBox(QMessageBox.Information, "Seite Löschen", f"Wollen Sie die Seite {self.app.current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
+			warning_box.setDefaultButton(QMessageBox.Yes)
+			warning_box.button(QMessageBox.Yes).setText("Ja")
+			warning_box.button(QMessageBox.No).setText("Nein")
+			check_box = QCheckBox("Nicht mehr nachfragen", warning_box)
+			warning_box.setCheckBox(check_box)
 
-	app.document_ui.pages.pop(app.current_page)
-	app.current_page -= 1
-	if (app.current_page < 0):
-		app.current_page = 0
-	if (len(app.document_ui.pages) == 0):
-		app.document_ui.pages.append(create_empty_page(True))
+			result = warning_box.exec_()
 
-	app.ui.view.setScene(app.document_ui.pages[app.current_page])
-	update_page_info_and_button_text()
+			if (result == QMessageBox.No):
+				return
 
-def next_page():
-	if (app.current_page + 1 < len(app.document_ui.pages)):
-		app.current_page += 1
-		app.ui.view.setScene(app.document_ui.pages[app.current_page])
-		update_page_info_and_button_text()
+			if (check_box.isChecked()):
+				self.app.show_warning_box = False
 
-def previous_page():
-	if (app.current_page > 0):
-		app.current_page -= 1
-		app.ui.view.setScene(app.document_ui.pages[app.current_page])
-		update_page_info_and_button_text()
+		self.app.document_ui.pages.pop(self.app.current_page)
+		self.app.current_page -= 1
+		if (self.app.current_page < 0):
+			self.app.current_page = 0
+		if (len(self.app.document_ui.pages) == 0):
+			self.app.document_ui.pages.append(self.create_empty_page(True))
 
-def create_new_document():
-	# disconnect old signals / slots:
-	app.ui.action_edit_heading.triggered.disconnect()
-	app.ui.action_edit_subheading.triggered.disconnect()
-	app.ui.action_edit_composer.triggered.disconnect()
+		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+		self.update_page_info_and_button_text()
 
-	# remove blur effect and enable centralwidget if still in welcome screen
-	if (app.in_welcome_screen):
-		app.end_welcome_screen()
+	def next_page(self):
+		if (self.app.current_page + 1 < len(self.app.document_ui.pages)):
+			self.app.current_page += 1
+			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+			self.update_page_info_and_button_text()
 
-	app.current_page = 0
-	app.document_ui.pages = [create_empty_page(True, app.new_doc_dialog_ui.heading_line_edit.text(), app.new_doc_dialog_ui.sub_heading_line_edit.text(), app.new_doc_dialog_ui.composer_line_edit.text())]
-	app.ui.view.setScene(app.document_ui.pages[0])
-	update_page_info_and_button_text()
+	def previous_page(self):
+		if (self.app.current_page > 0):
+			self.app.current_page -= 1
+			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+			self.update_page_info_and_button_text()
 
-	if (not app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
-		app.new_doc_dialog_ui.heading_line_edit.setText("")
-		app.new_doc_dialog_ui.sub_heading_line_edit.setText("")
-		app.new_doc_dialog_ui.composer_line_edit.setText("")
+	def create_new_document(self):
+		# disconnect old signals / slots:
+		self.app.ui.action_edit_heading.triggered.disconnect()
+		self.app.ui.action_edit_subheading.triggered.disconnect()
+		self.app.ui.action_edit_composer.triggered.disconnect()
 
-	app.new_doc_dialog.close()
+		# remove blur effect and enable centralwidget if still in welcome screen
+		if (self.app.ui.in_welcome_screen):
+			self.app.end_welcome_screen()
 
-def edit_text(text_field):
-	app.current_page = 0
-	app.ui.view.setScene(app.document_ui.pages[app.current_page])
-	update_page_info_and_button_text()
-	if (text_field == "heading"):
-		app.document_ui.heading.setFocus()
-	elif (text_field == "sub_heading"):
-		app.document_ui.sub_heading.setFocus()
-	elif (text_field == "composer"):
-		app.document_ui.composer.setFocus()
+		self.app.current_page = 0
+		self.app.document_ui.pages = [self.create_empty_page(True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text())]
+		self.app.ui.view.setScene(self.app.document_ui.pages[0])
+		self.update_page_info_and_button_text()
+
+		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
+			self.app.new_doc_dialog_ui.heading_line_edit.setText("")
+			self.app.new_doc_dialog_ui.sub_heading_line_edit.setText("")
+			self.app.new_doc_dialog_ui.composer_line_edit.setText("")
+
+		self.app.new_doc_dialog.close()
+
+	def edit_text(self, text_field):
+		self.app.current_page = 0
+		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+		self.update_page_info_and_button_text()
+		if (text_field == "heading"):
+			self.app.document_ui.heading.setFocus()
+		elif (text_field == "sub_heading"):
+			self.app.document_ui.sub_heading.setFocus()
+		elif (text_field == "composer"):
+			self.app.document_ui.composer.setFocus()

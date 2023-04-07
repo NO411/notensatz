@@ -2,15 +2,20 @@
 main.py: Notensatzprogramm, grundlegende Programmstruktur
 """
 
-import app
-import ui_misc
-import saving
-import page_handling
+from app import App
+from ui_misc import UiMiscHandler
+from saving import SavingHander
+from page_handling import PageHandler
 
 __author__ = "Noah Weiler"
 
 def main():
-	app.init()
+	app = App()
+
+	ui_misc = UiMiscHandler(app)
+	page_handling = PageHandler(app, ui_misc)
+	saving = SavingHander(app, page_handling)
+
 	app.document_ui.pages = [page_handling.create_empty_page(True)]
 	ui_misc.update_page_change_buttons_colors()
 	ui_misc.update_zoom_buttons_colors()
