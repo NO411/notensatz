@@ -16,7 +16,7 @@ def main():
 	page_handling = PageHandler(app, ui_misc)
 	saving = SavingHander(app, page_handling)
 
-	app.document_ui.pages = [page_handling.create_empty_page(True)]
+	app.document_ui.pages = [page_handling.create_empty_page(False)]
 	ui_misc.update_page_change_buttons_colors()
 	ui_misc.update_zoom_buttons_colors()
 
