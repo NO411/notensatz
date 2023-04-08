@@ -9,29 +9,10 @@ import qdarktheme
 from mainwindow import Ui_MainWindow
 from aboutbox import Ui_AboutBox
 from new_document import Ui_NewDocumentDialog
+from document import DocumentUi
 
 # intern imports
 from fonts import load_fonts, get_symbol
-
-class DocumentUi:
-	def __init__(self):
-		# table of QGraphicsScenes
-		self.pages = []
-
-		# A4 layout
-		self.width = 2480
-		self.height = 3508
-		# default margin: ca. 1.54 cm
-		# default paper width: 21 cm
-		# margin / width = [default margin] / [default paper width]
-		# -> margin = width * [default margin] / [default paper width]
-		self.margin = self.width * 1.54 / 21
-
-		# references of the objects stored in the scene to be able to access them
-		# because it is not always possible to determine the index of the item in the pages[x].items() list
-		self.heading = None
-		self.sub_heading = None
-		self.composer = None
 
 class App_Ui(Ui_MainWindow):
 	def __init__(self, app):

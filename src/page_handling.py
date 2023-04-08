@@ -3,20 +3,17 @@ from PyQt5.QtGui import QBrush
 from PyQt5.QtCore import Qt
 
 from app import App
-from document_text import DocumentTextitem
 from ui_misc import UiMiscHandler
+from document import Page, DocumentTextitem, point_to_px
 
 class PageHandler():
 	def __init__(self, app:App, ui_misc:UiMiscHandler):
 		self.app = app
+		# object which can change app ui
 		self.ui_misc = ui_misc
 
-	def create_empty_page(self, new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
-		new_page = QGraphicsScene(0, 0, self.app.document_ui.width, self.app.document_ui.height)
-		# white background
-		rect = QGraphicsRectItem(0, 0, self.app.document_ui.width, self.app.document_ui.height)
-		rect.setBrush(QBrush(Qt.white))
-		new_page.addItem(rect)
+	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
+		new_page = Page(page_number)
 
 		if (new_first_page):
 			if (heading_text == ""):
@@ -26,14 +23,13 @@ class PageHandler():
 			if (composer_text == ""):
 				composer_text = "Komponist / Arrangeur"
 
-			# the font sizes were roughly measured using an example
-			heading = DocumentTextitem(self.app, heading_text, self.app.document_ui.width * 0.6 / 21, self.app.document_ui.margin, "center", True)
-			sub_heading = DocumentTextitem(self.app, sub_heading_text, self.app.document_ui.width * 0.4 / 21, heading.y() + heading.boundingRect().height(), "center", False)
-			composer = DocumentTextitem(self.app, composer_text, self.app.document_ui.width * 0.3 / 21, sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
+			heading = DocumentTextitem(True, heading_text, point_to_px(20), Page.MARGIN, "center", True)
+			sub_heading = DocumentTextitem(True, sub_heading_text, point_to_px(12), heading.y() + heading.boundingRect().height(), "center", False)
+			composer = DocumentTextitem(True, composer_text, point_to_px(10), sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
 
-			new_page.addItem(heading)
-			new_page.addItem(sub_heading)
-			new_page.addItem(composer)
+			new_page.scene.addItem(heading)
+			new_page.scene.addItem(sub_heading)
+			new_page.scene.addItem(composer)
 
 			self.app.document_ui.heading = heading
 			self.app.document_ui.sub_heading = sub_heading
@@ -50,14 +46,19 @@ class PageHandler():
 		self.ui_misc.update_page_change_buttons_colors()
 
 	def new_page(self):
-		new_page = self.create_empty_page(False)
-		if (len(self.app.document_ui.pages) == self.app.current_page + 1):
+		self.app.current_page += 1
+		new_page = self.create_empty_page(self.app.current_page + 1)
+
+		if (len(self.app.document_ui.pages) == self.app.current_page):
 			self.app.document_ui.pages.append(new_page)
 		else:
-			self.app.document_ui.pages.insert(self.app.current_page + 1, new_page)
-		self.app.current_page += 1
-		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+			self.app.document_ui.pages.insert(self.app.current_page, new_page)
+		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
 		self.update_page_info_and_button_text()
+
+		for i, page in enumerate(self.app.document_ui.pages):
+			if (i > self.app.current_page):
+				page.increase_page_number()
 
 	def delete_page(self):
 		if (self.app.current_page == 0):
@@ -88,21 +89,25 @@ class PageHandler():
 		if (self.app.current_page < 0):
 			self.app.current_page = 0
 		if (len(self.app.document_ui.pages) == 0):
-			self.app.document_ui.pages.append(self.create_empty_page(True))
+			self.app.document_ui.pages.append(self.create_empty_page(1, True))
 
-		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
 		self.update_page_info_and_button_text()
+
+		for i, page in enumerate(self.app.document_ui.pages):
+			if (i > self.app.current_page):
+				page.decrease_page_number()
 
 	def next_page(self):
 		if (self.app.current_page + 1 < len(self.app.document_ui.pages)):
 			self.app.current_page += 1
-			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
 			self.update_page_info_and_button_text()
 
 	def previous_page(self):
 		if (self.app.current_page > 0):
 			self.app.current_page -= 1
-			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
 			self.update_page_info_and_button_text()
 
 	def create_new_document(self):
@@ -116,8 +121,8 @@ class PageHandler():
 			self.app.end_welcome_screen()
 
 		self.app.current_page = 0
-		self.app.document_ui.pages = [self.create_empty_page(True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text())]
-		self.app.ui.view.setScene(self.app.document_ui.pages[0])
+		self.app.document_ui.pages = [self.create_empty_page(1, True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text())]
+		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
 		self.update_page_info_and_button_text()
 
 		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
@@ -129,7 +134,7 @@ class PageHandler():
 
 	def edit_text(self, text_field):
 		self.app.current_page = 0
-		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page])
+		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
 		self.update_page_info_and_button_text()
 		if (text_field == "heading"):
 			self.app.document_ui.heading.setFocus()

@@ -3,11 +3,12 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QGraphicsTextItem
 
 from app import App
+from document import Page
 
 class DocumentTextitem(QGraphicsTextItem):
-	def __init__(self, app:App, text: str, fontSize: float, y: float, alignment: str, bold: bool):
+	def __init__(self, allow_interaction: bool, app:App, text: str, fontSize: float, y: float, alignment: str, bold: bool):
 		"""
-		`alignment`: "right", "center"
+		`alignment`: "right", "left, ""center"
 		"""
 		super().__init__()
 
@@ -18,9 +19,10 @@ class DocumentTextitem(QGraphicsTextItem):
 		self.setFont(font)
 		self.setDefaultTextColor(Qt.black)
 
-		# interaction
-		self.setTextInteractionFlags(Qt.TextEditorInteraction)
-		self.document().setMaximumBlockCount(1)
+		if (allow_interaction):
+			# interaction
+			self.setTextInteractionFlags(Qt.TextEditorInteraction)
+			self.document().setMaximumBlockCount(1)
 
 		# alignment and positioning
 		self.alignment = alignment
@@ -30,7 +32,7 @@ class DocumentTextitem(QGraphicsTextItem):
 
 	def crop_text(self, app:App):
 		# set maximum width
-		while (self.boundingRect().width() > (app.document_ui.width - 2 * app.document_ui.margin)):
+		while (self.boundingRect().width() > (Page.WIDTH - 2 * Page.MARGIN)):
 			self.document().blockSignals(True)
 			cursor = self.textCursor()
 			old_cursor_pos = cursor.position()
@@ -45,9 +47,9 @@ class DocumentTextitem(QGraphicsTextItem):
 	def align(self, app:App):
 		self.crop_text(app)
 		if (self.alignment == "right"):
-			self.setPos(app.document_ui.width - app.document_ui.margin - self.boundingRect().width(), self._y)
+			self.setPos(Page.WIDTH - Page.MARGIN - self.boundingRect().width(), self._y)
 		elif (self.alignment == "center"):
-			self.setPos(app.document_ui.width / 2 - self.boundingRect().width() / 2, self._y)
+			self.setPos(Page.WIDTH / 2 - self.boundingRect().width() / 2, self._y)
 
 	def remove_highlight(self):
 		# work around to remove highlighted text

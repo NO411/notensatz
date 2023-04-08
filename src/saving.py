@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
 from PyQt5.QtCore import QFileInfo
 
 from app import App
-from document_text import DocumentTextitem
+from document import DocumentTextitem
 from page_handling import PageHandler
 
 import json
@@ -30,20 +30,29 @@ class SavingHander():
 
 		p = QPainter(printer)
 
-		for i, scene in enumerate(self.app.document_ui.pages):
+		for i, page in enumerate(self.app.document_ui.pages):
 
 			# remove highlights (they would appear gray in the pdf)
-			for item in scene.items():
+			for item in page.scene.items():
 				if (type(item) == DocumentTextitem or type(item) == QGraphicsTextItem):
 					item.remove_highlight()
 
-			scene.render(p)
+			page.scene.render(p)
 			if i != len(self.app.document_ui.pages) - 1:
 				printer.newPage()
 		p.end()
 
+	def generate_filename(self):
+		# generate a filename out of the heading and the composer and remove unwanted chars
+		ret = self.app.document_ui.heading.toPlainText() + " - " + self.app.document_ui.composer.toPlainText()
+		forbidden_chars = '\\/:*?"<>|'
+		for char in forbidden_chars:
+			ret = ret.replace(char, "")
+
+		return ret[:260]
+
 	def export(self):
-		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz exportieren", self.app.document_ui.heading.toPlainText() + ".pdf", "*.pdf")
+		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz exportieren", self.generate_filename() + ".pdf", "*.pdf")
 		if filename:
 			self.export_to_pdf(filename)
 
@@ -62,7 +71,7 @@ class SavingHander():
 			json.dump(data, file_, indent="\t")
 
 	def save_as(self):
-		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.app.document_ui.heading.toPlainText() + "." + self.app.file_extension, "*." + self.app.file_extension)
+		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + self.app.file_extension, "*." + self.app.file_extension)
 		if filename:
 			self.save_data(filename)
 			self.app.current_file_name = filename
@@ -79,13 +88,13 @@ class SavingHander():
 		with open(filename, "r") as file_:
 			data = json.load(file_)
 
-		self.app.document_ui.pages = [self.page_handling.create_empty_page(True, data["heading"], data["sub_heading"], data["composer"])]
+		self.app.document_ui.pages = [self.page_handling.create_empty_page(1, True, data["heading"], data["sub_heading"], data["composer"])]
 		for x, _ in enumerate(data["pages"]):
 			if (x != 0):
-				self.app.document_ui.pages.append(self.page_handling.create_empty_page(False))
+				self.app.document_ui.pages.append(self.page_handling.create_empty_page(x + 1))
 
 		self.app.current_page = 0
-		self.app.ui.view.setScene(self.app.document_ui.pages[0])
+		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
 		self.page_handling.update_page_info_and_button_text()
 
 	def open_file(self):

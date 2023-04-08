@@ -17,10 +17,10 @@ def main():
 	page_handling = PageHandler(app, ui_misc)
 	saving = SavingHander(app, page_handling)
 
-	app.document_ui.pages = [page_handling.create_empty_page(False)]
+	app.document_ui.pages = [page_handling.create_empty_page(1)]
 	# object which is needed to render the scene
 	# view can change when the scene changes (new page)
-	app.ui.view.setScene(app.document_ui.pages[0])
+	app.ui.view.setScene(app.document_ui.pages[0].scene)
 
 	# ui adjustments which need functions of other modules
 	ui_misc.apply_zoom()
