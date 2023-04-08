@@ -1,6 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QMessageBox, QCheckBox
-from PyQt5.QtGui import QBrush
-from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QMessageBox, QCheckBox
 
 from app import App
 from ui_misc import UiMiscHandler

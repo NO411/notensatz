@@ -3,8 +3,11 @@ from json import load
 
 font_metadata = None
 
+def get_unicode(smufl_name):
+	return int(font_metadata[smufl_name][2:], 16)
+
 def get_symbol(smufl_name):
-	return str(chr(int(font_metadata[smufl_name][2:], 16)))
+	return str(chr(get_unicode(smufl_name)))
 
 def load_fonts():
 	global font_metadata
