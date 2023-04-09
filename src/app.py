@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QFont, QFontMetrics
+from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
@@ -18,6 +18,9 @@ class App_Ui(Ui_MainWindow):
 	def __init__(self, app):
 		super().__init__()
 		self.setupUi(app.window)
+
+		# this is for rendering staves correctly
+		self.view.setRenderHint(QPainter.Antialiasing)
 
 		# other ui setups
 		# (seperately to not get overriden by the pyqt5 designer...)

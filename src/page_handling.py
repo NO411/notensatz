@@ -1,8 +1,10 @@
 from PyQt5.QtWidgets import QMessageBox, QCheckBox
+from PyQt5.QtCore import Qt
 
 from app import App
 from ui_misc import UiMiscHandler
-from document import Page, DocumentTextitem, point_to_px
+from document import Page, DocumentTextitem, point_to_px, DocumentUi
+from notation_system import Bar, TimeSignature, KeySignature
 
 class PageHandler():
 	def __init__(self, app:App, ui_misc:UiMiscHandler):
@@ -119,6 +121,7 @@ class PageHandler():
 			self.app.end_welcome_screen()
 
 		self.app.current_page = 0
+		self.app.document_ui = DocumentUi()
 		self.app.document_ui.pages = [self.create_empty_page(1, True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text())]
 		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
 		self.update_page_info_and_button_text()
@@ -129,6 +132,12 @@ class PageHandler():
 			self.app.new_doc_dialog_ui.composer_line_edit.setText("")
 
 		self.app.new_doc_dialog.close()
+
+		first_bar = Bar(
+			TimeSignature(self.app.new_doc_dialog_ui.fundamental_beats_spin_box.value(), str(self.app.new_doc_dialog_ui.note_value_combo_box.currentText())),
+			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())
+		)
+		self.app.document_ui.setup(self.app.new_doc_dialog_ui.staves_spin_box.value(), first_bar)
 
 	def edit_text(self, text_field):
 		self.app.current_page = 0

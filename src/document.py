@@ -2,14 +2,18 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsTextItem
 from PyQt5.QtGui import QBrush, QFont
 from PyQt5.QtCore import Qt
 
+from notation_system import Bar
+from typing import List
+from fonts import get_symbol
+
 # converts font sizes to pixels in the app
-def point_to_px(pt: int):
+def point_to_px(pt: float):
 	# A4 width = 21cm
 	# 1 inch = 2,54 cm
 	# A4 px width = 2480
 	# 1 pt = 1 / 72 inch
 
-	return (pt * Page.WIDTH / 72) / (21 / 2.54)
+	return int((pt * Page.WIDTH / 72) / (21 / 2.54))
 
 class Page:
 	# A4 layout
@@ -59,13 +63,32 @@ class Page:
 class DocumentUi:
 	def __init__(self):
 		# table of all pages (those include the scenes)
-		self.pages:Page = []
+		self.pages: List[Page] = []
 
 		# references of the objects stored in the scene to be able to access them
 		# because it is not always possible to determine the index of the item in the pages[x].items() list
 		self.heading = None
 		self.sub_heading = None
 		self.composer = None
+
+		self.staves = None
+		# table of Bar objects
+		self.bars: Bar = []
+
+	def setup(self, staves: int, first_bar: Bar):
+		# info: first page was already added by page_handling 
+
+		self.staves = staves
+		self.bars = [first_bar]
+		self.bars[0].setup()
+
+class Musicitem(QGraphicsTextItem):
+	def __init__(self, symbol: str):
+		super().__init__()
+		
+		self.setPlainText(get_symbol(symbol))
+		self.setFont(QFont("Bravura", point_to_px(17.5)))
+		self.setDefaultTextColor(Qt.black)
 
 class DocumentTextitem(QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, bold: bool):

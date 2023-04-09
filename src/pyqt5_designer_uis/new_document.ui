@@ -212,14 +212,14 @@
            <item>
             <widget class="QLabel" name="key_signature_label">
              <property name="text">
-              <string>Vorzeichen</string>
+              <string>Tonart</string>
              </property>
             </widget>
            </item>
            <item>
             <widget class="QLabel" name="staffs_label">
              <property name="text">
-              <string>Notenliniensysteme</string>
+              <string>Stimmen pro System</string>
              </property>
             </widget>
            </item>
@@ -311,7 +311,7 @@
             </layout>
            </item>
            <item>
-            <widget class="QSpinBox" name="staffs_spin_box">
+            <widget class="QSpinBox" name="staves_spin_box">
              <property name="frame">
               <bool>true</bool>
              </property>
