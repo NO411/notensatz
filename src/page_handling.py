@@ -130,6 +130,10 @@ class PageHandler():
 			self.app.new_doc_dialog_ui.heading_line_edit.setText("")
 			self.app.new_doc_dialog_ui.sub_heading_line_edit.setText("")
 			self.app.new_doc_dialog_ui.composer_line_edit.setText("")
+			self.app.new_doc_dialog_ui.fundamental_beats_spin_box.setValue(4)
+			self.app.new_doc_dialog_ui.note_value_combo_box.setCurrentIndex(1)
+			self.app.new_doc_dialog_ui.key_signatures_combo_box.setCurrentIndex(0)
+			self.app.new_doc_dialog_ui.staves_spin_box.setValue(2)
 
 		self.app.new_doc_dialog.close()
 
