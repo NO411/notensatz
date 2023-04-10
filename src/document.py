@@ -73,7 +73,7 @@ class DocumentUi:
 
 		self.staves = None
 		# table of Bar objects
-		self.bars: Bar = []
+		self.bars: List[Bar] = []
 
 	def setup(self, staves: int, first_bar: Bar):
 		# info: first page was already added by page_handling 

@@ -61,11 +61,16 @@ class SavingHander():
 			"heading": self.app.document_ui.heading.toPlainText(),
 			"sub_heading": self.app.document_ui.sub_heading.toPlainText(),
 			"composer": self.app.document_ui.composer.toPlainText(),
-			"pages": [],
+			"pages": 0,
+			"bars": [],
 		}
 
-		for x,_ in enumerate(self.app.document_ui.pages):
-			data["pages"].append({})
+		for _ in self.app.document_ui.pages:
+			data["pages"] += 1
+
+		for bar in self.app.document_ui.bars:
+			data["bars"].append(bar.to_map())
+
 
 		with open(file_name, "w") as file_:
 			json.dump(data, file_, indent="\t")
@@ -89,9 +94,8 @@ class SavingHander():
 			data = json.load(file_)
 
 		self.app.document_ui.pages = [self.page_handling.create_empty_page(1, True, data["heading"], data["sub_heading"], data["composer"])]
-		for x, _ in enumerate(data["pages"]):
-			if (x != 0):
-				self.app.document_ui.pages.append(self.page_handling.create_empty_page(x + 1))
+		for x in range(1, data["pages"]):
+			self.app.document_ui.pages.append(self.page_handling.create_empty_page(x + 1))
 
 		self.app.current_page = 0
 		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)

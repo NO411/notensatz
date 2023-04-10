@@ -134,7 +134,7 @@ class PageHandler():
 		self.app.new_doc_dialog.close()
 
 		first_bar = Bar(
-			TimeSignature(self.app.new_doc_dialog_ui.fundamental_beats_spin_box.value(), str(self.app.new_doc_dialog_ui.note_value_combo_box.currentText())),
+			TimeSignature(1, 1),
 			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())
 		)
 		self.app.document_ui.setup(self.app.new_doc_dialog_ui.staves_spin_box.value(), first_bar)
