@@ -84,7 +84,7 @@ class Ui_NewDocumentDialog(object):
         self.fundamental_beats_spin_box = QtWidgets.QSpinBox(self.time_signature_group_box)
         self.fundamental_beats_spin_box.setSuffix("")
         self.fundamental_beats_spin_box.setMinimum(1)
-        self.fundamental_beats_spin_box.setMaximum(12)
+        self.fundamental_beats_spin_box.setMaximum(9)
         self.fundamental_beats_spin_box.setProperty("value", 4)
         self.fundamental_beats_spin_box.setDisplayIntegerBase(10)
         self.fundamental_beats_spin_box.setObjectName("fundamental_beats_spin_box")

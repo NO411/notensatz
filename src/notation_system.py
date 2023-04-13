@@ -133,7 +133,7 @@ class Bar:
 			self.note_groups = []
 			for note_group in time_signature_or_bar_map["note_groups"]:
 				self.note_groups.append(NoteGroup(note_group))
-
+		self.objects: List[Musicitem] = []
 	def to_map(self):
 		bar_map = {
 			"time_signature": self.time_signature.to_map(),
@@ -144,6 +144,8 @@ class Bar:
 			bar_map["note_groups"].append(note_group.to_map())
 
 		return bar_map
+
+	#def set_up(self, start_pos: QPointF, staves: List[Stave]):
 	
 class Stave:
 	line_pen = QPen(Qt.black, 3)
@@ -177,7 +179,7 @@ class Stave:
 		},
 	}
 
-	def __init__(self, drawing_scene: QGraphicsScene, clef_key: str, left_pos: QPointF, width: float, key_signature: KeySignature):
+	def __init__(self, drawing_scene: QGraphicsScene, clef_key: str, left_pos: QPointF, width: float, key_signature: KeySignature, first_bar: Bar):
 		# setup members
 		self.drawing_scene: QGraphicsScene = drawing_scene
 		self.clef_key: str = clef_key
@@ -185,6 +187,7 @@ class Stave:
 		self.width = width
 		self.key_signature: KeySignature = key_signature
 		self.lines: List[QGraphicsLineItem] = []
+		self.bars: List[Bar] = [first_bar]
 
 		# draw all lines
 		for i in range(5):
@@ -216,10 +219,15 @@ class Stave:
 			self.key_signature_accidentals.append(accidental)
 			self.drawing_scene.addItem(accidental)
 
+	def add_first_time_signature(self, start_x: float):
+		time_signature = Musicitem(["timeSigCombNumerator", "timeSig" + str(self.bars[0].time_signature.fundamental_beats), "timeSigCombDenominator", "timeSig" + str(self.bars[0].time_signature.note_value)])
+		time_signature.setPos(start_x + 0.25 * Musicitem.EM, self.left_pos.y() + Musicitem.EM)
+		self.bars[0].objects.append(time_signature)
+		self.drawing_scene.addItem(time_signature)
 
 class System:
 	min_stave_spacing = Musicitem.EM
-	def __init__(self, drawing_scene: QGraphicsScene, voices: int, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, first_bar: Bar, position: QPointF):
+	def __init__(self, drawing_scene: QGraphicsScene, voices: int, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, first_bar: Bar, position: QPointF, first_system: bool = False):
 		# setup all members
 		self.drawing_scene: QGraphicsScene = drawing_scene
 		self.pos: QPointF = position
@@ -229,9 +237,9 @@ class System:
 		self.with_piano: bool = with_piano
 		self.staves: List[Stave] = [
 			# create all staves using list comprehension
-			Stave(drawing_scene, clefs_tabel[n], QPointF(self.pos.x(), self.pos.y() + n * (Musicitem.EM + System.min_stave_spacing)), self.width, self.key_signature) for n in range(voices)
+			Stave(drawing_scene, clefs_tabel[n], QPointF(self.pos.x(), self.pos.y() + n * (Musicitem.EM + System.min_stave_spacing)), self.width, self.key_signature, first_bar) for n in range(voices)
 		]
-		self.bars: List[Bar] = [first_bar]
+		self.first_system = first_system
 
 		# setup the left bar line
 		self.left_bar_line = Musicitem("barlineSingle")
@@ -248,7 +256,9 @@ class System:
 		if (self.with_piano and self.voices > 1):
 			self.addbrace()
 
-		self.get_start_x()
+		if (self.first_system):
+			for stave in self.staves:
+				stave.add_first_time_signature(self.get_start_x())
 
 	def addbrace(self):
 		self.brace = Musicitem("brace")

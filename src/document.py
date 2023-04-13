@@ -34,4 +34,4 @@ class DocumentUi:
 		self.key_signature = key_signature
 
 		top_spacing = self.composer.y() + self.composer.sceneBoundingRect().height() + Page.MARGIN / 2
-		self.systems = [System(self.pages[0].scene, self.staves, self.clefs, self.key_signature, self.with_piano, first_bar, QPointF(2 * Page.MARGIN, top_spacing))]
+		self.systems = [System(self.pages[0].scene, self.staves, self.clefs, self.key_signature, self.with_piano, first_bar, QPointF(2 * Page.MARGIN, top_spacing), True)]
