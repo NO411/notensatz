@@ -1,10 +1,10 @@
 from PyQt5.QtWidgets import QMessageBox, QCheckBox
-from PyQt5.QtCore import Qt
 
 from app import App
 from ui_misc import UiMiscHandler
-from document import Page, DocumentTextitem, point_to_px, DocumentUi
+from document import Page, DocumentTextitem, DocumentUi
 from notation_system import Bar, TimeSignature, KeySignature
+from fonts import real_font_size
 
 class PageHandler():
 	def __init__(self, app:App, ui_misc:UiMiscHandler):
@@ -23,9 +23,9 @@ class PageHandler():
 			if (composer_text == ""):
 				composer_text = "Komponist / Arrangeur"
 
-			heading = DocumentTextitem(True, heading_text, point_to_px(20), Page.MARGIN, "center", True)
-			sub_heading = DocumentTextitem(True, sub_heading_text, point_to_px(12), heading.y() + heading.boundingRect().height(), "center", False)
-			composer = DocumentTextitem(True, composer_text, point_to_px(10), sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
+			heading = DocumentTextitem(True, heading_text, real_font_size(20, Page.HEIGHT), Page.MARGIN, "center", True)
+			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12, Page.HEIGHT), heading.y() + heading.boundingRect().height(), "center", False)
+			composer = DocumentTextitem(True, composer_text, real_font_size(12, Page.HEIGHT), sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
 
 			new_page.scene.addItem(heading)
 			new_page.scene.addItem(sub_heading)
@@ -126,30 +126,33 @@ class PageHandler():
 		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
 		self.update_page_info_and_button_text()
 
-		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
-			self.app.new_doc_dialog_ui.heading_line_edit.setText("")
-			self.app.new_doc_dialog_ui.sub_heading_line_edit.setText("")
-			self.app.new_doc_dialog_ui.composer_line_edit.setText("")
-			self.app.new_doc_dialog_ui.fundamental_beats_spin_box.setValue(4)
-			self.app.new_doc_dialog_ui.note_value_combo_box.setCurrentIndex(1)
-			self.app.new_doc_dialog_ui.key_signatures_combo_box.setCurrentIndex(0)
-			self.app.new_doc_dialog_ui.staves_spin_box.setValue(2)
-
-		self.app.new_doc_dialog.close()
-
-		first_bar = Bar(
-			TimeSignature(1, 1),
+		first_bar = Bar(TimeSignature(self.app.new_doc_dialog_ui.fundamental_beats_spin_box.value(), str(self.app.new_doc_dialog_ui.note_value_combo_box.currentText())))
+		self.app.document_ui.setup(
+			self.app.new_doc_dialog_ui.staves_spin_box.value(),
+			first_bar,
+			self.app.new_doc_dialog_ui.piano_checkbox.isChecked(),
+			self.app.new_doc_dialog_ui.get_clefs(),
 			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())
 		)
-		self.app.document_ui.setup(self.app.new_doc_dialog_ui.staves_spin_box.value(), first_bar)
+
+		# close dialog and eventually save the settings
+		self.app.new_doc_dialog.close()
+		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
+			self.app.new_doc_dialog_ui.reset()
 
 	def edit_text(self, text_field):
+		# "move" ui to text fields
 		self.app.current_page = 0
 		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
+		self.app.ui.view.verticalScrollBar().setValue(self.app.ui.view.verticalScrollBar().minimum())
 		self.update_page_info_and_button_text()
+
 		if (text_field == "heading"):
 			self.app.document_ui.heading.setFocus()
+			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
 		elif (text_field == "sub_heading"):
 			self.app.document_ui.sub_heading.setFocus()
+			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
 		elif (text_field == "composer"):
 			self.app.document_ui.composer.setFocus()
+			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum())

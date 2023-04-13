@@ -1,5 +1,5 @@
 """
-main.py: Notensatzprogramm, grundlegende Programmstruktur
+main.py: ♫ Notensatzprogramm, grundlegende Programmstruktur
 """
 
 from app import App

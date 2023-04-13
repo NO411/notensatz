@@ -10,19 +10,19 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>250</height>
+    <height>450</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
     <width>400</width>
-    <height>250</height>
+    <height>450</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>400</width>
-    <height>250</height>
+    <height>450</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -92,7 +92,7 @@
       </layout>
      </item>
      <item>
-      <spacer name="verticalSpacer">
+      <spacer name="top_vertical_spacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -107,7 +107,7 @@
      <item>
       <layout class="QHBoxLayout" name="specific_settings_layout">
        <item>
-        <widget class="QGroupBox" name="time_signatures">
+        <widget class="QGroupBox" name="time_signature_group_box">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -119,16 +119,16 @@
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <property name="leftMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="topMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="rightMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <property name="bottomMargin">
-           <number>3</number>
+           <number>9</number>
           </property>
           <item>
            <layout class="QVBoxLayout" name="time_signature_spin_box_labels">
@@ -149,7 +149,7 @@
            </layout>
           </item>
           <item>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
+           <layout class="QVBoxLayout" name="time_signatures_boxes_layout">
             <item>
              <widget class="QSpinBox" name="fundamental_beats_spin_box">
               <property name="suffix">
@@ -206,136 +206,369 @@
         </widget>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="other_settings_layout">
-         <item>
-          <layout class="QVBoxLayout" name="other_settings_labels">
-           <item>
-            <widget class="QLabel" name="key_signature_label">
+        <widget class="QGroupBox" name="key_signature_group_box">
+         <property name="title">
+          <string>Tonart</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QComboBox" name="key_signatures_combo_box">
+            <item>
              <property name="text">
-              <string>Tonart</string>
+              <string comment="0">C-Dur / a-Moll</string>
              </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="staffs_label">
+            </item>
+            <item>
              <property name="text">
-              <string>Stimmen pro System</string>
+              <string comment="1#">G-Dur / e-Moll</string>
              </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-         <item>
-          <layout class="QVBoxLayout" name="other_settings">
-           <item>
-            <layout class="QHBoxLayout" name="horizontalLayout">
-             <item>
-              <widget class="QComboBox" name="key_signatures_combo_box">
-               <item>
-                <property name="text">
-                 <string comment="0">C-Dur / a-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="1#">G-Dur / e-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="2#">D-Dur / h-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="3#">A-Dur / fis-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="4#">E-Dur / cis-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="5#">H-Dur / gis-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="6#">Fis-Dur / dis-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="7#">Cis-Dur / ais-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="1b">F-Dur / d-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="2b">B-Dur / g-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="3b">Es-Dur / c-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="4b">As-Dur / f-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="5b">Des-Dur / b-Moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="6b">Ges-Dur / es-moll</string>
-                </property>
-               </item>
-               <item>
-                <property name="text">
-                 <string comment="7b">Ces-Dur / as-Moll</string>
-                </property>
-               </item>
-              </widget>
-             </item>
-            </layout>
-           </item>
-           <item>
-            <widget class="QSpinBox" name="staves_spin_box">
-             <property name="frame">
-              <bool>true</bool>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="2#">D-Dur / h-Moll</string>
              </property>
-             <property name="minimum">
-              <number>1</number>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="3#">A-Dur / fis-Moll</string>
              </property>
-             <property name="maximum">
-              <number>4</number>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="4#">E-Dur / cis-Moll</string>
              </property>
-             <property name="value">
-              <number>2</number>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="5#">H-Dur / gis-Moll</string>
              </property>
-            </widget>
-           </item>
-          </layout>
-         </item>
-        </layout>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="6#">Fis-Dur / dis-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="7#">Cis-Dur / ais-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="1b">F-Dur / d-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="2b">B-Dur / g-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="3b">Es-Dur / c-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="4b">As-Dur / f-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="5b">Des-Dur / b-Moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="6b">Ges-Dur / es-moll</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string comment="7b">Ces-Dur / as-Moll</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+         </layout>
+        </widget>
        </item>
       </layout>
+     </item>
+     <item>
+      <widget class="QGroupBox" name="voices_group_box">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="title">
+        <string>Stimmen</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout">
+        <item>
+         <layout class="QHBoxLayout" name="voices_top_layout">
+          <item>
+           <widget class="QLabel" name="staffs_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Maximum">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Anzahl</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QSpinBox" name="staves_spin_box">
+            <property name="frame">
+             <bool>true</bool>
+            </property>
+            <property name="minimum">
+             <number>1</number>
+            </property>
+            <property name="maximum">
+             <number>4</number>
+            </property>
+            <property name="value">
+             <number>2</number>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="voices_top_settings_spacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::MinimumExpanding</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="piano_checkbox">
+            <property name="layoutDirection">
+             <enum>Qt::LeftToRight</enum>
+            </property>
+            <property name="autoFillBackground">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>mit Klavierstimme</string>
+            </property>
+            <property name="checked">
+             <bool>false</bool>
+            </property>
+            <property name="autoExclusive">
+             <bool>false</bool>
+            </property>
+            <property name="tristate">
+             <bool>false</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="voices_bottom_layout">
+          <item>
+           <layout class="QVBoxLayout" name="voices_labels_layout">
+            <item>
+             <widget class="QLabel" name="voice_1_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Stimme 1</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="voice_2_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Stimme 2</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="voice_3_label">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Stimme 3</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="voice_4_label">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>Stimme 4</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QVBoxLayout" name="voices_combo_boxes_layout">
+            <item>
+             <widget class="QComboBox" name="voice_1_combo_box">
+              <item>
+               <property name="text">
+                <string>Violinschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Bassschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Altschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Tenorschlüssel</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="voice_2_combo_box">
+              <property name="currentText">
+               <string>Violinschlüssel</string>
+              </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Violinschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Bassschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Altschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Tenorschlüssel</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="voice_3_combo_box">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="currentText">
+               <string>Violinschlüssel</string>
+              </property>
+              <property name="currentIndex">
+               <number>0</number>
+              </property>
+              <item>
+               <property name="text">
+                <string>Violinschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Bassschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Altschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Tenorschlüssel</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="voice_4_combo_box">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <item>
+               <property name="text">
+                <string>Violinschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Bassschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Altschlüssel</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Tenorschlüssel</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
      </item>
     </layout>
    </item>
    <item>
-    <spacer name="verticalSpacer_2">
+    <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
@@ -386,6 +619,9 @@
        <property name="text">
         <string>OK</string>
        </property>
+       <property name="shortcut">
+        <string>Return</string>
+       </property>
        <property name="autoDefault">
         <bool>false</bool>
        </property>
@@ -407,6 +643,9 @@
        </property>
        <property name="text">
         <string>Abbrechen</string>
+       </property>
+       <property name="shortcut">
+        <string>Esc</string>
        </property>
        <property name="autoDefault">
         <bool>false</bool>

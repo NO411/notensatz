@@ -15,9 +15,9 @@ class Ui_AboutBox(object):
     def setupUi(self, AboutBox):
         AboutBox.setObjectName("AboutBox")
         AboutBox.setWindowModality(QtCore.Qt.ApplicationModal)
-        AboutBox.resize(300, 200)
-        AboutBox.setMinimumSize(QtCore.QSize(300, 200))
-        AboutBox.setMaximumSize(QtCore.QSize(300, 200))
+        AboutBox.resize(270, 210)
+        AboutBox.setMinimumSize(QtCore.QSize(270, 210))
+        AboutBox.setMaximumSize(QtCore.QSize(270, 210))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap("pyqt5_designer_uis\\../../assets/icon.png"), QtGui.QIcon.Selected, QtGui.QIcon.On)
         AboutBox.setWindowIcon(icon)
@@ -55,5 +55,9 @@ class Ui_AboutBox(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Author: Noah Weiler</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Version: 0.0.1</p>\n"
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Webseite: <a href=\"https://github.com/NO411/notensatz\"><span style=\" font-size:8pt; text-decoration: underline; color:#528bff;\">https://github.com/NO411/notensatz</span></a></p>\n"
-"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Erstellt mit PyQt5</p></body></html>"))
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Musikfont: Bravura</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Python Version: &lt; 3.10</p>\n"
+"<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\">Erstellt mit PyQt5</p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><br /></p></body></html>"))
         self.pushButton.setText(_translate("AboutBox", "OK"))

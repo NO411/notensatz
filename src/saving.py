@@ -1,7 +1,7 @@
 from PyQt5.QtPrintSupport import QPrinter
-from PyQt5.QtGui import QPainter
+from PyQt5.QtGui import QPainter, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
-from PyQt5.QtCore import QFileInfo
+from PyQt5.QtCore import QFileInfo, QUrl
 
 from app import App
 from document import DocumentTextitem
@@ -53,8 +53,12 @@ class SavingHander():
 
 	def export(self):
 		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz exportieren", self.generate_filename() + ".pdf", "*.pdf")
-		if filename:
+		if (filename):
 			self.export_to_pdf(filename)
+
+			# open pdf in extern viewer, if successfull
+			if (QFileInfo(filename).exists()):
+				QDesktopServices.openUrl(QUrl.fromLocalFile(filename))
 
 	def save_data(self,file_name):
 		data = {
@@ -68,9 +72,8 @@ class SavingHander():
 		for _ in self.app.document_ui.pages:
 			data["pages"] += 1
 
-		for bar in self.app.document_ui.bars:
-			data["bars"].append(bar.to_map())
-
+		#for bar in self.app.document_ui.bars:
+		#	data["bars"].append(bar.to_map())
 
 		with open(file_name, "w") as file_:
 			json.dump(data, file_, indent="\t")
