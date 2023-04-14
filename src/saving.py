@@ -65,6 +65,7 @@ class SavingHander():
 			"heading": self.app.document_ui.heading.toPlainText(),
 			"sub_heading": self.app.document_ui.sub_heading.toPlainText(),
 			"composer": self.app.document_ui.composer.toPlainText(),
+			"tempo": self.app.document_ui.tempo.toPlainText(),
 			"pages": 0,
 			"bars": [],
 		}
@@ -96,7 +97,7 @@ class SavingHander():
 		with open(filename, "r") as file_:
 			data = json.load(file_)
 
-		self.app.document_ui.pages = [self.page_handling.create_empty_page(1, True, data["heading"], data["sub_heading"], data["composer"])]
+		self.app.document_ui.pages = [self.page_handling.create_empty_page(1, True, data["heading"], data["sub_heading"], data["composer"], data["tempo"])]
 		for x in range(1, data["pages"]):
 			self.app.document_ui.pages.append(self.page_handling.create_empty_page(x + 1))
 

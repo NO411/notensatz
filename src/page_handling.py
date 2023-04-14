@@ -12,7 +12,7 @@ class PageHandler():
 		# object which can change app ui
 		self.ui_misc = ui_misc
 
-	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text=""):
+	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text = ""):
 		new_page = Page(page_number)
 
 		if (new_first_page):
@@ -22,22 +22,28 @@ class PageHandler():
 				sub_heading_text = "Unterüberschrift"
 			if (composer_text == ""):
 				composer_text = "Komponist / Arrangeur"
+			if (tempo_text == ""):
+				tempo_text = "Tempoangabe"
 
-			heading = DocumentTextitem(True, heading_text, real_font_size(20, Page.HEIGHT), Page.MARGIN, "center", True)
-			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12, Page.HEIGHT), heading.y() + heading.boundingRect().height(), "center", False)
-			composer = DocumentTextitem(True, composer_text, real_font_size(12, Page.HEIGHT), sub_heading.y() + sub_heading.boundingRect().height(), "right", True)
+			heading = DocumentTextitem(True, heading_text, real_font_size(20, Page.HEIGHT), Page.MARGIN, "center", Page.MARGIN, True)
+			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12, Page.HEIGHT), heading.y() + heading.boundingRect().height(), "center", Page.MARGIN, False)
+			composer = DocumentTextitem(True, composer_text, real_font_size(12, Page.HEIGHT), sub_heading.y() + sub_heading.boundingRect().height(), "right", Page.MARGIN, True)
+			tempo = DocumentTextitem(True, tempo_text, real_font_size(12, Page.HEIGHT), composer.y() + composer.boundingRect().height(), "left", 2 * Page.MARGIN, True)
 
 			new_page.scene.addItem(heading)
 			new_page.scene.addItem(sub_heading)
 			new_page.scene.addItem(composer)
+			new_page.scene.addItem(tempo)
 
 			self.app.document_ui.heading = heading
 			self.app.document_ui.sub_heading = sub_heading
 			self.app.document_ui.composer = composer
+			self.app.document_ui.tempo = tempo
 
 			self.app.ui.action_edit_heading.triggered.connect(lambda : self.edit_text("heading"))
 			self.app.ui.action_edit_subheading.triggered.connect(lambda : self.edit_text("sub_heading"))
 			self.app.ui.action_edit_composer.triggered.connect(lambda : self.edit_text("composer"))
+			self.app.ui.action_edit_tempo.triggered.connect(lambda : self.edit_text("tempo"))
 		
 		return new_page
 
@@ -115,6 +121,7 @@ class PageHandler():
 		self.app.ui.action_edit_heading.triggered.disconnect()
 		self.app.ui.action_edit_subheading.triggered.disconnect()
 		self.app.ui.action_edit_composer.triggered.disconnect()
+		self.app.ui.action_edit_tempo.triggered.disconnect()
 
 		# remove blur effect and enable centralwidget if still in welcome screen
 		if (self.app.ui.in_welcome_screen):
@@ -122,7 +129,7 @@ class PageHandler():
 
 		self.app.current_page = 0
 		self.app.document_ui = DocumentUi()
-		self.app.document_ui.pages = [self.create_empty_page(1, True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text())]
+		self.app.document_ui.pages = [self.create_empty_page(1, True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text(), self.app.new_doc_dialog_ui.tempo_line_edit.text())]
 		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
 		self.update_page_info_and_button_text()
 
@@ -157,3 +164,6 @@ class PageHandler():
 		elif (text_field == "composer"):
 			self.app.document_ui.composer.setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum())
+		elif (text_field == "tempo"):
+			self.app.document_ui.tempo.setFocus()
+			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().minimum())

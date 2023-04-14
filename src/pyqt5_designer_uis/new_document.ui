@@ -67,6 +67,13 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QLabel" name="tempo_label">
+           <property name="text">
+            <string>Tempoangabe</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
        <item>
@@ -86,6 +93,9 @@
          </item>
          <item>
           <widget class="QLineEdit" name="composer_line_edit"/>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="tempo_line_edit"/>
          </item>
         </layout>
        </item>

@@ -50,7 +50,7 @@ class Page:
 		self.update_page_text()
 		
 class DocumentTextitem(QGraphicsTextItem):
-	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, bold: bool):
+	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):
 		"""
 		`alignment`: "right", "left, ""center"
 		"""
@@ -71,12 +71,13 @@ class DocumentTextitem(QGraphicsTextItem):
 		# alignment and positioning
 		self.alignment = alignment
 		self._y = y
+		self.align_spacing = align_spacing
 		self.align()
 		self.document().contentsChanged.connect(self.align)
 
 	def crop_text(self):
 		# set maximum width
-		while (self.boundingRect().width() > (Page.WIDTH - 2 * Page.MARGIN)):
+		while (self.boundingRect().width() > (Page.WIDTH - 2 * self.align_spacing)):
 			self.document().blockSignals(True)
 			cursor = self.textCursor()
 			old_cursor_pos = cursor.position()
@@ -92,9 +93,9 @@ class DocumentTextitem(QGraphicsTextItem):
 		self.crop_text()
 		x_align = 0
 		if (self.alignment == "right"):
-			x_align = Page.WIDTH - Page.MARGIN - self.boundingRect().width()
+			x_align = Page.WIDTH - self.align_spacing - self.boundingRect().width()
 		elif (self.alignment == "left"):
-			x_align = Page.MARGIN
+			x_align = self.align_spacing
 		elif (self.alignment == "center"):
 			x_align = Page.WIDTH / 2 - self.boundingRect().width() / 2
 			

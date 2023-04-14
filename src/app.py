@@ -127,6 +127,7 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 		self.heading_line_edit.setText("")
 		self.sub_heading_line_edit.setText("")
 		self.composer_line_edit.setText("")
+		self.tempo_line_edit.setText("")
 		self.key_signatures_combo_box.setCurrentIndex(0)
 		self.staves_spin_box.setValue(2)
 		self.piano_checkbox.setChecked(False)
@@ -238,10 +239,11 @@ class App(QApplication):
 			],
 			# misc
 			[
-				["repeatRight", "Wiederholung"],
-				["gClef", "Violinchlüssel"],
-				["cClef", "C-Schlüssel"],
-				["fClef", "Bassschlüssel"],
+				["repeatDots", "Wiederholung"],
+				["barlineSingle", "Taktstrich"],
+				["gClefChange", "Violinchlüssel (Wechsel)"],
+				["fClefChange", "Bassschlüssel (Wechsel)"],
+				["cClefChange", "C-Schlüssel (Wechsel)"],
 			],
 		]
 		self.show_warning_box = True

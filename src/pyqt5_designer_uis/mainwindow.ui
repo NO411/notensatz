@@ -406,6 +406,7 @@
     <addaction name="action_edit_heading"/>
     <addaction name="action_edit_subheading"/>
     <addaction name="action_edit_composer"/>
+    <addaction name="action_edit_tempo"/>
    </widget>
    <addaction name="menu_file"/>
    <addaction name="menu_edit"/>
@@ -464,6 +465,11 @@
   <action name="action_edit_subheading">
    <property name="text">
     <string>Unterüberschrift ändern</string>
+   </property>
+  </action>
+  <action name="action_edit_tempo">
+   <property name="text">
+    <string>Tempoangabe ändern</string>
    </property>
   </action>
  </widget>
