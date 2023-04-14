@@ -6,6 +6,22 @@ from page import Page
 from music_item import Musicitem
 
 class TimeSignature:
+	signatures_map = {
+		"2/4-Takt": [2, 4],
+        "2/2-Takt": [2, 2],
+        "3/2-Takt": [3, 2],
+        "3/4-Takt": [3, 4],
+        "3/8-Takt": [3, 8],
+        "4/4-Takt": [4, 4],
+        "5/4-Takt": [5, 4],
+        "5/8-Takt": [5, 8],
+        "6/4-Takt": [6, 4],
+        "6/8-Takt": [6, 8],
+        "7/8-Takt": [7, 8],
+        "9/8-Takt": [9, 8],
+        "12/8-Takt": [12, 8],
+	}
+	
 	def __init__(self, fundamental_beats_or_map: Union[int, dict], note_value: int = None):
 		if (type(fundamental_beats_or_map) == int):
 			self.fundamental_beats = fundamental_beats_or_map
@@ -19,6 +35,21 @@ class TimeSignature:
 			"fundamental_beats": self.fundamental_beats,
 			"note_value": self.note_value,
 		}
+	
+	def gen_unicode_combi(self) -> List[str]:
+		combi_list = []
+		if (self.fundamental_beats > 9):
+			combi_list.extend(["timeSigCombNumerator", "timeSig" + str(self.fundamental_beats // 10), "timeSigCombNumerator", "timeSig" + str(self.fundamental_beats % 10)])
+		else:
+			combi_list.extend(["timeSigCombNumerator", "timeSig" + str(self.fundamental_beats)])
+		      
+		if (self.note_value > 9):
+			combi_list.extend(["timeSigCombDenominator", "timeSig" + str(self.note_value // 10), "timeSigCombDenominator", "timeSig" + str(self.note_value % 10)])
+		else:
+			combi_list.extend(["timeSigCombDenominator", "timeSig" + str(self.note_value)])
+		return combi_list
+	def join_unicode_combi(combi: List[str]):
+		return '_'.join(combi)
 
 class Note:
 	def __init__(self, pitch_or_note_map: Union[int, dict], duration: float = None):
@@ -220,7 +251,7 @@ class Stave:
 			self.drawing_scene.addItem(accidental)
 
 	def add_first_time_signature(self, start_x: float):
-		time_signature = Musicitem(["timeSigCombNumerator", "timeSig" + str(self.bars[0].time_signature.fundamental_beats), "timeSigCombDenominator", "timeSig" + str(self.bars[0].time_signature.note_value)])
+		time_signature = Musicitem(self.bars[0].time_signature.gen_unicode_combi())
 		time_signature.setPos(start_x + 0.25 * Musicitem.EM, self.left_pos.y() + Musicitem.EM)
 		self.bars[0].objects.append(time_signature)
 		self.drawing_scene.addItem(time_signature)

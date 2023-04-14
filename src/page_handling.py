@@ -126,7 +126,8 @@ class PageHandler():
 		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
 		self.update_page_info_and_button_text()
 
-		first_bar = Bar(TimeSignature(self.app.new_doc_dialog_ui.fundamental_beats_spin_box.value(), str(self.app.new_doc_dialog_ui.note_value_combo_box.currentText())))
+		time_signature_key = self.app.new_doc_dialog_ui.time_signature_combo_box.currentText()
+		first_bar = Bar(TimeSignature(TimeSignature.signatures_map[time_signature_key][0], TimeSignature.signatures_map[time_signature_key][1]))
 		self.app.document_ui.setup(
 			self.app.new_doc_dialog_ui.staves_spin_box.value(),
 			first_bar,

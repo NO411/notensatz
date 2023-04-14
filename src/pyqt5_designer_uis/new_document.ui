@@ -131,76 +131,76 @@
            <number>9</number>
           </property>
           <item>
-           <layout class="QVBoxLayout" name="time_signature_spin_box_labels">
+           <widget class="QComboBox" name="time_signature_combo_box">
+            <property name="currentIndex">
+             <number>5</number>
+            </property>
             <item>
-             <widget class="QLabel" name="fundamental_beats_label">
-              <property name="text">
-               <string>Schläge</string>
-              </property>
-             </widget>
+             <property name="text">
+              <string>2/4-Takt</string>
+             </property>
             </item>
             <item>
-             <widget class="QLabel" name="note_value_label">
-              <property name="text">
-               <string>Notenwert</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QVBoxLayout" name="time_signatures_boxes_layout">
-            <item>
-             <widget class="QSpinBox" name="fundamental_beats_spin_box">
-              <property name="suffix">
-               <string/>
-              </property>
-              <property name="minimum">
-               <number>1</number>
-              </property>
-              <property name="maximum">
-               <number>9</number>
-              </property>
-              <property name="value">
-               <number>4</number>
-              </property>
-              <property name="displayIntegerBase">
-               <number>10</number>
-              </property>
-             </widget>
+             <property name="text">
+              <string>2/2-Takt</string>
+             </property>
             </item>
             <item>
-             <widget class="QComboBox" name="note_value_combo_box">
-              <property name="currentText">
-               <string>4</string>
-              </property>
-              <property name="currentIndex">
-               <number>1</number>
-              </property>
-              <property name="duplicatesEnabled">
-               <bool>false</bool>
-              </property>
-              <property name="frame">
-               <bool>true</bool>
-              </property>
-              <item>
-               <property name="text">
-                <string>2</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>4</string>
-               </property>
-              </item>
-              <item>
-               <property name="text">
-                <string>8</string>
-               </property>
-              </item>
-             </widget>
+             <property name="text">
+              <string>3/2-Takt</string>
+             </property>
             </item>
-           </layout>
+            <item>
+             <property name="text">
+              <string>3/4-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>3/8-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>4/4-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5/4-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>5/8-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>6/4-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>6/8-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>7/8-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>9/8-Takt</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>12/8-Takt</string>
+             </property>
+            </item>
+           </widget>
           </item>
          </layout>
         </widget>

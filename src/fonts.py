@@ -1,15 +1,22 @@
 from PyQt5.QtGui import QFontDatabase
 from json import load
+from typing import List, Union
 
 # global jsons
 font_metadata = None
 glyphnames = None
 
-def get_unicode(smufl_name):
+def get_unicode(smufl_name: str):
 	return int(glyphnames[smufl_name]["codepoint"][2:], 16)
 
-def get_symbol(smufl_name):
-	return str(chr(get_unicode(smufl_name)))
+def get_symbol(smufl_name: Union[str, List[str]]):
+	ret = ""
+	if (type(smufl_name) == str):
+		ret = str(chr(get_unicode(smufl_name)))
+	else:
+		for part in smufl_name:
+			ret += str(chr(get_unicode(part)))
+	return ret
 
 def get_specification(key1, key2):
 	return font_metadata[key1][key2]

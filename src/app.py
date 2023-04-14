@@ -13,12 +13,12 @@ from document import DocumentUi
 
 # intern imports
 from fonts import load_fonts, get_symbol
+from notation_system import TimeSignature
 
 class App_Ui(Ui_MainWindow):
 	def __init__(self, app):
 		super().__init__()
 		self.setupUi(app.window)
-
 		# this is for rendering staves correctly
 		self.view.setRenderHint(QPainter.Antialiasing)
 
@@ -81,7 +81,12 @@ class App_Ui(Ui_MainWindow):
 				# name[0]: unicode key
 				# name[1]: tooltip text
 				box_button = QPushButton(tab_widget)
-				box_button.setObjectName(name[0] + "Button")
+				description = ""
+				if (type(name[0]) == str):
+					description = name[0]
+				else:
+					description = TimeSignature.join_unicode_combi(name[0])
+				box_button.setObjectName(description + "Button")
 				box_button.setFixedSize(35, 60)
 				box_button.setFlat(True)
 				box_button.setCheckable(True)
@@ -95,6 +100,8 @@ class App_Ui(Ui_MainWindow):
 
 				self.box_tabs_layouts[i].addWidget(box_button)
 				self.symbols_box_buttons[i].append(box_button)
+
+from new_document import Ui_NewDocumentDialog
 
 class NewDocumentDialogUI(Ui_NewDocumentDialog):
 	def setupUi(self, NewDocumentDialog):
@@ -120,13 +127,12 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 		self.heading_line_edit.setText("")
 		self.sub_heading_line_edit.setText("")
 		self.composer_line_edit.setText("")
-		self.fundamental_beats_spin_box.setValue(4)
-		self.note_value_combo_box.setCurrentIndex(1)
 		self.key_signatures_combo_box.setCurrentIndex(0)
 		self.staves_spin_box.setValue(2)
 		self.piano_checkbox.setChecked(False)
 		self.update_voice_combo_boxes(True)
-
+		self.time_signature_combo_box.setCurrentIndex(5)
+	
 	def get_clefs(self):
 		"""return a lsit of clefs, like "Violinschlüssel", "Bassschlüssel", "Altschlüssel" or "Tenorschlüssel" """
 		ret: list[str] = []
@@ -173,6 +179,7 @@ class App(QApplication):
 		self.symbols = [
 			# notes
 			[# [unicode key, tooltip text]
+			 # this key can also be a list
 				["noteWhole", "ganze Note"],
 				["noteHalfUp", "halbe Note"],
 				["noteQuarterUp", "viertel Note"],
@@ -226,8 +233,8 @@ class App(QApplication):
 			],
 			# time signatures
 			[
-				["timeSigCommon", "Viervierteltakt"],
-				["timeSigCutCommon", "Zweivierteltakt"],
+				[TimeSignature(time_sig_table[0], time_sig_table[1]).gen_unicode_combi(), description]
+				for description, time_sig_table in TimeSignature.signatures_map.items()
 			],
 			# misc
 			[

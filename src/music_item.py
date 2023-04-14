@@ -16,15 +16,8 @@ class Musicitem(QGraphicsTextItem):
 	EM = get_one_em(FONTSIZE, Page.HEIGHT)
 	def __init__(self, symbol: Union[str, List[str]]):
 		super().__init__()
-		
-		# for time signatures: get_symbol("timeSigCombNumerator") + get_symbol("timeSig7") + get_symbol("timeSigCombDenominator") + get_symbol("timeSig8")
-		text = ""
-		if (type(symbol) == str):
-			text = get_symbol(symbol)
-		else:
-			for part in symbol:
-				text += get_symbol(part)
-		self.setPlainText(text)
+
+		self.setPlainText(get_symbol(symbol))
 		self.setFont(QFont("Bravura", real_font_size(Musicitem.FONTSIZE, Page.HEIGHT)))
 		self.setDefaultTextColor(Qt.black)
 
