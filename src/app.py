@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
+from PyQt5.QtWidgets import QWidget, QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
@@ -246,6 +246,7 @@ class App(QApplication):
 				["cClefChange", "C-Schlüssel (Wechsel)"],
 			],
 		]
+		
 		self.show_warning_box = True
 		self.current_page = 0
 
@@ -266,6 +267,11 @@ class App(QApplication):
 		# remove standard ?-help hymbol
 		self.new_doc_dialog.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
 		self.aboutbox.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
+
+	def set_scene(self, page_index):
+		"""page_index must be >= 0"""
+		self.current_page = page_index
+		self.ui.view.setScene(self.document_ui.pages[self.current_page].scene)
 
 	def window_resize(self, event):
 		if (self.ui.in_welcome_screen):

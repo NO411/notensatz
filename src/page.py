@@ -30,7 +30,7 @@ class Page:
 			align = "right"
 			if (page_number % 2 == 0):
 				align = "left"
-			self.page_number_text = DocumentTextitem(False, str(page_number), real_font_size(10, Page.HEIGHT), Page.MARGIN, align, False)
+			self.page_number_text = DocumentTextitem(False, str(page_number), real_font_size(10, Page.HEIGHT), Page.MARGIN / 2, align, Page.MARGIN, False)
 			self.scene.addItem(self.page_number_text)
 
 	def update_page_text(self):
@@ -40,14 +40,6 @@ class Page:
 
 		self.page_number_text.setPlainText(str(self.page_number))
 		self.page_number_text.align()
-
-	def increase_page_number(self):
-		self.page_number += 1
-		self.update_page_text()
-	
-	def decrease_page_number(self):
-		self.page_number -= 1
-		self.update_page_text()
 		
 class DocumentTextitem(QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):

@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QMessageBox, QCheckBox
+from PyQt5.QtCore import QPointF
 
 from app import App
 from ui_misc import UiMiscHandler
 from document import Page, DocumentTextitem, DocumentUi
-from notation_system import Bar, TimeSignature, KeySignature
+from notation_system import Bar, TimeSignature, KeySignature, System
 from fonts import real_font_size
 
 class PageHandler():
@@ -40,11 +41,6 @@ class PageHandler():
 			self.app.document_ui.composer = composer
 			self.app.document_ui.tempo = tempo
 
-			self.app.ui.action_edit_heading.triggered.connect(lambda : self.edit_text("heading"))
-			self.app.ui.action_edit_subheading.triggered.connect(lambda : self.edit_text("sub_heading"))
-			self.app.ui.action_edit_composer.triggered.connect(lambda : self.edit_text("composer"))
-			self.app.ui.action_edit_tempo.triggered.connect(lambda : self.edit_text("tempo"))
-		
 		return new_page
 
 	def update_page_info_and_button_text(self):
@@ -52,30 +48,97 @@ class PageHandler():
 		self.ui_misc.update_page_change_buttons_colors()
 
 	def new_page(self):
-		self.app.current_page += 1
-		new_page = self.create_empty_page(self.app.current_page + 1)
+		new_page = self.create_empty_page(len(self.app.document_ui.pages) + 1)
 
-		if (len(self.app.document_ui.pages) == self.app.current_page):
-			self.app.document_ui.pages.append(new_page)
-		else:
-			self.app.document_ui.pages.insert(self.app.current_page, new_page)
-		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
+		self.app.document_ui.pages.append(new_page)
+		self.app.set_scene(len(self.app.document_ui.pages) - 1)
 		self.update_page_info_and_button_text()
 
-		for i, page in enumerate(self.app.document_ui.pages):
-			if (i > self.app.current_page):
-				page.increase_page_number()
-
 	def delete_page(self):
-		if (self.app.current_page == 0):
-			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können die erste Seite nicht komplett löschen, da sie den Titel usw. enthält.", QMessageBox.Yes)
+		self.app.set_scene(len(self.app.document_ui.pages) - 2)
+		self.app.document_ui.pages.pop(len(self.app.document_ui.pages) - 1)
+		self.update_page_info_and_button_text()
+
+	def next_page(self):
+		if (self.app.current_page + 1 < len(self.app.document_ui.pages)):
+			self.app.set_scene(self.app.current_page + 1)
+			self.update_page_info_and_button_text()
+
+	def previous_page(self):
+		if (self.app.current_page > 0):
+			self.app.set_scene(self.app.current_page - 1)
+			self.update_page_info_and_button_text()
+
+	def setup_new_document(self, heading, sub_heading, composer, tempo):
+		# remove blur effect and enable centralwidget if still in welcome screen
+		if (self.app.ui.in_welcome_screen):
+			self.app.end_welcome_screen()
+		else:
+			# disconnect old functions if it is not the first document
+			# without, it would lead into unwanted behaviour
+			self.app.ui.new_system_button.clicked.disconnect()
+			self.app.ui.delete_last_system_button.clicked.disconnect()
+			self.app.ui.action_edit_heading.triggered.disconnect()
+			self.app.ui.action_edit_subheading.triggered.disconnect()
+			self.app.ui.action_edit_composer.triggered.disconnect()
+			self.app.ui.action_edit_tempo.triggered.disconnect()
+
+		# create new document with empty (apart from texts) page
+		self.app.document_ui = DocumentUi()
+		self.app.document_ui.pages = [self.create_empty_page(1, True, heading, sub_heading, composer, tempo)]
+		self.app.set_scene(0)
+		self.update_page_info_and_button_text()
+
+		self.app.ui.new_system_button.clicked.connect(self.new_system)
+		self.app.ui.delete_last_system_button.clicked.connect(self.delete_last_system)
+		self.app.ui.action_edit_heading.triggered.connect(lambda : self.edit_text("heading"))
+		self.app.ui.action_edit_subheading.triggered.connect(lambda : self.edit_text("sub_heading"))
+		self.app.ui.action_edit_composer.triggered.connect(lambda : self.edit_text("composer"))
+		self.app.ui.action_edit_tempo.triggered.connect(lambda : self.edit_text("tempo"))
+
+	def create_new_document(self):
+		self.setup_new_document(
+			self.app.new_doc_dialog_ui.heading_line_edit.text(),
+			self.app.new_doc_dialog_ui.sub_heading_line_edit.text(),
+			self.app.new_doc_dialog_ui.composer_line_edit.text(),
+			self.app.new_doc_dialog_ui.tempo_line_edit.text()
+		)
+
+		time_signature_key = self.app.new_doc_dialog_ui.time_signature_combo_box.currentText()
+		first_bar = Bar(TimeSignature(TimeSignature.signatures_map[time_signature_key][0], TimeSignature.signatures_map[time_signature_key][1]))
+		self.app.document_ui.setup(
+			self.app.new_doc_dialog_ui.staves_spin_box.value(),
+			first_bar,
+			self.app.new_doc_dialog_ui.piano_checkbox.isChecked(),
+			self.app.new_doc_dialog_ui.get_clefs(),
+			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())
+		)
+
+		# close dialog and eventually save / reset the settings
+		self.app.new_doc_dialog.close()
+		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
+			self.app.new_doc_dialog_ui.reset()
+	
+	def new_system(self):
+		add_new_page = self.app.document_ui.add_new_system()
+		if (add_new_page):
+			self.new_page()
+			self.app.document_ui.systems[-1].page_index += 1
+
+		self.app.document_ui.pages[-1].scene.addItem(self.app.document_ui.systems[-1])
+		self.app.set_scene(len(self.app.document_ui.pages) - 1)
+		self.update_page_info_and_button_text()
+
+	def delete_last_system(self):
+		if (len(self.app.document_ui.systems) < 2):
+			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können das erste System nicht löschen.", QMessageBox.Yes)
 			info_box.setDefaultButton(QMessageBox.Yes)
 			info_box.button(QMessageBox.Yes).setText("OK")
 			result = info_box.exec_()
 			return
 
 		if (self.app.show_warning_box):
-			warning_box = QMessageBox(QMessageBox.Information, "Seite Löschen", f"Wollen Sie die Seite {self.app.current_page + 1} wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
+			warning_box = QMessageBox(QMessageBox.Information, "System Löschen", "Wollen Sie das letzte System wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
 			warning_box.setDefaultButton(QMessageBox.Yes)
 			warning_box.button(QMessageBox.Yes).setText("Ja")
 			warning_box.button(QMessageBox.No).setText("Nein")
@@ -90,68 +153,15 @@ class PageHandler():
 			if (check_box.isChecked()):
 				self.app.show_warning_box = False
 
-		self.app.document_ui.pages.pop(self.app.current_page)
-		self.app.current_page -= 1
-		if (self.app.current_page < 0):
-			self.app.current_page = 0
-		if (len(self.app.document_ui.pages) == 0):
-			self.app.document_ui.pages.append(self.create_empty_page(1, True))
-
-		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
-		self.update_page_info_and_button_text()
-
-		for i, page in enumerate(self.app.document_ui.pages):
-			if (i > self.app.current_page):
-				page.decrease_page_number()
-
-	def next_page(self):
-		if (self.app.current_page + 1 < len(self.app.document_ui.pages)):
-			self.app.current_page += 1
-			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
-			self.update_page_info_and_button_text()
-
-	def previous_page(self):
-		if (self.app.current_page > 0):
-			self.app.current_page -= 1
-			self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
-			self.update_page_info_and_button_text()
-
-	def create_new_document(self):
-		# disconnect old signals / slots:
-		self.app.ui.action_edit_heading.triggered.disconnect()
-		self.app.ui.action_edit_subheading.triggered.disconnect()
-		self.app.ui.action_edit_composer.triggered.disconnect()
-		self.app.ui.action_edit_tempo.triggered.disconnect()
-
-		# remove blur effect and enable centralwidget if still in welcome screen
-		if (self.app.ui.in_welcome_screen):
-			self.app.end_welcome_screen()
-
-		self.app.current_page = 0
-		self.app.document_ui = DocumentUi()
-		self.app.document_ui.pages = [self.create_empty_page(1, True, self.app.new_doc_dialog_ui.heading_line_edit.text(), self.app.new_doc_dialog_ui.sub_heading_line_edit.text(), self.app.new_doc_dialog_ui.composer_line_edit.text(), self.app.new_doc_dialog_ui.tempo_line_edit.text())]
-		self.app.ui.view.setScene(self.app.document_ui.pages[0].scene)
-		self.update_page_info_and_button_text()
-
-		time_signature_key = self.app.new_doc_dialog_ui.time_signature_combo_box.currentText()
-		first_bar = Bar(TimeSignature(TimeSignature.signatures_map[time_signature_key][0], TimeSignature.signatures_map[time_signature_key][1]))
-		self.app.document_ui.setup(
-			self.app.new_doc_dialog_ui.staves_spin_box.value(),
-			first_bar,
-			self.app.new_doc_dialog_ui.piano_checkbox.isChecked(),
-			self.app.new_doc_dialog_ui.get_clefs(),
-			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())
-		)
-
-		# close dialog and eventually save the settings
-		self.app.new_doc_dialog.close()
-		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
-			self.app.new_doc_dialog_ui.reset()
+		self.app.document_ui.delete_last_system()
+		
+		# check for an empty last page
+		if (self.app.document_ui.systems[-1].page_index != len(self.app.document_ui.pages) - 1):
+			self.delete_page()
 
 	def edit_text(self, text_field):
 		# "move" ui to text fields
-		self.app.current_page = 0
-		self.app.ui.view.setScene(self.app.document_ui.pages[self.app.current_page].scene)
+		self.app.set_scene(0)
 		self.app.ui.view.verticalScrollBar().setValue(self.app.ui.view.verticalScrollBar().minimum())
 		self.update_page_info_and_button_text()
 

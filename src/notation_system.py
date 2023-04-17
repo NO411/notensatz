@@ -1,9 +1,10 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsLineItem
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup, QGraphicsItem
 from PyQt5.QtGui import QPen, QTransform
 from PyQt5.QtCore import QPointF, Qt
 from typing import List, Optional, Union
 from page import Page
 from music_item import Musicitem
+from fonts import get_symbol
 
 class TimeSignature:
 	signatures_map = {
@@ -30,7 +31,7 @@ class TimeSignature:
 			self.fundamental_beats = fundamental_beats_or_map["fundamental_beats"]
 			self.note_value = fundamental_beats_or_map["note_value"]
 
-	def to_map(self):
+	def to_dict(self):
 		return {
 			"fundamental_beats": self.fundamental_beats,
 			"note_value": self.note_value,
@@ -80,7 +81,7 @@ class Note:
 			self.dotted = pitch_or_note_map["dotted"]
 			self.accidental = pitch_or_note_map["accidental"]
 
-	def to_map(self):
+	def to_dict(self):
 		return {
 			"pitch": self.pitch,
 			"duration": self.duration,
@@ -100,16 +101,16 @@ class NoteGroup:
 
 			for note in note_group_map["second_voice"]:
 				self.second_voice.append(Note(note))
-	def to_map(self):
+	def to_dict(self):
 		group_map = {
 			"first_voice": [],
 			"second_voice": [],
 		}
 
 		for note in self.first_voice:
-			group_map["first_voice"].append(note.to_map())
+			group_map["first_voice"].append(note.to_dict())
 		for note in self.second_voice:
-			group_map["second_voice"].append(note.to_map())
+			group_map["second_voice"].append(note.to_dict())
 
 		return group_map
 
@@ -148,37 +149,36 @@ class KeySignature:
 			self.number = key_signature["number"]
 			self.type = key_signature["type"]
 
-	def to_map(self):
+	def to_dict(self):
 		return {
 			"number": self.number,
 			"type": self.type,
 		}
 
 class Bar:
-	def __init__(self, time_signature_or_bar_map: Union[TimeSignature, dict]):
-		if (type(time_signature_or_bar_map) == TimeSignature):
-			self.time_signature = time_signature_or_bar_map
+	def __init__(self, time_signature_or_dict_data: Union[TimeSignature, dict]):
+		if (type(time_signature_or_dict_data) == TimeSignature):
+			self.time_signature = time_signature_or_dict_data
 			self.note_groups = []
 		else:
-			self.time_signature = TimeSignature(time_signature_or_bar_map["time_signature"])
+			self.time_signature = TimeSignature(time_signature_or_dict_data["time_signature"])
 			self.note_groups = []
-			for note_group in time_signature_or_bar_map["note_groups"]:
+			for note_group in time_signature_or_dict_data["note_groups"]:
 				self.note_groups.append(NoteGroup(note_group))
 		self.objects: List[Musicitem] = []
-	def to_map(self):
-		bar_map = {
-			"time_signature": self.time_signature.to_map(),
-			"note_groups": [],
+	def to_dict(self):
+		dict_data = {
+			"time_signature": self.time_signature.to_dict(),
+			"note_groups": [note_group.to_dict() for note_group in self.note_groups],
 		}
-
-		for note_group in self.note_groups:
-			bar_map["note_groups"].append(note_group.to_map())
-
-		return bar_map
+		return dict_data
 
 	#def set_up(self, start_pos: QPointF, staves: List[Stave]):
 	
-class Stave:
+class Stave(QGraphicsItemGroup):
+	"""This is a QGraphicsItemGroup to move all its members at once.\n
+	All positions are relative to the parent from here on!"""
+
 	line_pen = QPen(Qt.black, 3)
 
 	# 0 = bottom line
@@ -210,11 +210,12 @@ class Stave:
 		},
 	}
 
-	def __init__(self, drawing_scene: QGraphicsScene, clef_key: str, left_pos: QPointF, width: float, key_signature: KeySignature, first_bar: Bar):
+	def __init__(self, system_group: QGraphicsItemGroup, clef_key: str, width: float, key_signature: KeySignature, first_bar: Bar):
+		super().__init__()
+
 		# setup members
-		self.drawing_scene: QGraphicsScene = drawing_scene
+		self.system_group: QGraphicsItemGroup = system_group
 		self.clef_key: str = clef_key
-		self.left_pos: QPointF = left_pos
 		self.width = width
 		self.key_signature: KeySignature = key_signature
 		self.lines: List[QGraphicsLineItem] = []
@@ -224,16 +225,16 @@ class Stave:
 		for i in range(5):
 			# first i is 0
 			# first line is the bottom line with index 0 in self.lines...
-			y = self.left_pos.y() + Musicitem.EM - i * 0.25 * Musicitem.EM
-			line = QGraphicsLineItem(self.left_pos.x(), y, self.left_pos.x() + self.width, y)
+			y = Musicitem.EM - i * 0.25 * Musicitem.EM
+			line = QGraphicsLineItem(0, y, self.width, y)
 			line.setPen(Stave.line_pen)
 			self.lines.append(line)
-			self.drawing_scene.addItem(line)
+			self.addToGroup(line)
 
 		# add clef
 		self.clef = Musicitem(Stave.clefs[self.clef_key]["smufl_key"])
-		self.clef.setPos(self.left_pos.x() + 0.05 * Musicitem.EM, self.left_pos.y() + Musicitem.EM - Musicitem.EM * 0.25 * Stave.clefs[self.clef_key]["line"])
-		self.drawing_scene.addItem(self.clef)
+		self.addToGroup(self.clef)
+		self.clef.setPos(0.05 * Musicitem.EM, Musicitem.EM - Musicitem.EM * 0.25 * Stave.clefs[self.clef_key]["line"])
 
 		self.key_signature_accidentals: List[Musicitem] = []
 		# add key signature
@@ -244,45 +245,65 @@ class Stave:
 				# #
 				smufl_name = "accidentalFlat"
 			accidental = Musicitem(smufl_name)
+			self.addToGroup(accidental)
 			x = self.clef.pos().x() + self.clef.sceneBoundingRect().width() + i * (accidental.sceneBoundingRect().width() - 0.1 * Musicitem.EM) + 0.1 * Musicitem.EM
-			y = self.left_pos.y() + Musicitem.EM - Musicitem.EM * 0.25 * (KeySignature.accidentals_positions[self.key_signature.type - 1][i] + Stave.clefs[clef_key]["accidental_shift"])
+			y = Musicitem.EM - Musicitem.EM * 0.25 * (KeySignature.accidentals_positions[self.key_signature.type - 1][i] + Stave.clefs[clef_key]["accidental_shift"])
 			accidental.setPos(x, y)
 			self.key_signature_accidentals.append(accidental)
-			self.drawing_scene.addItem(accidental)
 
 	def add_first_time_signature(self, start_x: float):
 		time_signature = Musicitem(self.bars[0].time_signature.gen_unicode_combi())
-		time_signature.setPos(start_x + 0.25 * Musicitem.EM, self.left_pos.y() + Musicitem.EM)
+		self.addToGroup(time_signature)
+		time_signature.setPos(start_x + 0.25 * Musicitem.EM, Musicitem.EM)
 		self.bars[0].objects.append(time_signature)
-		self.drawing_scene.addItem(time_signature)
 
-class System:
+	def to_dict(self):
+		dict_data = {
+			"bars": [bar.to_dict() for bar in self.bars]
+		}
+		return dict_data
+
+class System(QGraphicsItemGroup):
+	"""This is a QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
+	All positions are relative to the parent from here on!\n
+	To add an item, first add it and then set a relative position!"""
+
 	min_stave_spacing = Musicitem.EM
-	def __init__(self, drawing_scene: QGraphicsScene, voices: int, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, first_bar: Bar, position: QPointF, first_system: bool = False):
+	system_spacing = Musicitem.EM * 1.5
+	def __init__(self, page_index: int, voices: int, pos: QPointF, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, first_bar: Bar, first_system: bool = False):
+		super().__init__()
+
 		# setup all members
-		self.drawing_scene: QGraphicsScene = drawing_scene
-		self.pos: QPointF = position
-		self.width = Page.WIDTH - self.pos.x() - Page.MARGIN
+		self.page_index = page_index
+		self.setPos(pos)
+
+		self.width = Page.WIDTH - self.x() - Page.MARGIN
 		self.voices: int = voices
 		self.key_signature = key_signature
 		self.with_piano: bool = with_piano
+
+		# create staves
 		self.staves: List[Stave] = [
 			# create all staves using list comprehension
-			Stave(drawing_scene, clefs_tabel[n], QPointF(self.pos.x(), self.pos.y() + n * (Musicitem.EM + System.min_stave_spacing)), self.width, self.key_signature, first_bar) for n in range(voices)
+			Stave(self, clefs_tabel[n], self.width, self.key_signature, first_bar) for n in range(voices)
 		]
+		for n, stave in enumerate(self.staves):
+			self.addToGroup(stave)
+			stave.setPos(0, n * (Musicitem.EM + System.min_stave_spacing))
+
 		self.first_system = first_system
 
 		# setup the left bar line
 		self.left_bar_line = Musicitem("barlineSingle")
 		self.left_bar_line.setTransform(QTransform().scale(1, (self.voices * Musicitem.EM + (self.voices - 1) * System.min_stave_spacing) / Musicitem.EM))
-		self.left_bar_line.setPos(self.pos.x() - self.left_bar_line.sceneBoundingRect().width() / 2, self.pos.y() + (2 * self.voices - 1) * Musicitem.EM)
-		self.drawing_scene.addItem(self.left_bar_line)
+		self.addToGroup(self.left_bar_line)
+		self.left_bar_line.setPos(-self.left_bar_line.sceneBoundingRect().width() / 2, (2 * self.voices - 1) * Musicitem.EM)
 
 		# draw final barline (just to test it)
 		self.right_bar_line = Musicitem("barlineFinal")
 		self.right_bar_line.setTransform(QTransform().scale(1, (self.voices * Musicitem.EM + (self.voices - 1) * System.min_stave_spacing) / Musicitem.EM))
-		self.right_bar_line.setPos(self.pos.x() + self.width - self.right_bar_line.sceneBoundingRect().width() / 1.3, self.pos.y() + (2 * self.voices - 1) * Musicitem.EM)
-		self.drawing_scene.addItem(self.right_bar_line)
+		self.addToGroup(self.right_bar_line)
+		self.set_end_bar_line()
 
 		if (self.with_piano and self.voices > 1):
 			self.addbrace()
@@ -293,12 +314,12 @@ class System:
 
 	def addbrace(self):
 		self.brace = Musicitem("brace")
+		self.addToGroup(self.brace)
 
 		# default brace: 1 EM
-		scale = (self.staves[-1].left_pos.y() - self.staves[-2].left_pos.y() + Musicitem.EM) / Musicitem.EM
+		scale = (self.staves[-1].y() - self.staves[-2].y() + Musicitem.EM) / Musicitem.EM
 		self.brace.setScale(scale)
-		self.brace.setPos(self.pos.x() - self.brace.sceneBoundingRect().width(),self.staves[-1].left_pos.y() + Musicitem.EM)
-		self.drawing_scene.addItem(self.brace)
+		self.brace.setPos(-self.brace.sceneBoundingRect().width(), self.staves[-1].y() + Musicitem.EM)
 
 	def get_start_x(self):
 		staves_start_x = []
@@ -308,3 +329,21 @@ class System:
 			else:
 				staves_start_x.append(stave.clef.sceneBoundingRect().width() + stave.clef.pos().x())
 		return max(staves_start_x)
+
+	def to_dict(self):
+		dict_data = {
+			"staves": [stave.to_dict() for stave in self.staves],
+		}
+		return dict_data
+
+	def set_normal_end_bar_line(self):
+		self.right_bar_line.setPlainText(get_symbol("barlineSingle"))
+		self.right_bar_line.setPos(self.width - self.right_bar_line.sceneBoundingRect().width() / 2, (2 * self.voices - 1) * Musicitem.EM)
+	
+	def set_end_bar_line(self):
+		self.right_bar_line.setPlainText(get_symbol("barlineFinal"))
+		self.right_bar_line.setPos(self.width - self.right_bar_line.sceneBoundingRect().width() / 1.3, (2 * self.voices - 1) * Musicitem.EM)
+
+	def get_bottom_y(self)-> float:
+		return self.y() + self.staves[-1].y() + Musicitem.EM
+	

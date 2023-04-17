@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>827</width>
-    <height>589</height>
+    <width>800</width>
+    <height>600</height>
    </rect>
   </property>
   <property name="minimumSize">
    <size>
-    <width>584</width>
-    <height>589</height>
+    <width>800</width>
+    <height>600</height>
    </size>
   </property>
   <property name="font">
@@ -59,106 +59,122 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QFrame" name="top_frame">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>100</height>
-       </size>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>9</number>
       </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>100</height>
-       </size>
+      <property name="topMargin">
+       <number>9</number>
       </property>
-      <property name="frameShape">
-       <enum>QFrame::NoFrame</enum>
+      <property name="rightMargin">
+       <number>9</number>
       </property>
-      <property name="frameShadow">
-       <enum>QFrame::Plain</enum>
-      </property>
-      <property name="lineWidth">
+      <property name="bottomMargin">
        <number>0</number>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <property name="leftMargin">
-        <number>4</number>
-       </property>
-       <property name="topMargin">
-        <number>4</number>
-       </property>
-       <property name="rightMargin">
-        <number>4</number>
-       </property>
-       <property name="bottomMargin">
-        <number>2</number>
-       </property>
-       <item>
-        <widget class="QTabWidget" name="symbols_box">
-         <property name="cursor">
-          <cursorShape>ArrowCursor</cursorShape>
-         </property>
-         <property name="currentIndex">
-          <number>0</number>
-         </property>
-         <property name="elideMode">
-          <enum>Qt::ElideLeft</enum>
-         </property>
-         <property name="usesScrollButtons">
-          <bool>false</bool>
-         </property>
-         <property name="documentMode">
-          <bool>false</bool>
-         </property>
-         <property name="tabsClosable">
-          <bool>false</bool>
-         </property>
-         <property name="movable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="notations">
-          <attribute name="title">
-           <string>Noten</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="articulation">
-          <attribute name="title">
-           <string>Artikulation</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="dynamics">
-          <attribute name="title">
-           <string>Dynamik</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="rests">
-          <attribute name="title">
-           <string>Pausen</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="accidentals">
-          <attribute name="title">
-           <string>Vorzeichen</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="time_signatures">
-          <attribute name="title">
-           <string>Taktarten</string>
-          </attribute>
-         </widget>
-         <widget class="QWidget" name="misc">
-          <attribute name="title">
-           <string>Sonstige</string>
-          </attribute>
-         </widget>
+      <item>
+       <widget class="QTabWidget" name="symbols_box">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>0</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="sizeIncrement">
+         <size>
+          <width>0</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="cursor">
+         <cursorShape>ArrowCursor</cursorShape>
+        </property>
+        <property name="tabShape">
+         <enum>QTabWidget::Rounded</enum>
+        </property>
+        <property name="currentIndex">
+         <number>0</number>
+        </property>
+        <property name="elideMode">
+         <enum>Qt::ElideLeft</enum>
+        </property>
+        <property name="usesScrollButtons">
+         <bool>false</bool>
+        </property>
+        <property name="documentMode">
+         <bool>false</bool>
+        </property>
+        <property name="tabsClosable">
+         <bool>false</bool>
+        </property>
+        <property name="movable">
+         <bool>true</bool>
+        </property>
+        <property name="tabBarAutoHide">
+         <bool>false</bool>
+        </property>
+        <widget class="QWidget" name="notations">
+         <attribute name="title">
+          <string>Noten</string>
+         </attribute>
         </widget>
-       </item>
-      </layout>
-     </widget>
+        <widget class="QWidget" name="articulation">
+         <attribute name="title">
+          <string>Artikulation</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="dynamics">
+         <attribute name="title">
+          <string>Dynamik</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="rests">
+         <attribute name="title">
+          <string>Pausen</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="accidentals">
+         <attribute name="title">
+          <string>Vorzeichen</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="time_signatures">
+         <attribute name="title">
+          <string>Taktarten</string>
+         </attribute>
+        </widget>
+        <widget class="QWidget" name="misc">
+         <attribute name="title">
+          <string>Sonstige</string>
+         </attribute>
+        </widget>
+       </widget>
+      </item>
+     </layout>
     </item>
     <item>
      <widget class="QGraphicsView" name="view">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="cursor" stdset="0">
+       <cursorShape>ArrowCursor</cursorShape>
+      </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>
@@ -203,7 +219,30 @@
        <property name="verticalSpacing">
         <number>6</number>
        </property>
-       <item row="0" column="8">
+       <item row="0" column="4">
+        <widget class="QPushButton" name="delete_last_system_button">
+         <property name="text">
+          <string>Letztes System löschen</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QPushButton" name="new_system_button">
+         <property name="text">
+          <string>Neues System</string>
+         </property>
+         <property name="default">
+          <bool>true</bool>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="12">
         <widget class="QPushButton" name="zoom_in_button">
          <property name="font">
           <font>
@@ -218,7 +257,56 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="6">
+       <item row="0" column="2">
+        <widget class="QPushButton" name="next_page_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+           <italic>false</italic>
+           <underline>false</underline>
+           <strikeout>false</strikeout>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Nächste Seite&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="whatsThis">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>🡢</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="previous_page_button">
+         <property name="font">
+          <font>
+           <pointsize>12</pointsize>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Vorherige Seite&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="text">
+          <string>🡠</string>
+         </property>
+         <property name="flat">
+          <bool>true</bool>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="13">
+        <widget class="QLabel" name="zoom_label">
+         <property name="text">
+          <string>0%</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="10">
         <widget class="QPushButton" name="zoom_out_button">
          <property name="font">
           <font>
@@ -245,28 +333,39 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="5">
-        <spacer name="bottom_bar_spacer">
+       <item row="0" column="9">
+        <spacer name="horizontalSpacer">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
          <property name="sizeHint" stdset="0">
           <size>
-           <width>20</width>
-           <height>17</height>
+           <width>40</width>
+           <height>20</height>
           </size>
          </property>
         </spacer>
        </item>
-       <item row="0" column="9">
-        <widget class="QLabel" name="zoom_label">
+       <item row="0" column="0">
+        <widget class="QLabel" name="current_page_label">
+         <property name="font">
+          <font>
+           <italic>false</italic>
+          </font>
+         </property>
          <property name="text">
-          <string>0%</string>
+          <string>Seite 1 von 1</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="7">
+       <item row="0" column="11">
         <widget class="QSlider" name="zoom_slider">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>100</width>
@@ -293,81 +392,11 @@
          </property>
         </widget>
        </item>
-       <item row="0" column="4">
-        <widget class="QPushButton" name="delete_page_button">
-         <property name="text">
-          <string>Lösche Seite</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-         <property name="flat">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QPushButton" name="next_page_button">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Nächste Seite&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="whatsThis">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string>🡢</string>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0">
-        <widget class="QLabel" name="current_page_label">
-         <property name="text">
-          <string>Seite 1 von 1</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QPushButton" name="previous_page_button">
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="toolTip">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#000000;&quot;&gt;Vorherige Seite&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-         </property>
-         <property name="text">
-          <string>🡠</string>
-         </property>
-         <property name="flat">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QPushButton" name="new_page_button">
-         <property name="text">
-          <string>Neue Seite</string>
-         </property>
-         <property name="default">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
       </layout>
      </widget>
     </item>
    </layout>
    <zorder>bottom_frame</zorder>
-   <zorder>top_frame</zorder>
    <zorder>view</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -375,7 +404,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>827</width>
+     <width>800</width>
      <height>21</height>
     </rect>
    </property>
@@ -416,20 +445,32 @@
    <property name="text">
     <string>Neu</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+N</string>
+   </property>
   </action>
   <action name="action_open">
    <property name="text">
     <string>Öffnen</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
    </property>
   </action>
   <action name="action_save">
    <property name="text">
     <string>Speichern</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="action_close">
    <property name="text">
     <string>Beenden</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Q</string>
    </property>
   </action>
   <action name="action_doc">
@@ -446,10 +487,16 @@
    <property name="text">
     <string>Speichern unter</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
   </action>
   <action name="action_export">
    <property name="text">
     <string>Exportieren</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+E</string>
    </property>
   </action>
   <action name="action_edit_heading">

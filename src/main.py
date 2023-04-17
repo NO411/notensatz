@@ -20,7 +20,7 @@ def main():
 	app.document_ui.pages = [page_handling.create_empty_page(1)]
 	# object which is needed to render the scene
 	# view can change when the scene changes (new page)
-	app.ui.view.setScene(app.document_ui.pages[0].scene)
+	app.set_scene(0)
 
 	# ui adjustments which need functions of other modules
 	ui_misc.apply_zoom()
@@ -41,8 +41,6 @@ def main():
 	app.ui.zoom_slider.valueChanged.connect(ui_misc.apply_zoom)
 	app.ui.zoom_in_button.clicked.connect(ui_misc.zoom_in)
 	app.ui.zoom_out_button.clicked.connect(ui_misc.zoom_out)
-	app.ui.new_page_button.clicked.connect(page_handling.new_page)
-	app.ui.delete_page_button.clicked.connect(page_handling.delete_page)
 	app.ui.next_page_button.clicked.connect(page_handling.next_page)
 	app.ui.previous_page_button.clicked.connect(page_handling.previous_page)
 
