@@ -1,7 +1,7 @@
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup, QGraphicsItem
 from PyQt5.QtGui import QPen, QTransform
 from PyQt5.QtCore import QPointF, Qt
-from typing import List, Optional, Union
+from typing import List
 from page import Page
 from music_item import Musicitem
 from fonts import get_symbol
@@ -23,19 +23,9 @@ class TimeSignature:
         "12/8-Takt": [12, 8],
 	}
 	
-	def __init__(self, fundamental_beats_or_map: Union[int, dict], note_value: int = None):
-		if (type(fundamental_beats_or_map) == int):
-			self.fundamental_beats = fundamental_beats_or_map
-			self.note_value = note_value
-		else:
-			self.fundamental_beats = fundamental_beats_or_map["fundamental_beats"]
-			self.note_value = fundamental_beats_or_map["note_value"]
-
-	def to_dict(self):
-		return {
-			"fundamental_beats": self.fundamental_beats,
-			"note_value": self.note_value,
-		}
+	def __init__(self, fundamental_beats: int, note_value: int = None):
+		self.fundamental_beats = fundamental_beats
+		self.note_value = note_value
 	
 	def gen_unicode_combi(self) -> List[str]:
 		combi_list = []
@@ -53,66 +43,33 @@ class TimeSignature:
 		return '_'.join(combi)
 
 class Note:
-	def __init__(self, pitch_or_note_map: Union[int, dict], duration: float = None):
-		if (type(pitch_or_note_map) == int):
-			# pitch from 1 - 88 (subcontra-a to c5)
-			# pitch 0 is a rest
-			self.pitch = pitch_or_note_map
+	def __init__(self, pitch: int, duration: float = None):
+		# pitch from 1 - 88 (subcontra-a to c5)
+		# pitch 0 is a rest
+		self.pitch = pitch
 
-			# values: e.g. 0.25 for a quarter note
-			# -1 for whole rest
-			self.duration = duration
-			self.dotted = False
+		# values: e.g. 0.25 for a quarter note
+		# -1 for whole rest
+		self.duration = duration
+		self.dotted = False
 
-			# sync this to the table in app.py
-			# -1 = nothing
-			# 0 = ♮
-			# 1 = #
-			# 2 = b
-			# 3 = ##
-			# 4 = bb
-			
-			self.accidental = -1
-			# ....
-			#self.articulation_sign = 0
-		else:
-			self.pitch = pitch_or_note_map["pitch"]
-			self.duration = pitch_or_note_map["duration"]
-			self.dotted = pitch_or_note_map["dotted"]
-			self.accidental = pitch_or_note_map["accidental"]
-
-	def to_dict(self):
-		return {
-			"pitch": self.pitch,
-			"duration": self.duration,
-			"dotted": self.dotted,
-			"accidental": self.accidental,
-		}
+		# sync this to the table in app.py
+		# -1 = nothing
+		# 0 = ♮
+		# 1 = #
+		# 2 = b
+		# 3 = ##
+		# 4 = bb
+		
+		self.accidental = -1
+		# ....
+		#self.articulation_sign = 0
 
 # notes that will appear above each other
 class NoteGroup:
-	def __init__(self, note_group_map: Optional[dict] = None):
-		if (type(note_group_map) != dict):
-			self.first_voice: List[Note] = []
-			self.second_voice: List[Note] = []
-		else:
-			for note in note_group_map["first_voice"]:
-				self.first_voice.append(Note(note))
-
-			for note in note_group_map["second_voice"]:
-				self.second_voice.append(Note(note))
-	def to_dict(self):
-		group_map = {
-			"first_voice": [],
-			"second_voice": [],
-		}
-
-		for note in self.first_voice:
-			group_map["first_voice"].append(note.to_dict())
-		for note in self.second_voice:
-			group_map["second_voice"].append(note.to_dict())
-
-		return group_map
+	def __init__(self):
+		self.first_voice: List[Note] = []
+		self.second_voice: List[Note] = []
 
 class KeySignature:
 	signatures_map = {
@@ -141,37 +98,15 @@ class KeySignature:
 		[2, 3.5, 1.5, 3, 1, 2.5, 0.5],
 	]
 
-	def __init__(self, key_signature: Union[str, dict]):
-		if (type(key_signature) == str):
-			self.number = self.signatures_map[key_signature][0]
-			self.type = self.signatures_map[key_signature][1]
-		else:
-			self.number = key_signature["number"]
-			self.type = key_signature["type"]
-
-	def to_dict(self):
-		return {
-			"number": self.number,
-			"type": self.type,
-		}
+	def __init__(self, key_signature: str):
+		self.number = self.signatures_map[key_signature][0]
+		self.type = self.signatures_map[key_signature][1]
 
 class Bar:
-	def __init__(self, time_signature_or_dict_data: Union[TimeSignature, dict]):
-		if (type(time_signature_or_dict_data) == TimeSignature):
-			self.time_signature = time_signature_or_dict_data
-			self.note_groups = []
-		else:
-			self.time_signature = TimeSignature(time_signature_or_dict_data["time_signature"])
-			self.note_groups = []
-			for note_group in time_signature_or_dict_data["note_groups"]:
-				self.note_groups.append(NoteGroup(note_group))
+	def __init__(self, time_signature: TimeSignature):
+		self.time_signature = time_signature
+		self.note_groups = []
 		self.objects: List[Musicitem] = []
-	def to_dict(self):
-		dict_data = {
-			"time_signature": self.time_signature.to_dict(),
-			"note_groups": [note_group.to_dict() for note_group in self.note_groups],
-		}
-		return dict_data
 
 	#def set_up(self, start_pos: QPointF, staves: List[Stave]):
 	
@@ -257,12 +192,6 @@ class Stave(QGraphicsItemGroup):
 		time_signature.setPos(start_x + 0.25 * Musicitem.EM, Musicitem.EM)
 		self.bars[0].objects.append(time_signature)
 
-	def to_dict(self):
-		dict_data = {
-			"bars": [bar.to_dict() for bar in self.bars]
-		}
-		return dict_data
-
 class System(QGraphicsItemGroup):
 	"""This is a QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
 	All positions are relative to the parent from here on!\n
@@ -329,13 +258,7 @@ class System(QGraphicsItemGroup):
 			else:
 				staves_start_x.append(stave.clef.sceneBoundingRect().width() + stave.clef.pos().x())
 		return max(staves_start_x)
-
-	def to_dict(self):
-		dict_data = {
-			"staves": [stave.to_dict() for stave in self.staves],
-		}
-		return dict_data
-
+	
 	def set_normal_end_bar_line(self):
 		self.right_bar_line.setPlainText(get_symbol("barlineSingle"))
 		self.right_bar_line.setPos(self.width - self.right_bar_line.sceneBoundingRect().width() / 2, (2 * self.voices - 1) * Musicitem.EM)

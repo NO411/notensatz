@@ -36,10 +36,10 @@ class PageHandler():
 			new_page.scene.addItem(composer)
 			new_page.scene.addItem(tempo)
 
-			self.app.document_ui.heading = heading
-			self.app.document_ui.sub_heading = sub_heading
-			self.app.document_ui.composer = composer
-			self.app.document_ui.tempo = tempo
+			self.app.document_ui.set_heading(heading)
+			self.app.document_ui.set_sub_heading(sub_heading)
+			self.app.document_ui.set_composer(composer)
+			self.app.document_ui.set_tempo(tempo)
 
 		return new_page
 
@@ -171,14 +171,14 @@ class PageHandler():
 		self.update_page_info_and_button_text()
 
 		if (text_field == "heading"):
-			self.app.document_ui.heading.setFocus()
+			self.app.document_ui.get_heading().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
 		elif (text_field == "sub_heading"):
-			self.app.document_ui.sub_heading.setFocus()
+			self.app.document_ui.get_sub_heading().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
 		elif (text_field == "composer"):
-			self.app.document_ui.composer.setFocus()
+			self.app.document_ui.get_composer().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum())
 		elif (text_field == "tempo"):
-			self.app.document_ui.tempo.setFocus()
+			self.app.document_ui.get_tempo().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().minimum())

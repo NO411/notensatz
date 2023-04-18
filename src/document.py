@@ -1,21 +1,21 @@
 from PyQt5.QtCore import QPointF
-from PyQt5.QtWidgets import QMessageBox, QCheckBox
 
 from notation_system import Bar, System, KeySignature
 from typing import List
 from page import Page, DocumentTextitem
+from items import ItemContainer
+
+text_items = ItemContainer()
 
 class DocumentUi:
 	def __init__(self):
 		# table of all pages (those include the scenes)
 		self.pages: List[Page] = []
 
-		# references of the objects stored in the scene to be able to access them
-		# because it is not always possible to determine the index of the item in the pages[x].items() list
-		self.heading: DocumentTextitem = None
-		self.sub_heading: DocumentTextitem = None
-		self.composer: DocumentTextitem = None
-		self.tempo: DocumentTextitem = None
+		self.heading = None
+		self.sub_heading = None
+		self.composer = None
+		self.tempo = None
 
 	def setup(self, staves: int, first_bar: Bar, with_piano: bool, clefs: List[str], key_signature: KeySignature):
 		# info: first page was already added by page_handling 
@@ -24,33 +24,9 @@ class DocumentUi:
 		self.clefs = clefs
 		self.key_signature = key_signature
 
-		top_spacing = self.tempo.y() + self.tempo.sceneBoundingRect().height() + Page.MARGIN / 4
+		top_spacing = self.get_tempo().y() + self.get_tempo().sceneBoundingRect().height() + Page.MARGIN / 4
 		self.systems = [System(0, self.staves, QPointF(2 * Page.MARGIN, top_spacing), self.clefs, self.key_signature, self.with_piano, first_bar, True)]
 		self.pages[0].scene.addItem(self.systems[-1])
-
-	def setup_by_dict(self, dict_data: dict):
-		self.with_piano = dict_data["with_piano"]
-		self.staves = dict_data["staves"]
-		self.clefs = dict_data["clefs"]
-		self.key_signature = dict_data["key_signature"]
-
-		#for x, system_dict in enumerate(dict_data["systems"]):
-		#	topy = system_dict["y"]
-		#	self.systems.append(System(0, self.staves, QPointF(2 * Page.MARGIN, top_spacing), self.clefs, self.key_signature, self.with_piano, first_bar, True))
-
-	def to_dict(self):
-		dict_data = {
-			"heading": self.heading.toPlainText(),
-			"sub_heading": self.sub_heading.toPlainText(),
-			"composer": self.composer.toPlainText(),
-			"tempo": self.tempo.toPlainText(),
-			"with_piano": self.with_piano,
-			"staves": self.staves,
-			"clefs": self.clefs,
-			"key_signature": self.key_signature.to_dict(),
-			"systems": [system.to_dict() for system in self.systems],
-		}
-		return dict_data
 
 	def add_new_system(self) -> bool:
 		page_index = len(self.pages) - 1
@@ -65,3 +41,44 @@ class DocumentUi:
 		self.pages[-1].scene.removeItem(self.systems[-1])
 		self.systems.pop(len(self.systems) - 1)
 		self.systems[-1].set_end_bar_line()
+
+	def get_heading(self) -> DocumentTextitem:
+		global text_items
+		return text_items[self.heading]
+
+	def set_heading(self, heading: DocumentTextitem):
+		global text_items
+		self.heading = text_items.append(heading)
+		
+	def get_sub_heading(self) -> DocumentTextitem:
+		global text_items
+		return text_items[self.sub_heading]
+
+	def set_sub_heading(self, sub_heading: DocumentTextitem):
+		global text_items
+		self.sub_heading = text_items.append(sub_heading)
+
+	def get_composer(self) -> DocumentTextitem:
+		global text_items
+		return text_items[self.composer]
+
+	def set_composer(self, composer: DocumentTextitem):
+		global text_items
+		self.composer = text_items.append(composer)
+	
+	def get_tempo(self) -> DocumentTextitem:
+		global text_items
+		return text_items[self.tempo]
+
+	def set_tempo(self, tempo: DocumentTextitem):
+		global text_items
+		self.tempo = text_items.append(tempo)
+
+	def prepare_for_pickle():
+		# save texts from DocumentTextitems as variables
+		# also call the prepare function on the pages
+		pass
+	
+	def restore_from_pickle():
+		# create DocumentTextitems from the texts in the unpickled object
+		pass

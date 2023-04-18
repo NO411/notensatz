@@ -8,6 +8,7 @@ from document import DocumentTextitem
 from page_handling import PageHandler
 
 import json
+import pickle
 
 class SavingHander():
 	def __init__(self, app:App, page_handling:PageHandler):
@@ -44,7 +45,7 @@ class SavingHander():
 
 	def generate_filename(self):
 		# generate a filename out of the heading and the composer and remove unwanted chars
-		ret = self.app.document_ui.heading.toPlainText() + " - " + self.app.document_ui.composer.toPlainText()
+		ret = self.app.document_ui.get_heading().toPlainText() + " - " + self.app.document_ui.get_composer().toPlainText()
 		forbidden_chars = '\\/:*?"<>|'
 		for char in forbidden_chars:
 			ret = ret.replace(char, "")
@@ -61,10 +62,11 @@ class SavingHander():
 				QDesktopServices.openUrl(QUrl.fromLocalFile(filename))
 
 	def save_data(self,file_name):
-		data = self.app.document_ui.to_dict()
-
-		with open(file_name, "w") as file_:
-			json.dump(data, file_, indent="\t")
+		#with open('my_scene.pickle', 'wb') as f:
+		#	pickle.dump(self.app.document_ui, f)
+		#with open(file_name, "w") as file_:
+		#	json.dump(data, file_, indent="\t")
+		pass
 
 	def save_as(self):
 		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + self.app.file_extension, "*." + self.app.file_extension)
@@ -85,7 +87,7 @@ class SavingHander():
 			data = json.load(file_)
 
 		self.page_handling.setup_new_document(data["heading"], data["sub_heading"], data["composer"], data["tempo"])
-		self.app.document_ui.setup_by_dict(data)
+		#self.app.document_ui = pickledata
 
 	def open_file(self):
 		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + self.app.file_extension)
