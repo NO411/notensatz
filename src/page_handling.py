@@ -119,6 +119,10 @@ class PageHandler():
 		if (not self.app.new_doc_dialog_ui.save_settings_check_box.isChecked()):
 			self.app.new_doc_dialog_ui.reset()
 	
+	def set_last_system_page(self):
+		self.app.set_scene(len(self.app.document_ui.pages) - 1)
+		self.update_page_info_and_button_text()
+
 	def new_system(self):
 		add_new_page = self.app.document_ui.add_new_system()
 		if (add_new_page):
@@ -126,8 +130,7 @@ class PageHandler():
 			self.app.document_ui.systems[-1].page_index += 1
 
 		self.app.document_ui.pages[-1].scene.addItem(self.app.document_ui.systems[-1])
-		self.app.set_scene(len(self.app.document_ui.pages) - 1)
-		self.update_page_info_and_button_text()
+		self.set_last_system_page()
 
 	def delete_last_system(self):
 		if (len(self.app.document_ui.systems) < 2):
@@ -158,6 +161,8 @@ class PageHandler():
 		# check for an empty last page
 		if (self.app.document_ui.systems[-1].page_index != len(self.app.document_ui.pages) - 1):
 			self.delete_page()
+
+		self.set_last_system_page()
 
 	def edit_text(self, text_field):
 		# "move" ui to text fields
