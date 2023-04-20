@@ -1,10 +1,9 @@
 from PyQt5.QtWidgets import QMessageBox, QCheckBox
-from PyQt5.QtCore import QPointF
 
 from app import App
 from ui_misc import UiMiscHandler
 from document import Page, DocumentTextitem, DocumentUi
-from notation_system import Bar, TimeSignature, KeySignature, System
+from notation_system import Bar, TimeSignature, KeySignature
 from fonts import real_font_size
 
 class PageHandler():

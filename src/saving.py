@@ -1,14 +1,13 @@
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtGui import QPainter, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
-from PyQt5.QtCore import QFileInfo, QUrl, QLineF
+from PyQt5.QtCore import QFileInfo, QUrl
 
 from app import App
 from document import DocumentTextitem
 from page_handling import PageHandler
 from qt_saving_layer import *
 
-import json
 import pickle
 
 class SavingHander():

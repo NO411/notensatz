@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsLineItem, QGraphicsItemGroup, QGraphicsItem
+from PyQt5.QtWidgets import QGraphicsLineItem, QGraphicsItemGroup
 from PyQt5.QtGui import QPen, QTransform
 from PyQt5.QtCore import QPointF, Qt
 from typing import List

@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QWidget, QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
+from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
