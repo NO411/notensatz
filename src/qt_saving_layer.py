@@ -26,6 +26,7 @@ class N_GraphicsObject():
         self.key = items.append(item)
 
     def _qt(self):
+        """Returns the real QGraphicsItem."""
         global items
         return items[self.key]
 
@@ -38,12 +39,19 @@ class N_QGraphicsScene(N_GraphicsObject):
     
     def prepare_for_pickle(self):
         self.rect = self.qt().sceneRect()
-        # ... all important members
 
     def restore_from_pickle(self):
         self.__init__(QGraphicsScene(self.rect))
 
-class N_QGraphicsTextItem():
+    def __getstate__(self):
+        self.line = self.qt().line()
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.__init__(QGraphicsLineItem(self.line))
+
+class N_QGraphicsTextItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsTextItem):
         super().__init__(item)
 
@@ -52,8 +60,13 @@ class N_QGraphicsTextItem():
     
     def prepare_for_pickle(self):
         self.text = self.qt().toPlainText()
+        self.pos = self.qt().pos()
 
-class N_QGraphicsItemGroup():
+    def restore_from_pickle(self):
+        self.__init__(QGraphicsTextItem(self.text))
+        self.qt().setPos(self.pos)
+
+class N_QGraphicsItemGroup(N_GraphicsObject):
     def __init__(self, item: QGraphicsItemGroup):
         super().__init__(item)
 
@@ -61,19 +74,28 @@ class N_QGraphicsItemGroup():
         return self._qt()
     
     def prepare_for_pickle(self):
-        pass
+        self.pos = self.qt().pos()
 
-class N_QGraphicsLineItem():
+    def restore_from_pickle(self):
+        self.__init__(QGraphicsItemGroup())
+        self.qt().setPos(self.pos)
+
+class N_QGraphicsLineItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsLineItem):
         super().__init__(item)
 
     def qt(self) -> QGraphicsLineItem:
         return self._qt()
     
-    def prepare_for_pickle(self):
-        pass
+    def __getstate__(self):
+        self.line = self.qt().line()
+        return self.__dict__
 
-class N_QGraphicsRectItem():
+    def __setstate__(self, d):
+        self.__dict__ = d
+        self.__init__(QGraphicsLineItem(self.line))
+
+class N_QGraphicsRectItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsRectItem):
         super().__init__(item)
 
@@ -81,4 +103,7 @@ class N_QGraphicsRectItem():
         return self._qt()
     
     def prepare_for_pickle(self):
-        pass
+        self.rect = self.qt().rect()
+
+    def restore_from_pickle(self):
+        self.__init__(QGraphicsRectItem(self.rect))

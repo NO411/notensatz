@@ -1,11 +1,12 @@
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtGui import QPainter, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
-from PyQt5.QtCore import QFileInfo, QUrl
+from PyQt5.QtCore import QFileInfo, QUrl, QLineF
 
 from app import App
 from document import DocumentTextitem
 from page_handling import PageHandler
+from qt_saving_layer import *
 
 import json
 import pickle
@@ -61,12 +62,11 @@ class SavingHander():
 			if (QFileInfo(filename).exists()):
 				QDesktopServices.openUrl(QUrl.fromLocalFile(filename))
 
-	def save_data(self,file_name):
-		#with open('my_scene.pickle', 'wb') as f:
-		#	pickle.dump(self.app.document_ui, f)
-		#with open(file_name, "w") as file_:
-		#	json.dump(data, file_, indent="\t")
-		pass
+	def save_data(self, file_name):
+		self.app.document_ui.prepare_for_pickle()
+		testItem = N_QGraphicsLineItem(QGraphicsLineItem(1, 2, 3, 4))
+		with open(file_name, 'wb') as f:
+			pickle.dump(testItem, f)
 
 	def save_as(self):
 		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + self.app.file_extension, "*." + self.app.file_extension)
@@ -82,11 +82,12 @@ class SavingHander():
 			self.save_as()
 
 	def open_data(self, filename):
-		data = {}
-		with open(filename, "r") as file_:
-			data = json.load(file_)
+		with open(filename, 'rb') as f:
+			line: N_QGraphicsLineItem = pickle.load(f)
+			print(line.qt().line().p1().y())
 
-		self.page_handling.setup_new_document(data["heading"], data["sub_heading"], data["composer"], data["tempo"])
+
+		#self.page_handling.setup_new_document(data["heading"], data["sub_heading"], data["composer"], data["tempo"])
 		#self.app.document_ui = pickledata
 
 	def open_file(self):

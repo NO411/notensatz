@@ -74,11 +74,11 @@ class DocumentUi:
 		global text_items
 		self.tempo = text_items.append(tempo)
 
-	def prepare_for_pickle():
+	def prepare_for_pickle(self):
 		# save texts from DocumentTextitems as variables
 		# also call the prepare function on the pages
 		pass
 	
-	def restore_from_pickle():
+	def restore_from_pickle(self):
 		# create DocumentTextitems from the texts in the unpickled object
 		pass
