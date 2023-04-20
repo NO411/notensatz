@@ -36,20 +36,14 @@ class N_QGraphicsScene(N_GraphicsObject):
 
     def qt(self) -> QGraphicsScene:
         return self._qt()
-    
-    def prepare_for_pickle(self):
-        self.rect = self.qt().sceneRect()
-
-    def restore_from_pickle(self):
-        self.__init__(QGraphicsScene(self.rect))
 
     def __getstate__(self):
-        self.line = self.qt().line()
+        self.rect = self.qt().sceneRect()
         return self.__dict__
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.__init__(QGraphicsLineItem(self.line))
+        self.__init__(QGraphicsScene(self.rect))
 
 class N_QGraphicsTextItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsTextItem):
@@ -57,12 +51,14 @@ class N_QGraphicsTextItem(N_GraphicsObject):
 
     def qt(self) -> QGraphicsTextItem:
         return self._qt()
-    
-    def prepare_for_pickle(self):
+
+    def __getstate__(self):
         self.text = self.qt().toPlainText()
         self.pos = self.qt().pos()
+        return self.__dict__
 
-    def restore_from_pickle(self):
+    def __setstate__(self, d):
+        self.__dict__ = d
         self.__init__(QGraphicsTextItem(self.text))
         self.qt().setPos(self.pos)
 
@@ -72,11 +68,13 @@ class N_QGraphicsItemGroup(N_GraphicsObject):
 
     def qt(self) -> QGraphicsItemGroup:
         return self._qt()
-    
-    def prepare_for_pickle(self):
-        self.pos = self.qt().pos()
 
-    def restore_from_pickle(self):
+    def __getstate__(self):
+        self.pos = self.qt().pos()
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__ = d
         self.__init__(QGraphicsItemGroup())
         self.qt().setPos(self.pos)
 
@@ -101,9 +99,11 @@ class N_QGraphicsRectItem(N_GraphicsObject):
 
     def qt(self) -> QGraphicsRectItem:
         return self._qt()
-    
-    def prepare_for_pickle(self):
-        self.rect = self.qt().rect()
 
-    def restore_from_pickle(self):
+    def __getstate__(self):
+        self.rect = self.qt().rect()
+        return self.__dict__
+
+    def __setstate__(self, d):
+        self.__dict__ = d
         self.__init__(QGraphicsRectItem(self.rect))
