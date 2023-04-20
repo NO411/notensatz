@@ -3,7 +3,7 @@ from PyQt5.QtCore import QPointF
 from notation_system import Bar, System, KeySignature
 from typing import List
 from page import Page, DocumentTextitem
-from items import ItemContainer
+from qt_saving_layer import ItemContainer
 
 text_items = ItemContainer()
 

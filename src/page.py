@@ -21,9 +21,9 @@ class Page:
 		self.page_number = page_number
 
 		# setup white background
-		rect = QGraphicsRectItem(0, 0, Page.WIDTH, Page.HEIGHT)
-		rect.setBrush(QBrush(Qt.white))
-		self.scene.addItem(rect)
+		self.rect = QGraphicsRectItem(0, 0, Page.WIDTH, Page.HEIGHT)
+		self.rect.setBrush(QBrush(Qt.white))
+		self.scene.addItem(self.rect)
 
 		# add page number text
 		if (page_number > 1):
@@ -40,7 +40,8 @@ class Page:
 
 		self.page_number_text.setPlainText(str(self.page_number))
 		self.page_number_text.align()
-		
+
+	
 class DocumentTextitem(QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):
 		"""
