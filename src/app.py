@@ -122,6 +122,10 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 				self.voices_combo_boxes[index].setEnabled(True)
 				if (reset):
 					self.voices_combo_boxes[index].setCurrentIndex(0)
+		if (self.staves_spin_box.value() == 1):
+			self.piano_checkbox.setEnabled(False)
+		else:
+			self.piano_checkbox.setEnabled(True)
 	
 	def reset(self):
 		self.heading_line_edit.setText("")
@@ -130,6 +134,7 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 		self.tempo_line_edit.setText("")
 		self.key_signatures_combo_box.setCurrentIndex(0)
 		self.staves_spin_box.setValue(2)
+		self.piano_checkbox.setEnabled(True)
 		self.piano_checkbox.setChecked(False)
 		self.update_voice_combo_boxes(True)
 		self.time_signature_combo_box.setCurrentIndex(5)
