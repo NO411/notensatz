@@ -40,6 +40,9 @@ class N_QGraphicsScene(N_GraphicsObject):
         self.rect = self.qt().sceneRect()
         # ... all important members
 
+    def restore_from_pickle(self):
+        self.__init__(QGraphicsScene(self.rect))
+
 class N_QGraphicsTextItem():
     def __init__(self, item: QGraphicsTextItem):
         super().__init__(item)
