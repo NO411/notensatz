@@ -4,9 +4,9 @@ from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
 from PyQt5.QtCore import QFileInfo, QUrl
 
 from app import App
-from document import DocumentTextitem
+from document import DocumentUi
 from page_handling import PageHandler
-from qt_saving_layer import *
+from page import DocumentTextitem
 
 import pickle
 
@@ -63,9 +63,8 @@ class SavingHander():
 				QDesktopServices.openUrl(QUrl.fromLocalFile(filename))
 
 	def save_data(self, file_name):
-		self.app.document_ui.prepare_for_pickle()
 		testItem = self.app.document_ui# N_QGraphicsLineItem(QGraphicsLineItem(1, 2, 3, 4))
-		with open(file_name, 'wb') as f:
+		with open(file_name, "wb") as f:
 			pickle.dump(testItem, f)
 
 	def save_as(self):
@@ -82,10 +81,10 @@ class SavingHander():
 			self.save_as()
 
 	def open_data(self, filename):
-		with open(filename, 'rb') as f:
-			line: N_QGraphicsLineItem = pickle.load(f)
-			print(line.qt().line().p1().y())
+		with open(filename, "rb") as f:
+			data: DocumentUi = pickle.load(f)
 
+			print(data.heading.qt().toPlainText())
 
 		#self.page_handling.setup_new_document(data["heading"], data["sub_heading"], data["composer"], data["tempo"])
 		#self.app.document_ui = pickledata

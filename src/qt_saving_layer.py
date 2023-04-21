@@ -22,6 +22,9 @@ items = ItemContainer()
 
 class N_GraphicsObject():
     def __init__(self, item):
+        self._init(item)
+    
+    def _init(self, item):
         global items
         self.key = items.append(item)
 
@@ -43,7 +46,7 @@ class N_QGraphicsScene(N_GraphicsObject):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.__init__(QGraphicsScene(self.rect))
+        self._init(QGraphicsScene(self.rect))
 
 class N_QGraphicsTextItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsTextItem):
@@ -59,7 +62,7 @@ class N_QGraphicsTextItem(N_GraphicsObject):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.__init__(QGraphicsTextItem(self.text))
+        self._init(QGraphicsTextItem(self.text))
         self.qt().setPos(self.pos)
 
 class N_QGraphicsItemGroup(N_GraphicsObject):
@@ -75,7 +78,7 @@ class N_QGraphicsItemGroup(N_GraphicsObject):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.__init__(QGraphicsItemGroup())
+        self._init(QGraphicsItemGroup())
         self.qt().setPos(self.pos)
 
 class N_QGraphicsLineItem(N_GraphicsObject):
@@ -91,7 +94,7 @@ class N_QGraphicsLineItem(N_GraphicsObject):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.__init__(QGraphicsLineItem(self.line))
+        self._init(QGraphicsLineItem(self.line))
 
 class N_QGraphicsRectItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsRectItem):
@@ -106,4 +109,4 @@ class N_QGraphicsRectItem(N_GraphicsObject):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self.__init__(QGraphicsRectItem(self.rect))
+        self._init(QGraphicsRectItem(self.rect))

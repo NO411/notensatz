@@ -38,6 +38,3 @@ class DocumentUi:
 		self.pages[-1].scene.qt().removeItem(self.systems[-1].qt())
 		self.systems.pop(len(self.systems) - 1)
 		self.systems[-1].set_end_bar_line()
-
-	def prepare_for_pickle(self):
-		pass
