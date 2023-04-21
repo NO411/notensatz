@@ -26,19 +26,19 @@ class PageHandler():
 				tempo_text = "Tempoangabe"
 
 			heading = DocumentTextitem(True, heading_text, real_font_size(20, Page.HEIGHT), Page.MARGIN, "center", Page.MARGIN, True)
-			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12, Page.HEIGHT), heading.y() + heading.boundingRect().height(), "center", Page.MARGIN, False)
-			composer = DocumentTextitem(True, composer_text, real_font_size(12, Page.HEIGHT), sub_heading.y() + sub_heading.boundingRect().height(), "right", Page.MARGIN, True)
-			tempo = DocumentTextitem(True, tempo_text, real_font_size(12, Page.HEIGHT), composer.y() + composer.boundingRect().height(), "left", 2 * Page.MARGIN, True)
+			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12, Page.HEIGHT), heading.qt().y() + heading.qt().boundingRect().height(), "center", Page.MARGIN, False)
+			composer = DocumentTextitem(True, composer_text, real_font_size(12, Page.HEIGHT), sub_heading.qt().y() + sub_heading.qt().boundingRect().height(), "right", Page.MARGIN, True)
+			tempo = DocumentTextitem(True, tempo_text, real_font_size(12, Page.HEIGHT), composer.qt().y() + composer.qt().boundingRect().height(), "left", 2 * Page.MARGIN, True)
 
-			new_page.scene.addItem(heading)
-			new_page.scene.addItem(sub_heading)
-			new_page.scene.addItem(composer)
-			new_page.scene.addItem(tempo)
+			new_page.scene.qt().addItem(heading.qt())
+			new_page.scene.qt().addItem(sub_heading.qt())
+			new_page.scene.qt().addItem(composer.qt())
+			new_page.scene.qt().addItem(tempo.qt())
 
-			self.app.document_ui.set_heading(heading)
-			self.app.document_ui.set_sub_heading(sub_heading)
-			self.app.document_ui.set_composer(composer)
-			self.app.document_ui.set_tempo(tempo)
+			self.app.document_ui.heading = heading
+			self.app.document_ui.sub_heading = sub_heading
+			self.app.document_ui.composer = composer
+			self.app.document_ui.tempo = tempo
 
 		return new_page
 
@@ -128,7 +128,7 @@ class PageHandler():
 			self.new_page()
 			self.app.document_ui.systems[-1].page_index += 1
 
-		self.app.document_ui.pages[-1].scene.addItem(self.app.document_ui.systems[-1])
+		self.app.document_ui.pages[-1].scene.qt().addItem(self.app.document_ui.systems[-1].qt())
 		self.set_last_system_page()
 
 	def delete_last_system(self):
@@ -170,14 +170,14 @@ class PageHandler():
 		self.update_page_info_and_button_text()
 
 		if (text_field == "heading"):
-			self.app.document_ui.get_heading().setFocus()
+			self.app.document_ui.heading.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
 		elif (text_field == "sub_heading"):
-			self.app.document_ui.get_sub_heading().setFocus()
+			self.app.document_ui.sub_heading.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
 		elif (text_field == "composer"):
-			self.app.document_ui.get_composer().setFocus()
+			self.app.document_ui.composer.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum())
 		elif (text_field == "tempo"):
-			self.app.document_ui.get_tempo().setFocus()
+			self.app.document_ui.tempo.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().minimum())

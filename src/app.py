@@ -276,7 +276,7 @@ class App(QApplication):
 	def set_scene(self, page_index):
 		"""page_index must be >= 0"""
 		self.current_page = page_index
-		self.ui.view.setScene(self.document_ui.pages[self.current_page].scene)
+		self.ui.view.setScene(self.document_ui.pages[self.current_page].scene.qt())
 
 	def window_resize(self, event):
 		if (self.ui.in_welcome_screen):

@@ -34,18 +34,19 @@ class SavingHander():
 		for i, page in enumerate(self.app.document_ui.pages):
 
 			# remove highlights (they would appear gray in the pdf)
-			for item in page.scene.items():
-				if (type(item) == DocumentTextitem or type(item) == QGraphicsTextItem):
+			print(len(page.scene.qt().items()))
+			for item in page.scene.qt().items():
+				if (type(item) == DocumentTextitem):
 					item.remove_highlight()
 
-			page.scene.render(p)
+			page.scene.qt().render(p)
 			if i != len(self.app.document_ui.pages) - 1:
 				printer.newPage()
 		p.end()
 
 	def generate_filename(self):
 		# generate a filename out of the heading and the composer and remove unwanted chars
-		ret = self.app.document_ui.get_heading().toPlainText() + " - " + self.app.document_ui.get_composer().toPlainText()
+		ret = self.app.document_ui.heading.qt().toPlainText() + " - " + self.app.document_ui.composer.qt().toPlainText()
 		forbidden_chars = '\\/:*?"<>|'
 		for char in forbidden_chars:
 			ret = ret.replace(char, "")
@@ -63,7 +64,7 @@ class SavingHander():
 
 	def save_data(self, file_name):
 		self.app.document_ui.prepare_for_pickle()
-		testItem = N_QGraphicsLineItem(QGraphicsLineItem(1, 2, 3, 4))
+		testItem = self.app.document_ui# N_QGraphicsLineItem(QGraphicsLineItem(1, 2, 3, 4))
 		with open(file_name, 'wb') as f:
 			pickle.dump(testItem, f)
 
