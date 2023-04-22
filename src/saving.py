@@ -16,9 +16,6 @@ class SavingHander():
 		self.page_handling = page_handling
 
 	def export_to_pdf(self, filename):
-		# fix black border!!
-		# maybe with small upscale to hide them
-
 		printer = QPrinter (QPrinter.HighResolution)
 		printer.setPageSize(QPrinter.A4)
 		printer.setOrientation(QPrinter.Portrait)
@@ -83,11 +80,10 @@ class SavingHander():
 	def open_data(self, filename):
 		with open(filename, "rb") as f:
 			data: DocumentUi = pickle.load(f)
-
-			print(data.heading.qt().toPlainText())
-
-		#self.page_handling.setup_new_document(data["heading"], data["sub_heading"], data["composer"], data["tempo"])
-		#self.app.document_ui = pickledata
+			self.app.document_ui = data
+			self.app.document_ui.reassemble()
+			self.app.set_scene(0)
+			self.page_handling.update_page_info_and_button_text()
 
 	def open_file(self):
 		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + self.app.file_extension)

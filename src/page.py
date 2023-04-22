@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsRectItem, QGraphicsTextItem
-from PyQt5.QtGui import QBrush, QFont
+from PyQt5.QtGui import QBrush, QFont, QPen
 from PyQt5.QtCore import Qt
 
 from fonts import real_font_size
@@ -24,6 +24,7 @@ class Page:
 		# setup white background
 		self.rect = N_QGraphicsRectItem(QGraphicsRectItem(0, 0, Page.WIDTH, Page.HEIGHT))
 		self.rect.qt().setBrush(QBrush(Qt.white))
+		self.rect.qt().setPen(QPen(Qt.white))
 		self.scene.qt().addItem(self.rect.qt())
 
 		# add page number text
@@ -42,7 +43,11 @@ class Page:
 		self.page_number_text.qt().setPlainText(str(self.page_number))
 		self.page_number_text.align()
 
-	
+	def reassemble(self):
+		self.scene.qt().addItem(self.rect.qt())
+		if (self.page_number > 1):
+			self.scene.qt().addItem(self.page_number_text.qt())
+
 class DocumentTextitem(N_QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):
 		"""
