@@ -146,14 +146,14 @@ class PageHandler():
 
 	def delete_last_system(self):
 		if (len(self.app.document_ui.systems) < 2):
-			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können das erste System nicht löschen.", QMessageBox.Yes)
+			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können das erste System nicht löschen.", QMessageBox.Yes, self.app.window)
 			info_box.setDefaultButton(QMessageBox.Yes)
 			info_box.button(QMessageBox.Yes).setText("OK")
 			result = info_box.exec_()
 			return
 
 		if (self.app.show_warning_box):
-			warning_box = QMessageBox(QMessageBox.Information, "System Löschen", "Wollen Sie das letzte System wirklich löschen?", QMessageBox.Yes | QMessageBox.No)
+			warning_box = QMessageBox(QMessageBox.Information, "System Löschen", "Wollen Sie das letzte System wirklich löschen?", QMessageBox.Yes | QMessageBox.No, self.app.window)
 			warning_box.setDefaultButton(QMessageBox.Yes)
 			warning_box.button(QMessageBox.Yes).setText("Ja")
 			warning_box.button(QMessageBox.No).setText("Nein")
