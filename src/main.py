@@ -20,8 +20,6 @@ def main():
 	app.window.close_signal.connect(lambda: saving.handle_close_event(app, app.quit))
 
 	app.document_ui.pages = [page_handling.create_empty_page(1)]
-	# object which is needed to render the scene
-	# view can change when the scene changes (new page)
 	app.set_scene(0)
 
 	# ui adjustments which need functions of other modules
@@ -54,7 +52,7 @@ def main():
 	app.ui.welcome_button_new.clicked.connect(app.new_doc_dialog.show)
 	app.ui.welcome_button_open.clicked.connect(saving.open_file)
 
-	# new document
+	# create new document
 	app.new_doc_dialog_ui.ok_button.clicked.connect(page_handling.create_new_document)
 
 	# show and execute the app
