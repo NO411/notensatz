@@ -177,7 +177,7 @@ class App(QApplication):
 				"scrollbarSlider.activeBackground": "#4e5563",
 				"scrollbarSlider.hoverBackground": "#414855",
 			},
-			corner_shape="rounded"
+			corner_shape="rounded",
 		)
 
 		self.document_ui = DocumentUi()

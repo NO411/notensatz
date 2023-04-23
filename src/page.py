@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsRectItem, QGraphicsTextItem
+from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsRectItem
 from PyQt5.QtGui import QBrush, QFont, QPen
 from PyQt5.QtCore import Qt
 
 from fonts import real_font_size
-from qt_saving_layer import N_QGraphicsTextItem, N_QGraphicsScene, N_QGraphicsRectItem
+from qt_saving_layer import Fixed_QGraphicsTextItem, N_QGraphicsScene, N_QGraphicsRectItem, N_QGraphicsTextItem
 
 class Page:
 	# A4 layout
@@ -53,7 +53,7 @@ class DocumentTextitem(N_QGraphicsTextItem):
 		"""
 		`alignment`: "right", "left, ""center"
 		"""
-		super().__init__(QGraphicsTextItem(text))
+		super().__init__(Fixed_QGraphicsTextItem(text))
 
 		font = QFont("Times New Roman", fontSize)
 		font.setBold(bold)
@@ -105,11 +105,6 @@ class DocumentTextitem(N_QGraphicsTextItem):
 		cursor = self.qt().textCursor()
 		cursor.setPosition(len(self.qt().toPlainText()))
 		self.qt().setTextCursor(cursor)
-
-	# !!
-	# this is really important to avoid a program crash when rightklicking an QGraphicstextItem!
-	def contextMenuEvent(self, event):
-		event.ignore()
 
 	# automatically reconnect the align function
 	def __setstate__(self, d):

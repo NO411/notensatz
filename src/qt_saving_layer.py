@@ -50,11 +50,16 @@ class N_QGraphicsScene(N_GraphicsObject):
         self.__dict__ = d
         self._init(QGraphicsScene(self.rect))
 
+class Fixed_QGraphicsTextItem(QGraphicsTextItem):
+	# this is really important to avoid a program crash when rightklicking an QGraphicstextItem!
+	def contextMenuEvent(self, event):
+		event.ignore()
+
 class N_QGraphicsTextItem(N_GraphicsObject):
-    def __init__(self, item: QGraphicsTextItem):
+    def __init__(self, item: Fixed_QGraphicsTextItem):
         super().__init__(item)
 
-    def qt(self) -> QGraphicsTextItem:
+    def qt(self) -> Fixed_QGraphicsTextItem:
         return self._qt()
 
     def __getstate__(self):
@@ -69,7 +74,7 @@ class N_QGraphicsTextItem(N_GraphicsObject):
 
     def __setstate__(self, d):
         self.__dict__ = d
-        self._init(QGraphicsTextItem(self.text))
+        self._init(Fixed_QGraphicsTextItem(self.text))
         self.qt().setPos(self.pos)
         font = QFont()
         font.fromString(self.font)
