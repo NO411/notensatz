@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsTextItem
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QColor
 from PyQt5.QtCore import Qt
 
 from fonts import get_symbol, real_font_size
@@ -12,6 +12,7 @@ from qt_saving_layer import N_QGraphicsTextItem
 # important: the vertical center of every music (text) item is the bottom line of the 5 lines of a stave
 # also important: always use sceneBoundingRect which cares about transformations .....
 class Musicitem(N_QGraphicsTextItem):
+	"""Always scale and transform with QTransform, which can be pickled."""
 	FONTSIZE = 24
 	# em space (typically width of "M", here height of one bar line)
 	# -> stave lines spacing = em / 4

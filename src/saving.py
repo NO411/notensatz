@@ -1,6 +1,6 @@
 from PyQt5.QtPrintSupport import QPrinter
 from PyQt5.QtGui import QPainter, QDesktopServices
-from PyQt5.QtWidgets import QFileDialog, QGraphicsTextItem
+from PyQt5.QtWidgets import QFileDialog, QMessageBox, QMainWindow
 from PyQt5.QtCore import QFileInfo, QUrl
 
 from app import App
@@ -60,9 +60,8 @@ class SavingHander():
 				QDesktopServices.openUrl(QUrl.fromLocalFile(filename))
 
 	def save_data(self, file_name):
-		testItem = self.app.document_ui# N_QGraphicsLineItem(QGraphicsLineItem(1, 2, 3, 4))
 		with open(file_name, "wb") as f:
-			pickle.dump(testItem, f)
+			pickle.dump(self.app.document_ui, f)
 
 	def save_as(self):
 		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + self.app.file_extension, "*." + self.app.file_extension)
@@ -82,8 +81,7 @@ class SavingHander():
 			data: DocumentUi = pickle.load(f)
 			self.app.document_ui = data
 			self.app.document_ui.reassemble()
-			self.app.set_scene(0)
-			self.page_handling.update_page_info_and_button_text()
+			self.page_handling.setup_document()
 
 	def open_file(self):
 		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + self.app.file_extension)
@@ -94,3 +92,21 @@ class SavingHander():
 			# remove blur effect and enable centralwidget if still in welcome screen
 			if (self.app.ui.in_welcome_screen):
 				self.app.end_welcome_screen()
+
+	def handle_close_event(self, app: App, action):
+		if (not self.app.ui.in_welcome_screen):
+			close_box = QMessageBox(QMessageBox.Question, "Notensatz", "Wollen Sie das aktuelle Dokument speichern?", QMessageBox.Save | QMessageBox.Discard | QMessageBox.Cancel, app.window)
+			close_box.setDefaultButton(QMessageBox.Yes)
+			close_box.button(QMessageBox.Save).setText("Speichern")
+			close_box.button(QMessageBox.Discard).setText("Nicht speichern")
+			close_box.button(QMessageBox.Cancel).setText("Abbrechen")
+			result = close_box.exec_()
+
+			if (result == QMessageBox.Cancel):
+				return
+
+			if result == QMessageBox.Save:
+				self.save_file()
+		
+		# e.g. app.quit
+		action()

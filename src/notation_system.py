@@ -105,14 +105,27 @@ class KeySignature:
 		self.number = self.signatures_map[key_signature][0]
 		self.type = self.signatures_map[key_signature][1]
 
-class Bar:
+class Bar(N_QGraphicsItemGroup):
 	def __init__(self, time_signature: TimeSignature):
+		super().__init__(QGraphicsItemGroup())
+
 		self.time_signature = time_signature
 		self.note_groups = []
 		self.objects: List[Musicitem] = []
 
+	def show_time_signature(self):
+		time_signature = Musicitem(self.time_signature.gen_unicode_combi())
+
+		self.qt().addToGroup(time_signature.qt())
+		time_signature.setPos(0, Musicitem.EM)
+		self.objects.append(time_signature)
+
+	def reassemble(self):
+		for obj in self.objects:
+			self.qt().addToGroup(obj.qt())
+
 	#def set_up(self, start_pos: QPointF, staves: List[Stave]):
-	
+
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
 	All positions are relative to the parent from here on!"""
@@ -148,16 +161,15 @@ class Stave(N_QGraphicsItemGroup):
 		},
 	}
 
-	def __init__(self, system_group: N_QGraphicsItemGroup, clef_key: str, width: float, key_signature: KeySignature, first_bar: Bar):
+	def __init__(self, clef_key: str, width: float, key_signature: KeySignature):
 		super().__init__(QGraphicsItemGroup())
 
 		# setup members
-		self.system_group: N_QGraphicsItemGroup = system_group
 		self.clef_key: str = clef_key
 		self.width = width
 		self.key_signature: KeySignature = key_signature
 		self.lines: List[N_QGraphicsLineItem] = []
-		self.bars: List[Bar] = [first_bar]
+		self.bars: List[Bar] = []
 
 		# draw all lines
 		for i in range(5):
@@ -189,11 +201,30 @@ class Stave(N_QGraphicsItemGroup):
 			accidental.setPos(x, y)
 			self.key_signature_accidentals.append(accidental)
 
-	def add_first_time_signature(self, start_x: float):
-		time_signature = Musicitem(self.bars[0].time_signature.gen_unicode_combi())
-		self.qt().addToGroup(time_signature.qt())
-		time_signature.setPos(start_x + 0.25 * Musicitem.EM, Musicitem.EM)
-		self.bars[0].objects.append(time_signature)
+	def create_first_bar(self, first_system: bool, start_x: float, time_signature: TimeSignature):
+		self.bars.append(Bar(time_signature))
+		self.qt().addToGroup(self.bars[-1].qt())
+		self.bars[-1].qt().setPos(start_x + 0.25 * Musicitem.EM, 0)
+
+		if (first_system):
+			self.bars[-1].show_time_signature()
+
+	def reassemble(self):
+		for line in self.lines:
+			self.qt().addToGroup(line.qt())
+
+		self.qt().addToGroup(self.clef.qt())
+
+		for accidental in self.key_signature_accidentals:
+			self.qt().addToGroup(accidental.qt())
+		self.qt().setPos(self.pos)
+
+		for bar in self.bars:
+			bar.reassemble()
+			self.qt().addToGroup(bar.qt())
+			bar.qt().setPos(bar.pos)
+			
+
 
 class System(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
@@ -202,7 +233,7 @@ class System(N_QGraphicsItemGroup):
 
 	min_stave_spacing = Musicitem.EM
 	system_spacing = Musicitem.EM * 1.5
-	def __init__(self, page_index: int, voices: int, pos: QPointF, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, first_bar: Bar, first_system: bool = False):
+	def __init__(self, page_index: int, voices: int, pos: QPointF, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, time_signature: TimeSignature, first_system: bool = False):
 		super().__init__(QGraphicsItemGroup())
 
 		# setup all members
@@ -217,7 +248,7 @@ class System(N_QGraphicsItemGroup):
 		# create staves
 		self.staves: List[Stave] = [
 			# create all staves using list comprehension
-			Stave(self, clefs_tabel[n], self.width, self.key_signature, first_bar) for n in range(voices)
+			Stave(clefs_tabel[n], self.width, self.key_signature) for n in range(voices)
 		]
 		for n, stave in enumerate(self.staves):
 			self.qt().addToGroup(stave.qt())
@@ -240,9 +271,8 @@ class System(N_QGraphicsItemGroup):
 		if (self.with_piano and self.voices > 1):
 			self.addbrace()
 
-		if (self.first_system):
-			for stave in self.staves:
-				stave.add_first_time_signature(self.get_start_x())
+		for stave in self.staves:
+			stave.create_first_bar(self.first_system, self.get_start_x(), time_signature)
 
 	def addbrace(self):
 		self.brace = Musicitem("brace")
@@ -250,7 +280,7 @@ class System(N_QGraphicsItemGroup):
 
 		# default brace: 1 EM
 		scale = (self.staves[-1].qt().y() - self.staves[-2].qt().y() + Musicitem.EM) / Musicitem.EM
-		self.brace.qt().setScale(scale)
+		self.brace.qt().setTransform(QTransform().scale(scale, scale))
 		self.brace.setPos(-self.brace.qt().sceneBoundingRect().width(), self.staves[-1].qt().y() + Musicitem.EM)
 
 	def get_start_x(self):
@@ -270,5 +300,18 @@ class System(N_QGraphicsItemGroup):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineFinal"))
 		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 1.3, (2 * self.voices - 1) * Musicitem.EM)
 
-	def get_bottom_y(self)-> float:
+	def get_bottom_y(self) -> float:
 		return self.qt().y() + self.staves[-1].qt().y() + Musicitem.EM
+
+	def reassemble(self):
+		for n, stave in enumerate(self.staves):
+			stave.reassemble()
+			self.qt().addToGroup(stave.qt())
+			stave.qt().setPos(stave.pos)
+
+		if (self.with_piano):
+			self.qt().addToGroup(self.brace.qt())
+
+		self.qt().addToGroup(self.right_bar_line.qt())
+		self.qt().addToGroup(self.left_bar_line.qt())
+		

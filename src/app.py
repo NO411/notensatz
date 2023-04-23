@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
 # from <https://pypi.org/project/pyqtdarktheme/>
@@ -101,7 +101,15 @@ class App_Ui(Ui_MainWindow):
 				self.box_tabs_layouts[i].addWidget(box_button)
 				self.symbols_box_buttons[i].append(box_button)
 
-from new_document import Ui_NewDocumentDialog
+class MainWindow(QMainWindow):
+	close_signal = pyqtSignal()
+
+	def __init__(self):
+		super().__init__()
+
+	def closeEvent(self, event):
+		self.close_signal.emit()
+		event.ignore()
 
 class NewDocumentDialogUI(Ui_NewDocumentDialog):
 	def setupUi(self, NewDocumentDialog):
@@ -255,7 +263,7 @@ class App(QApplication):
 		self.show_warning_box = True
 		self.current_page = 0
 
-		self.window = QMainWindow()
+		self.window = MainWindow()
 		self.aboutbox = QDialog()
 		self.new_doc_dialog = QDialog()
 

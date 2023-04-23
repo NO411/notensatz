@@ -1,4 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsTextItem, QGraphicsItemGroup, QGraphicsLineItem, QGraphicsRectItem
+from PyQt5.QtGui import QFont, QPen
+from PyQt5.QtCore import Qt
 
 class ItemContainer():
     def __init__(self):
@@ -58,12 +60,25 @@ class N_QGraphicsTextItem(N_GraphicsObject):
     def __getstate__(self):
         self.text = self.qt().toPlainText()
         self.pos = self.qt().pos()
+        self.font = self.qt().font().toString()
+        self.color = self.qt().defaultTextColor()
+        self.max_block_count = self.qt().document().maximumBlockCount()
+        self.interaction = bool(self.qt().textInteractionFlags() & Qt.TextEditorInteraction)
+        self.transform = self.qt().transform()
         return self.__dict__
 
     def __setstate__(self, d):
         self.__dict__ = d
         self._init(QGraphicsTextItem(self.text))
         self.qt().setPos(self.pos)
+        font = QFont()
+        font.fromString(self.font)
+        self.qt().setFont(font)
+        self.qt().setDefaultTextColor(self.color)
+        self.qt().document().setMaximumBlockCount(self.max_block_count)
+        if (self.interaction):
+            self.qt().setTextInteractionFlags(Qt.TextEditorInteraction)
+        self.qt().setTransform(self.transform)
 
 class N_QGraphicsItemGroup(N_GraphicsObject):
     def __init__(self, item: QGraphicsItemGroup):
@@ -79,7 +94,6 @@ class N_QGraphicsItemGroup(N_GraphicsObject):
     def __setstate__(self, d):
         self.__dict__ = d
         self._init(QGraphicsItemGroup())
-        self.qt().setPos(self.pos)
 
 class N_QGraphicsLineItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsLineItem):
@@ -90,11 +104,14 @@ class N_QGraphicsLineItem(N_GraphicsObject):
     
     def __getstate__(self):
         self.line = self.qt().line()
+        self.color = self.qt().pen().color()
+        self.width = self.qt().pen().width()
         return self.__dict__
 
     def __setstate__(self, d):
         self.__dict__ = d
         self._init(QGraphicsLineItem(self.line))
+        self.qt().setPen(QPen(self.color, self.width))
 
 class N_QGraphicsRectItem(N_GraphicsObject):
     def __init__(self, item: QGraphicsRectItem):
@@ -105,8 +122,13 @@ class N_QGraphicsRectItem(N_GraphicsObject):
 
     def __getstate__(self):
         self.rect = self.qt().rect()
+        self.brush_color = self.qt().brush().color()
+        self.pen_color = self.qt().pen().color()
         return self.__dict__
 
     def __setstate__(self, d):
         self.__dict__ = d
         self._init(QGraphicsRectItem(self.rect))
+        self.qt().setBrush(self.brush_color)
+        self.qt().setPen(self.pen_color)
+

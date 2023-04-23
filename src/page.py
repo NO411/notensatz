@@ -70,6 +70,9 @@ class DocumentTextitem(N_QGraphicsTextItem):
 		self._y = y
 		self.align_spacing = align_spacing
 		self.align()
+		self.connect_contentchange()
+
+	def connect_contentchange(self):
 		self.qt().document().contentsChanged.connect(self.align)
 
 	def crop_text(self):
@@ -107,3 +110,9 @@ class DocumentTextitem(N_QGraphicsTextItem):
 	# this is really important to avoid a program crash when rightklicking an QGraphicstextItem!
 	def contextMenuEvent(self, event):
 		event.ignore()
+
+	# automatically reconnect the align function
+	def __setstate__(self, d):
+		super().__setstate__(d)
+		self.__dict__.update(d)
+		self.connect_contentchange()

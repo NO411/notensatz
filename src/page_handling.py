@@ -2,8 +2,9 @@ from PyQt5.QtWidgets import QMessageBox, QCheckBox
 
 from app import App
 from ui_misc import UiMiscHandler
-from document import Page, DocumentTextitem, DocumentUi
-from notation_system import Bar, TimeSignature, KeySignature
+from page import Page, DocumentTextitem
+from document import DocumentUi
+from notation_system import TimeSignature, KeySignature
 from fonts import real_font_size
 
 class PageHandler():
@@ -68,11 +69,8 @@ class PageHandler():
 			self.app.set_scene(self.app.current_page - 1)
 			self.update_page_info_and_button_text()
 
-	def setup_new_document(self, heading, sub_heading, composer, tempo):
-		# remove blur effect and enable centralwidget if still in welcome screen
-		if (self.app.ui.in_welcome_screen):
-			self.app.end_welcome_screen()
-		else:
+	def reconnect(self):
+		if (not self.app.ui.in_welcome_screen):
 			# disconnect old functions if it is not the first document
 			# without, it would lead into unwanted behaviour
 			self.app.ui.new_system_button.clicked.disconnect()
@@ -82,12 +80,6 @@ class PageHandler():
 			self.app.ui.action_edit_composer.triggered.disconnect()
 			self.app.ui.action_edit_tempo.triggered.disconnect()
 
-		# create new document with empty (apart from texts) page
-		self.app.document_ui = DocumentUi()
-		self.app.document_ui.pages = [self.create_empty_page(1, True, heading, sub_heading, composer, tempo)]
-		self.app.set_scene(0)
-		self.update_page_info_and_button_text()
-
 		self.app.ui.new_system_button.clicked.connect(self.new_system)
 		self.app.ui.delete_last_system_button.clicked.connect(self.delete_last_system)
 		self.app.ui.action_edit_heading.triggered.connect(lambda : self.edit_text("heading"))
@@ -95,7 +87,27 @@ class PageHandler():
 		self.app.ui.action_edit_composer.triggered.connect(lambda : self.edit_text("composer"))
 		self.app.ui.action_edit_tempo.triggered.connect(lambda : self.edit_text("tempo"))
 
+	def setup_document(self):
+		self.app.set_scene(0)
+		self.update_page_info_and_button_text()
+
+		self.reconnect()
+
+	def setup_new_document(self, heading, sub_heading, composer, tempo):
+		# create new document with empty (apart from texts) page
+		self.app.document_ui = DocumentUi()
+		self.app.document_ui.pages = [self.create_empty_page(1, True, heading, sub_heading, composer, tempo)]
+		# also reconnects all actions
+		self.setup_document()
+
+		# remove blur effect and enable centralwidget if still in welcome screen
+		if (self.app.ui.in_welcome_screen):
+			self.app.end_welcome_screen()
+
 	def create_new_document(self):
+		self.app.current_file_saved = False
+		self.app.current_file_name = ""
+
 		self.setup_new_document(
 			self.app.new_doc_dialog_ui.heading_line_edit.text(),
 			self.app.new_doc_dialog_ui.sub_heading_line_edit.text(),
@@ -103,11 +115,12 @@ class PageHandler():
 			self.app.new_doc_dialog_ui.tempo_line_edit.text()
 		)
 
+		# setup document (adding first system)
 		time_signature_key = self.app.new_doc_dialog_ui.time_signature_combo_box.currentText()
-		first_bar = Bar(TimeSignature(TimeSignature.signatures_map[time_signature_key][0], TimeSignature.signatures_map[time_signature_key][1]))
+		time_signature = TimeSignature(TimeSignature.signatures_map[time_signature_key][0], TimeSignature.signatures_map[time_signature_key][1])
 		self.app.document_ui.setup(
 			self.app.new_doc_dialog_ui.staves_spin_box.value(),
-			first_bar,
+			time_signature,
 			self.app.new_doc_dialog_ui.piano_checkbox.isChecked(),
 			self.app.new_doc_dialog_ui.get_clefs(),
 			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())

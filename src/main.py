@@ -17,6 +17,8 @@ def main():
 	page_handling = PageHandler(app, ui_misc)
 	saving = SavingHander(app, page_handling)
 
+	app.window.close_signal.connect(lambda: saving.handle_close_event(app, app.quit))
+
 	app.document_ui.pages = [page_handling.create_empty_page(1)]
 	# object which is needed to render the scene
 	# view can change when the scene changes (new page)
@@ -30,12 +32,12 @@ def main():
 	app.ui.view.horizontalScrollBar().setValue(app.ui.view.horizontalScrollBar().minimum())
 
 	# menubar actions
-	app.ui.action_export.triggered.connect(saving.export)
 	app.ui.action_about.triggered.connect(app.aboutbox.show)
-	app.ui.action_new.triggered.connect(app.new_doc_dialog.show)
+	app.ui.action_new.triggered.connect(lambda: saving.handle_close_event(app, app.new_doc_dialog.show))
+	app.ui.action_open.triggered.connect(lambda: saving.handle_close_event(app, saving.open_file))
 	app.ui.action_save_as.triggered.connect(saving.save_as)
 	app.ui.action_save.triggered.connect(saving.save_file)
-	app.ui.action_open.triggered.connect(saving.open_file)
+	app.ui.action_export.triggered.connect(saving.export)
 
 	# buttons and other gui elements
 	app.ui.zoom_slider.valueChanged.connect(ui_misc.apply_zoom)
