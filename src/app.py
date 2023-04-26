@@ -1,9 +1,10 @@
 from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QFileInfo
 from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
+import json
 
 # window / dialog imports
 from mainwindow import Ui_MainWindow
@@ -112,12 +113,35 @@ class MainWindow(QMainWindow):
 		event.ignore()
 
 class NewDocumentDialogUI(Ui_NewDocumentDialog):
+	DEFAULT_SETTINGS = {
+		"heading": "",
+		"sub_heading": "",
+		"composer": "",
+		"tempo": "",
+		"key_signature": 0,
+		"staves": 2,
+		"piano_checkbox": False,
+		"time_signature_combo_box": 5,
+	}
+	SETTINGS_FILENAME = "document_settings.json"
+
 	def setupUi(self, NewDocumentDialog):
 		super().setupUi(NewDocumentDialog)
 		self.voices_labels = [self.voice_1_label, self.voice_2_label, self.voice_3_label, self.voice_4_label]
 		self.voices_combo_boxes = [self.voice_1_combo_box, self.voice_2_combo_box, self.voice_3_combo_box, self.voice_4_combo_box]
 		self.staves_spin_box.valueChanged.connect(lambda: self.update_voice_combo_boxes(False))
-	
+
+		settings = NewDocumentDialogUI.DEFAULT_SETTINGS
+
+		# open saved document settings
+		if (QFileInfo(NewDocumentDialogUI.SETTINGS_FILENAME).exists()):
+			with open(NewDocumentDialogUI.SETTINGS_FILENAME, "r") as f:
+				settings = json.load(f)
+			if (NewDocumentDialogUI.DEFAULT_SETTINGS != settings):
+				self.save_settings_check_box.setChecked(True)
+
+		self.set_settings(settings)
+
 	def update_voice_combo_boxes(self, reset: bool):
 		for i in range(1, self.staves_spin_box.maximum() + 1):
 			index = i - 1
@@ -136,16 +160,31 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 			self.piano_checkbox.setEnabled(True)
 	
 	def reset(self):
-		self.heading_line_edit.setText("")
-		self.sub_heading_line_edit.setText("")
-		self.composer_line_edit.setText("")
-		self.tempo_line_edit.setText("")
-		self.key_signatures_combo_box.setCurrentIndex(0)
-		self.staves_spin_box.setValue(2)
-		self.piano_checkbox.setEnabled(True)
-		self.piano_checkbox.setChecked(False)
+		self.set_settings(NewDocumentDialogUI.DEFAULT_SETTINGS)
 		self.update_voice_combo_boxes(True)
-		self.time_signature_combo_box.setCurrentIndex(5)
+
+	def set_settings(self, settings: dict):
+		self.heading_line_edit.setText(settings["heading"])
+		self.sub_heading_line_edit.setText(settings["sub_heading"])
+		self.composer_line_edit.setText(settings["composer"])
+		self.tempo_line_edit.setText(settings["tempo"])
+		self.key_signatures_combo_box.setCurrentIndex(settings["key_signature"])
+		self.staves_spin_box.setValue(settings["staves"])
+		self.piano_checkbox.setChecked(settings["piano_checkbox"])
+		self.time_signature_combo_box.setCurrentIndex(settings["time_signature_combo_box"])
+
+	def get_settings(self):
+		settings = {
+			"heading": self.heading_line_edit.text(),
+			"sub_heading": self.sub_heading_line_edit.text(),
+			"composer": self.composer_line_edit.text(),
+			"tempo": self.tempo_line_edit.text(),
+			"key_signature": self.key_signatures_combo_box.currentIndex(),
+			"staves": self.staves_spin_box.value(),
+			"piano_checkbox": self.piano_checkbox.isChecked(),
+			"time_signature_combo_box": self.time_signature_combo_box.currentIndex(),
+		}
+		return settings
 	
 	def get_clefs(self):
 		"""return a lsit of clefs, like "Violinschlüssel", "Bassschlüssel", "Altschlüssel" or "Tenorschlüssel" """

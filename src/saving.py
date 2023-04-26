@@ -3,12 +3,13 @@ from PyQt5.QtGui import QPainter, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QFileInfo, QUrl
 
-from app import App
+from app import App, NewDocumentDialogUI
 from document import DocumentUi
 from page_handling import PageHandler
 from page import DocumentTextitem
 
 import pickle
+import json
 
 class SavingHander():
 	def __init__(self, app:App, page_handling:PageHandler):
@@ -110,3 +111,8 @@ class SavingHander():
 		
 		# e.g. app.quit
 		action()
+
+	def save_document_settings(self):
+		json_settings = json.dumps(self.app.new_doc_dialog_ui.get_settings(), indent="\t")
+		with open(NewDocumentDialogUI.SETTINGS_FILENAME, "w") as f:
+			f.write(json_settings)

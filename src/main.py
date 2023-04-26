@@ -18,6 +18,7 @@ def main():
 	saving = SavingHander(app, page_handling)
 
 	app.window.close_signal.connect(lambda: saving.handle_close_event(app, app.quit))
+	app.window.close_signal.connect(lambda: saving.save_document_settings())
 
 	app.document_ui.pages = [page_handling.create_empty_page(1)]
 	app.set_scene(0)
