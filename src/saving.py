@@ -32,7 +32,6 @@ class SavingHander():
 		for i, page in enumerate(self.app.document_ui.pages):
 
 			# remove highlights (they would appear gray in the pdf)
-			print(len(page.scene.qt().items()))
 			for item in page.scene.qt().items():
 				if (type(item) == DocumentTextitem):
 					item.remove_highlight()
