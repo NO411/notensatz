@@ -1,8 +1,10 @@
 from PyQt5.QtCore import QPointF
+from PyQt5.QtGui import QColor
 
 from notation_system import TimeSignature, System, KeySignature
 from typing import List
-from page import Page, DocumentTextitem
+from editing import Page, DocumentTextitem, Musicitem
+from settings import Settings
 
 class DocumentUi:
 	def __init__(self):
@@ -21,21 +23,21 @@ class DocumentUi:
 		self.clefs = clefs
 		self.key_signature = key_signature
 
-		top_spacing = self.tempo.qt().y() + self.tempo.qt().sceneBoundingRect().height() + Page.MARGIN / 4
-		self.systems = [System(0, self.staves, QPointF(2 * Page.MARGIN, top_spacing), self.clefs, self.key_signature, self.with_piano, time_signature, True)]
-		self.pages[0].scene.qt().addItem(self.systems[-1].qt())
+		top_spacing = self.tempo.qt().y() + self.tempo.qt().sceneBoundingRect().height() + Settings.Layout.MARGIN / 4
+		self.systems = [System(0, self.staves, QPointF(2 * Settings.Layout.MARGIN, top_spacing), self.clefs, self.key_signature, self.with_piano, time_signature, True)]
+		self.pages[0].qt().addItem(self.systems[-1].qt())
 
 	def add_new_system(self) -> bool:
 		page_index = len(self.pages) - 1
 		last_time_sig = self.systems[-1].staves[0].bars[-1].time_signature
 		self.systems[-1].set_normal_end_bar_line()
-		self.systems.append(System(page_index, self.staves, QPointF(Page.MARGIN, self.systems[-1].get_bottom_y() + System.system_spacing), self.clefs, self.key_signature, self.with_piano, last_time_sig, False))
-		if (self.systems[-1].get_bottom_y() > Page.HEIGHT - Page.MARGIN):
-			self.systems[-1].qt().setPos(Page.MARGIN, Page.MARGIN)
+		self.systems.append(System(page_index, self.staves, QPointF(Settings.Layout.MARGIN, self.systems[-1].get_bottom_y() + System.system_spacing), self.clefs, self.key_signature, self.with_piano, last_time_sig, False))
+		if (self.systems[-1].get_bottom_y() > Settings.Layout.HEIGHT - Settings.Layout.MARGIN):
+			self.systems[-1].qt().setPos(Settings.Layout.MARGIN, Settings.Layout.MARGIN)
 			return True
 		
 	def delete_last_system(self):
-		self.pages[-1].scene.qt().removeItem(self.systems[-1].qt())
+		self.pages[-1].qt().removeItem(self.systems[-1].qt())
 		self.systems.pop(len(self.systems) - 1)
 		self.systems[-1].set_end_bar_line()
 
@@ -43,12 +45,17 @@ class DocumentUi:
 		for page in self.pages:
 			page.reassemble()
 
-		self.pages[0].scene.qt().addItem(self.heading.qt())
-		self.pages[0].scene.qt().addItem(self.sub_heading.qt())
-		self.pages[0].scene.qt().addItem(self.composer.qt())
-		self.pages[0].scene.qt().addItem(self.tempo.qt())
+		self.pages[0].qt().addItem(self.heading.qt())
+		self.pages[0].qt().addItem(self.sub_heading.qt())
+		self.pages[0].qt().addItem(self.composer.qt())
+		self.pages[0].qt().addItem(self.tempo.qt())
 
 		for system in self.systems:
 			system.reassemble()
-			self.pages[system.page_index].scene.qt().addItem(system.qt())
+			self.pages[system.page_index].qt().addItem(system.qt())
 			system.qt().setPos(system.pos)
+
+	def setup_edit(self):
+		self.edit_object = Musicitem("", QColor("#528bff"))
+		self.pages[0].qt().edit_object = self.edit_object
+		self.pages[0].qt().addItem(self.edit_object.qt())

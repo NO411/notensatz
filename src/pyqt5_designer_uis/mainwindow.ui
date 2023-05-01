@@ -105,7 +105,7 @@
          <enum>QTabWidget::Rounded</enum>
         </property>
         <property name="currentIndex">
-         <number>0</number>
+         <number>-1</number>
         </property>
         <property name="elideMode">
          <enum>Qt::ElideLeft</enum>
@@ -125,41 +125,6 @@
         <property name="tabBarAutoHide">
          <bool>false</bool>
         </property>
-        <widget class="QWidget" name="notations">
-         <attribute name="title">
-          <string>Noten</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="articulation">
-         <attribute name="title">
-          <string>Artikulation</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="dynamics">
-         <attribute name="title">
-          <string>Dynamik</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="rests">
-         <attribute name="title">
-          <string>Pausen</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="accidentals">
-         <attribute name="title">
-          <string>Vorzeichen</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="time_signatures">
-         <attribute name="title">
-          <string>Taktarten</string>
-         </attribute>
-        </widget>
-        <widget class="QWidget" name="misc">
-         <attribute name="title">
-          <string>Sonstige</string>
-         </attribute>
-        </widget>
        </widget>
       </item>
      </layout>

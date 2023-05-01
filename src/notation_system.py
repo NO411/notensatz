@@ -4,8 +4,8 @@ from PyQt5.QtCore import QPointF, Qt
 
 from typing import List
 
-from page import Page
-from music_item import Musicitem
+from settings import Settings
+from editing import Musicitem
 from fonts import get_symbol
 from qt_saving_layer import N_QGraphicsItemGroup, N_QGraphicsLineItem
 
@@ -76,7 +76,7 @@ class NoteGroup:
 
 class KeySignature:
 	signatures_map = {
-		# name defined in the vombo box : [number of accidentals, type (see Note class)]
+		# name defined in the combo box : [number of accidentals, type (see Note class)]
 		"C-Dur / a-Moll" : [0, 1],
 		"G-Dur / e-Moll" : [1, 1],
 		"D-Dur / h-Moll" : [2, 1],
@@ -240,7 +240,7 @@ class System(N_QGraphicsItemGroup):
 		self.page_index = page_index
 		self.qt().setPos(pos)
 
-		self.width = Page.WIDTH - self.qt().x() - Page.MARGIN
+		self.width = Settings.Layout.WIDTH - self.qt().x() - Settings.Layout.MARGIN
 		self.voices: int = voices
 		self.key_signature = key_signature
 		self.with_piano: bool = with_piano

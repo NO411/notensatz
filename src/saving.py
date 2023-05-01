@@ -3,10 +3,11 @@ from PyQt5.QtGui import QPainter, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QFileInfo, QUrl
 
-from app import App, NewDocumentDialogUI
+from app import App
 from document import DocumentUi
 from page_handling import PageHandler
-from page import DocumentTextitem
+from editing import DocumentTextitem
+from settings import Settings
 
 import pickle
 import json
@@ -32,11 +33,11 @@ class SavingHander():
 		for i, page in enumerate(self.app.document_ui.pages):
 
 			# remove highlights (they would appear gray in the pdf)
-			for item in page.scene.qt().items():
+			for item in page.qt().items():
 				if (type(item) == DocumentTextitem):
 					item.remove_highlight()
 
-			page.scene.qt().render(p)
+			page.qt().render(p)
 			if i != len(self.app.document_ui.pages) - 1:
 				printer.newPage()
 		p.end()
@@ -84,7 +85,7 @@ class SavingHander():
 			self.page_handling.setup_document()
 
 	def open_file(self):
-		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + self.app.file_extension)
+		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + Settings.Document.FILE_EXTENSION)
 		if filename:
 			self.app.current_file_name = filename
 			self.app.current_file_saved = True
@@ -113,5 +114,5 @@ class SavingHander():
 
 	def save_document_settings(self):
 		json_settings = json.dumps(self.app.new_doc_dialog_ui.get_settings(), indent="\t")
-		with open(NewDocumentDialogUI.SETTINGS_FILENAME, "w") as f:
+		with open(Settings.Document.SETTINGS_FILENAME, "w") as f:
 			f.write(json_settings)

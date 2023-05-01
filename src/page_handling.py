@@ -2,18 +2,20 @@ from PyQt5.QtWidgets import QMessageBox, QCheckBox
 
 from app import App
 from ui_misc import UiMiscHandler
-from page import Page, DocumentTextitem
+from editing import Page, DocumentTextitem
 from document import DocumentUi
 from notation_system import TimeSignature, KeySignature
 from fonts import real_font_size
+from symbol_button import SymbolButton
+from settings import Settings
 
 class PageHandler():
-	def __init__(self, app:App, ui_misc:UiMiscHandler):
+	def __init__(self, app: App, ui_misc: UiMiscHandler):
 		self.app = app
 		# object which can change app ui
 		self.ui_misc = ui_misc
 
-	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text = ""):
+	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text=""):
 		new_page = Page(page_number)
 
 		if (new_first_page):
@@ -26,15 +28,15 @@ class PageHandler():
 			if (tempo_text == ""):
 				tempo_text = "Tempoangabe"
 
-			heading = DocumentTextitem(True, heading_text, real_font_size(20, Page.HEIGHT), Page.MARGIN, "center", Page.MARGIN, True)
-			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12, Page.HEIGHT), heading.qt().y() + heading.qt().boundingRect().height(), "center", Page.MARGIN, False)
-			composer = DocumentTextitem(True, composer_text, real_font_size(12, Page.HEIGHT), sub_heading.qt().y() + sub_heading.qt().boundingRect().height(), "right", Page.MARGIN, True)
-			tempo = DocumentTextitem(True, tempo_text, real_font_size(12, Page.HEIGHT), composer.qt().y() + composer.qt().boundingRect().height(), "left", 2 * Page.MARGIN, True)
+			heading = DocumentTextitem(True, heading_text, real_font_size(20), Settings.Layout.MARGIN, "center", Settings.Layout.MARGIN, True)
+			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12), heading.qt().y() + heading.qt().boundingRect().height(), "center", Settings.Layout.MARGIN, False)
+			composer = DocumentTextitem(True, composer_text, real_font_size(12), sub_heading.qt().y() + sub_heading.qt().boundingRect().height(), "right", Settings.Layout.MARGIN, True)
+			tempo = DocumentTextitem(True, tempo_text, real_font_size(12), composer.qt().y() + composer.qt().boundingRect().height(), "left", 2 * Settings.Layout.MARGIN, True)
 
-			new_page.scene.qt().addItem(heading.qt())
-			new_page.scene.qt().addItem(sub_heading.qt())
-			new_page.scene.qt().addItem(composer.qt())
-			new_page.scene.qt().addItem(tempo.qt())
+			new_page.qt().addItem(heading.qt())
+			new_page.qt().addItem(sub_heading.qt())
+			new_page.qt().addItem(composer.qt())
+			new_page.qt().addItem(tempo.qt())
 
 			self.app.document_ui.heading = heading
 			self.app.document_ui.sub_heading = sub_heading
@@ -92,6 +94,7 @@ class PageHandler():
 		self.update_page_info_and_button_text()
 
 		self.reconnect()
+		self.app.document_ui.setup_edit()
 
 	def setup_new_document(self, heading, sub_heading, composer, tempo):
 		# create new document with empty (apart from texts) page
@@ -141,7 +144,7 @@ class PageHandler():
 			self.new_page()
 			self.app.document_ui.systems[-1].page_index += 1
 
-		self.app.document_ui.pages[-1].scene.qt().addItem(self.app.document_ui.systems[-1].qt())
+		self.app.document_ui.pages[-1].qt().addItem(self.app.document_ui.systems[-1].qt())
 		self.set_last_system_page()
 
 	def delete_last_system(self):
@@ -194,3 +197,7 @@ class PageHandler():
 		elif (text_field == "tempo"):
 			self.app.document_ui.tempo.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().minimum())
+
+	def symbol_button_pressed(self, button: SymbolButton):
+		self.ui_misc.unselect_buttons(button)
+		self.app.document_ui.edit_object.change_text(SymbolButton.SYMBOLS[button.group_key][button.n_symbol][0])

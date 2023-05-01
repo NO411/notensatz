@@ -20,6 +20,7 @@ class ItemContainer():
     def __setitem__(self, key, value):
         self.container[key] = value
 
+# stores all QGraphics objects which are not pickleable
 items = ItemContainer()
 
 class N_GraphicsObject():

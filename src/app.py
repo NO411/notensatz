@@ -1,25 +1,28 @@
-from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog
+from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog, QWidget
 from PyQt5.QtCore import Qt, pyqtSignal, QFileInfo
 from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
 import json
+from typing import List
 
 # window / dialog imports
 from mainwindow import Ui_MainWindow
 from aboutbox import Ui_AboutBox
 from new_document import Ui_NewDocumentDialog
 from document import DocumentUi
+from symbol_button import SymbolButton
+from settings import Settings
 
 # intern imports
-from fonts import load_fonts, get_symbol
-from notation_system import TimeSignature
+from fonts import load_fonts
 
 class App_Ui(Ui_MainWindow):
 	def __init__(self, app):
 		super().__init__()
 		self.setupUi(app.window)
+
 		# this is for rendering staves correctly
 		self.view.setRenderHint(QPainter.Antialiasing)
 
@@ -28,11 +31,10 @@ class App_Ui(Ui_MainWindow):
 		self.start_zoom = 0.3
 		self.zoom_slider.setValue(int(self.start_zoom * 100))
 		self.zoom_out_button.setFixedWidth(self.zoom_out_button.height())
-		self.symbols_box_buttons = []
-		self.box_tabs_layouts = []
+		self.symbols_box_buttons: List[List[SymbolButton]] = [[] for _ in SymbolButton.SYMBOLS]
+		self.box_tabs_layouts: List[QHBoxLayout] = []
 
-		# welcome screen:
-		# blur effect:
+		# setup welcome screen
 		self.in_welcome_screen = True
 		self.blur_effect = QGraphicsBlurEffect()
 		self.blur_effect.setBlurRadius(12)
@@ -47,7 +49,7 @@ class App_Ui(Ui_MainWindow):
 
 		self.welcome_label = QLabel("Willkommen!", app.window)
 		self.welcome_label.setFont(label_font)
-		self.welcome_label.setStyleSheet(f"color: {app.primary_color}; background-color: transparent")
+		self.welcome_label.setStyleSheet(f"color: {Settings.Gui.PRIMARY_COLOR}; background-color: transparent")
 
 		font_metrics = QFontMetrics(self.welcome_label.font())
 		text_width = font_metrics.boundingRect(self.welcome_label.text()).width() + 10
@@ -67,40 +69,39 @@ class App_Ui(Ui_MainWindow):
 		self.action_save_as.setEnabled(False)
 		self.action_export.setEnabled(False)
 
-		self.init_symbol_buttons(app)
+		self.init_symbol_buttons()
 
-	def init_symbol_buttons(self, app):
+	def init_symbol_buttons(self):
 		# setup symbol buttons
-		for i, symbol_class in enumerate(app.symbols):
-			self.symbols_box_buttons.insert(0, [])
+		n_group = 0
+		for group_key, group in SymbolButton.SYMBOLS.items():
+			self.symbols_box.addTab(QWidget(), group_key)
+			tab_widget = self.symbols_box.widget(n_group)
+			self.box_tabs_layouts.append(QHBoxLayout(tab_widget))
+			self.box_tabs_layouts[n_group].setContentsMargins(3, 3, 3, 3)
+			self.box_tabs_layouts[n_group].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
+			for n_symbol, _ in enumerate(group):
+				box_button = SymbolButton(tab_widget, group_key, n_symbol)
 
-			tab_widget = self.symbols_box.widget(i)
-			self.box_tabs_layouts.insert(i, QHBoxLayout(tab_widget))
-			self.box_tabs_layouts[i].setContentsMargins(3, 3, 3, 3)
-			self.box_tabs_layouts[i].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-			for name in symbol_class:
-				# name[0]: unicode key
-				# name[1]: tooltip text
-				box_button = QPushButton(tab_widget)
-				description = ""
-				if (type(name[0]) == str):
-					description = name[0]
-				else:
-					description = TimeSignature.join_unicode_combi(name[0])
-				box_button.setObjectName(description + "Button")
-				box_button.setFixedSize(35, 60)
-				box_button.setFlat(True)
-				box_button.setCheckable(True)
-				box_button.setToolTip(name[1])
-				box_button.setStyleSheet("QToolTip {color: black}")
-				label = QLabel(get_symbol(name[0]), box_button)
-				font = QFont("Bravura", 20)
-				label.setFont(font)
-				label.setAlignment(Qt.AlignHCenter)
-				label.setGeometry(0, -20, box_button.width(), 100)
+				self.box_tabs_layouts[n_group].addWidget(box_button)
+				self.symbols_box_buttons[n_group].append(box_button)
+			n_group += 1
 
-				self.box_tabs_layouts[i].addWidget(box_button)
-				self.symbols_box_buttons[i].append(box_button)
+	def end_welcome_screen(self):
+		self.in_welcome_screen = False
+
+		# remove all graphics effects and enable ui
+		self.centralwidget.setEnabled(True)
+		self.centralwidget.setGraphicsEffect(None)
+		self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+		self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+		self.welcome_label.setParent(None)
+		self.welcome_button_new.setParent(None)
+		self.welcome_button_open.setParent(None)
+		self.menubar.findChild(QMenu, "menu_edit").setEnabled(True)
+		self.action_save.setEnabled(True)
+		self.action_save_as.setEnabled(True)
+		self.action_export.setEnabled(True)
 
 class MainWindow(QMainWindow):
 	close_signal = pyqtSignal()
@@ -113,31 +114,19 @@ class MainWindow(QMainWindow):
 		event.ignore()
 
 class NewDocumentDialogUI(Ui_NewDocumentDialog):
-	DEFAULT_SETTINGS = {
-		"heading": "",
-		"sub_heading": "",
-		"composer": "",
-		"tempo": "",
-		"key_signature": 0,
-		"staves": 2,
-		"piano_checkbox": False,
-		"time_signature_combo_box": 5,
-	}
-	SETTINGS_FILENAME = "document_settings.json"
-
 	def setupUi(self, NewDocumentDialog):
 		super().setupUi(NewDocumentDialog)
 		self.voices_labels = [self.voice_1_label, self.voice_2_label, self.voice_3_label, self.voice_4_label]
 		self.voices_combo_boxes = [self.voice_1_combo_box, self.voice_2_combo_box, self.voice_3_combo_box, self.voice_4_combo_box]
 		self.staves_spin_box.valueChanged.connect(lambda: self.update_voice_combo_boxes(False))
 
-		settings = NewDocumentDialogUI.DEFAULT_SETTINGS
+		settings = Settings.Document.DEFAULT_SETTINGS
 
 		# open saved document settings
-		if (QFileInfo(NewDocumentDialogUI.SETTINGS_FILENAME).exists()):
-			with open(NewDocumentDialogUI.SETTINGS_FILENAME, "r") as f:
+		if (QFileInfo(Settings.Document.SETTINGS_FILENAME).exists()):
+			with open(Settings.Document.SETTINGS_FILENAME, "r") as f:
 				settings = json.load(f)
-			if (NewDocumentDialogUI.DEFAULT_SETTINGS != settings):
+			if (Settings.Document.DEFAULT_SETTINGS != settings):
 				self.save_settings_check_box.setChecked(True)
 
 		self.set_settings(settings)
@@ -160,7 +149,7 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 			self.piano_checkbox.setEnabled(True)
 	
 	def reset(self):
-		self.set_settings(NewDocumentDialogUI.DEFAULT_SETTINGS)
+		self.set_settings(Settings.Document.DEFAULT_SETTINGS)
 		self.update_voice_combo_boxes(True)
 
 	def set_settings(self, settings: dict):
@@ -197,133 +186,44 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 class App(QApplication):
 	def __init__(self):
 		qdarktheme.enable_hi_dpi()
-	
-		self.app = QApplication([])
+
+		super().__init__([])
 
 		load_fonts()
 		# apply the dark theme to the app
 		# see <https://pyqtdarktheme.readthedocs.io/en/latest/reference/theme_color.html>
-		self.primary_color = "#528bff"
-		qdarktheme.setup_theme(
-			custom_colors = {
-				"primary": self.primary_color,
-				"background": "#21252b",
-				"border": "#474a4f",
-				"foreground": "#d7d7d5",
-				"scrollbar.background": "#282c34",
-				"scrollbarSlider.background": "#3b414d",
-				"scrollbarSlider.disabledBackground": "#3b414d",
-				"scrollbarSlider.activeBackground": "#4e5563",
-				"scrollbarSlider.hoverBackground": "#414855",
-			},
-			corner_shape="rounded",
-		)
+		qdarktheme.setup_theme(Settings.Gui.THEME, Settings.Gui.CORNER_SHAPE, Settings.Gui.CUSTOM_COLORS)
 
 		self.document_ui = DocumentUi()
 
-		# nos stands for NOtenSatz
-		self.file_extension = "nos"
+		# status vars
 		self.current_file_name = ""
 		self.current_file_saved = False
-
-		# symbols that will be implemented
-		# map of the symbols shown on the buttons in the symbols box
-		# indexes MUST match with the indexes in the designer
-		self.symbols = [
-			# notes
-			[# [unicode key, tooltip text]
-			 # this key can also be a list
-				["noteWhole", "ganze Note"],
-				["noteHalfUp", "halbe Note"],
-				["noteQuarterUp", "viertel Note"],
-				["note8thUp", "achtel Note"],
-				["note16thUp", "sechszehntel Note"],
-				["note32ndUp", "zweiunddreißigstel Note"],
-				["note64thUp", "vierundsechszigstel Note"],
-				["metAugmentationDot", "Punktierung"],
-			],
-			# articulation
-			[
-				["articAccentAbove", "Akzent"],
-				["articStaccatoAbove", "Staccato"],
-				["articTenutoAbove", "Tenuto"],
-				["keyboardPedalPed", "Pedal"],
-				["keyboardPedalUp", "Pedal loslassen"],
-			],
-			# dynamics
-			[
-				["dynamicMP", "mezzopiano"],
-				["dynamicPiano", "piano"],
-				["dynamicPP", "pianissimo"],
-				["dynamicPPP", "pianopianissimo"],
-				["dynamicPF", "pianoforte"],
-				["dynamicFortePiano", "fortepiano"],
-				["dynamicMF", "mezzoforte"],
-				["dynamicForte", "forte"],
-				["dynamicFF", "fortissimo"],
-				["dynamicFFF", "fortefortissimo"],
-				["dynamicCrescendoHairpin", "crescendo"],
-				["dynamicDiminuendoHairpin", "decrescendo"],
-			],
-			# rests
-			[
-				["restWholeLegerLine", "ganze Pause"],
-				["restHalfLegerLine", "halbe pause"],
-				["restQuarter", "viertel Pause"],
-				["rest8th", "achtel Pause"],
-				["rest16th", "sechszehntel Pause"],
-				["rest32nd", "zweiunddreißigstel Pause"],
-				["rest64th", "vierundsechszigstel Pause"],
-				["metAugmentationDot", "Punktierung"],
-			],
-			# accidentals
-			[
-				["accidentalSharp", "Kreuz"],
-				["accidentalFlat", "b"],
-				["accidentalDoubleSharp", "Doppelkreuz"],
-				["accidentalNatural", "Auflösung"],
-				["accidentalDoubleFlat", "doppel b"],
-			],
-			# time signatures
-			[
-				[TimeSignature(time_sig_table[0], time_sig_table[1]).gen_unicode_combi(), description]
-				for description, time_sig_table in TimeSignature.signatures_map.items()
-			],
-			# misc
-			[
-				["repeatDots", "Wiederholung"],
-				["barlineSingle", "Taktstrich"],
-				["gClefChange", "Violinchlüssel (Wechsel)"],
-				["fClefChange", "Bassschlüssel (Wechsel)"],
-				["cClefChange", "C-Schlüssel (Wechsel)"],
-			],
-		]
-		
 		self.show_warning_box = True
 		self.current_page = 0
 
+		# windows
 		self.window = MainWindow()
 		self.aboutbox = QDialog()
 		self.new_doc_dialog = QDialog()
 
-		# setup main ui
-		self.ui = App_Ui(self)
 		self.window.resizeEvent = self.window_resize
 
-		# setup dialog ui
+		# setup uis
+		self.ui = App_Ui(self)
 		self.aboutbox_ui = Ui_AboutBox()
-		self.aboutbox_ui.setupUi(self.aboutbox)
 		self.new_doc_dialog_ui = NewDocumentDialogUI()
+		self.aboutbox_ui.setupUi(self.aboutbox)
 		self.new_doc_dialog_ui.setupUi(self.new_doc_dialog)
 
-		# remove standard ?-help hymbol
+		# remove standard ?-help symbols
 		self.new_doc_dialog.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
 		self.aboutbox.setWindowFlag(Qt.WindowContextHelpButtonHint, False)
 
 	def set_scene(self, page_index):
 		"""page_index must be >= 0"""
 		self.current_page = page_index
-		self.ui.view.setScene(self.document_ui.pages[self.current_page].scene.qt())
+		self.ui.view.setScene(self.document_ui.pages[self.current_page].qt())
 
 	def window_resize(self, event):
 		if (self.ui.in_welcome_screen):
@@ -332,17 +232,6 @@ class App(QApplication):
 			self.ui.welcome_button_open.move((self.window.width() - self.ui.welcome_button_open.width()) / 2 - self.ui.welcome_button_open.width() / 2 - 10, self.ui.welcome_label.y() + self.ui.welcome_label.height() + 20)
 	
 	def end_welcome_screen(self):
-		self.ui.in_welcome_screen = False
-		self.ui.centralwidget.setEnabled(True)
-		self.ui.centralwidget.setGraphicsEffect(None)
-		self.ui.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-		self.ui.view.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
-		self.ui.welcome_label.setParent(None)
 		self.window.resizeEvent = None
-		self.ui.welcome_button_new.setParent(None)
-		self.ui.welcome_button_open.setParent(None)
-		edit_menu = self.ui.menubar.findChild(QMenu, "menu_edit")
-		edit_menu.setEnabled(True)
-		self.ui.action_save.setEnabled(True)
-		self.ui.action_save_as.setEnabled(True)
-		self.ui.action_export.setEnabled(True)
+		self.ui.end_welcome_screen()
+

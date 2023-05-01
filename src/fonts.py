@@ -1,6 +1,7 @@
 from PyQt5.QtGui import QFontDatabase
 from json import load
 from typing import List, Union
+from settings import Settings
 
 # global jsons
 font_metadata = None
@@ -43,23 +44,23 @@ def load_fonts():
 	glyphnames_file.close()
 
 # get em, which all other specifications depend on
-def get_one_em(pt: float, pixel_height: int):
+def get_one_em(pt: float):
 	# physical page height in inches
 	height = 11.69
 	# number of pixels / physical size in inches
-	dpi = pixel_height / height
+	dpi = Settings.Layout.HEIGHT / height
     
 	# 72pt = 1inch
 	return pt * (dpi / 72)
 
 # converts font sizes to real font sizes on a real A4 page
-def real_font_size(pt: float, pixel_height: int):
+def real_font_size(pt: float):
 	# physical page height in inches
 	height = 11.69
 	# number of pixels / physical size in inches
-	dpi = pixel_height / height
+	dpi = Settings.Layout.HEIGHT / height
 
-	pixels = get_one_em(pt, pixel_height)
+	pixels = get_one_em(pt)
     
     # calculate the real font size for A4 page
-	return pixels * (pixel_height / height) / dpi / 1.333
+	return pixels * (Settings.Layout.HEIGHT / height) / dpi / 1.333
