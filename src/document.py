@@ -1,6 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsSceneMouseEvent
-from PyQt5.QtCore import QPointF
-from PyQt5.QtGui import QColor
+from PyQt5.QtCore import QPointF, QLineF
 
 from notation_system import TimeSignature, System, KeySignature
 from typing import List
@@ -56,6 +54,12 @@ class DocumentUi:
 			self.pages[system.page_index].qt().addItem(system.qt())
 			system.qt().setPos(system.pos)
 
-	def setup_edit(self):
-		self.edit_object = Musicitem("", QColor("#528bff"))
-		self.pages[0].qt().addItem(self.edit_object.qt())
+	def get_closest_system(self, mouse_pos: QPointF, current_page: int) -> System:
+		system_distances = []
+		systems: List[System] = []
+		for system in self.systems:
+			if (system.page_index == current_page):
+				system_distances.append(QLineF(system.get_center(), mouse_pos).length())
+				systems.append(system)
+
+		return systems[system_distances.index(min(system_distances))]

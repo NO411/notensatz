@@ -6,9 +6,7 @@ from edit_items import Page, DocumentTextitem
 from document import DocumentUi
 from notation_system import TimeSignature, KeySignature
 from fonts import real_font_size
-from symbol_button import SymbolButton
 from settings import Settings
-from editing import on_button_pressed
 
 class PageHandler():
 	def __init__(self, app: App, ui_misc: UiMiscHandler):
@@ -96,7 +94,6 @@ class PageHandler():
 		self.update_page_info_and_button_text()
 
 		self.reconnect()
-		self.app.document_ui.setup_edit()
 
 	def setup_new_document(self, heading, sub_heading, composer, tempo):
 		# create new document with empty (apart from texts) page
@@ -199,7 +196,3 @@ class PageHandler():
 		elif (text_field == "tempo"):
 			self.app.document_ui.tempo.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().minimum())
-
-	def symbol_button_pressed(self, button: SymbolButton):
-		self.ui_misc.unselect_buttons(button)
-		on_button_pressed(self.app, button)

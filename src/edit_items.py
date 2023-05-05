@@ -63,6 +63,8 @@ class Page(N_QGraphicsScene):
 			self.page_number_text = DocumentTextitem(False, str(page_number), real_font_size(10), Settings.Layout.MARGIN / 2, align, Settings.Layout.MARGIN, False)
 			self.qt().addItem(self.page_number_text.qt())
 
+		self.setup_edit()
+
 	def update_page_text(self):
 		self.page_number_text.alignment = "right"
 		if (self.page_number % 2 == 0):
@@ -71,10 +73,16 @@ class Page(N_QGraphicsScene):
 		self.page_number_text.qt().setPlainText(str(self.page_number))
 		self.page_number_text.align()
 
+	def setup_edit(self):
+		self.edit_object = Musicitem("", QColor("#528bff"))
+		self.qt().addItem(self.edit_object.qt())
+		self.edit_object.qt().setZValue(1)
+
 	def reassemble(self):
 		self.qt().addItem(self.rect.qt())
 		if (self.page_number > 1):
 			self.qt().addItem(self.page_number_text.qt())
+
 
 class DocumentTextitem(N_QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):

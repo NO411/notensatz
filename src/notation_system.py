@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsLineItem, QGraphicsItemGroup
 from PyQt5.QtGui import QPen, QTransform
-from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtCore import QPointF, Qt, QLineF
 
 from typing import List
 
@@ -8,6 +8,7 @@ from settings import Settings
 from edit_items import Musicitem
 from fonts import get_symbol
 from qt_saving_layer import N_QGraphicsItemGroup, N_QGraphicsLineItem
+from misc import bound
 
 class TimeSignature:
 	signatures_map = {
@@ -128,15 +129,17 @@ class Bar(N_QGraphicsItemGroup):
 
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
-	All positions are relative to the parent from here on!"""
+	All positions are relative to the parent from here on!\n
+	in general:\n
+	0 = bottom line\n
+	0.5 = first space from the bottom \n
+	1 = 2nd line from the bottom\n
+	...\n
+	e.g. -1 would be c (with g clef)\n
+	"""
 
 	line_pen = QPen(Qt.black, 3)
 
-	# 0 = bottom line
-	# 0.5 = first space from the bottom 
-	# 1 = 2nd line from the bottom
-	# ...
-	# e.g. -1 would be c (with g clef)
 
 	clefs = {
 		"Violinschlüssel": {
@@ -223,15 +226,23 @@ class Stave(N_QGraphicsItemGroup):
 			bar.reassemble()
 			self.qt().addToGroup(bar.qt())
 			bar.qt().setPos(bar.pos)
-			
 
+	def get_center(self) -> QPointF:
+		return QPointF(self.qt().sceneBoundingRect().x() + self.width / 2, self.qt().sceneBoundingRect().y() + Musicitem.EM / 2)
+
+	def get_closest_line(self, mouse_pos: QPointF) -> int:
+		step = Musicitem.EM / 4
+		n = (self.qt().sceneBoundingRect().y() + Musicitem.EM - mouse_pos.y()) / step
+		# with multiplying with two, rounding and the dividing again, we get 0.5 steps 
+		n *= 2
+		return bound(round(n) / 2, -10, 10)
 
 class System(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
 	All positions are relative to the parent from here on!\n
 	To add an item, first add it and then set a relative position!"""
 
-	min_stave_spacing = Musicitem.EM
+	min_stave_spacing = Musicitem.EM * 1.2
 	system_spacing = Musicitem.EM * 1.5
 	def __init__(self, page_index: int, voices: int, pos: QPointF, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, time_signature: TimeSignature, first_system: bool = False):
 		super().__init__(QGraphicsItemGroup())
@@ -258,13 +269,13 @@ class System(N_QGraphicsItemGroup):
 
 		# setup the left bar line
 		self.left_bar_line = Musicitem("barlineSingle")
-		self.left_bar_line.qt().setTransform(QTransform().scale(1, (self.voices * Musicitem.EM + (self.voices - 1) * System.min_stave_spacing) / Musicitem.EM))
+		self.left_bar_line.qt().setTransform(QTransform().scale(1, (self.get_bottom_y() - self.qt().y()) / Musicitem.EM))
 		self.qt().addToGroup(self.left_bar_line.qt())
-		self.left_bar_line.setPos(-self.left_bar_line.qt().sceneBoundingRect().width() / 2, (2 * self.voices - 1) * Musicitem.EM)
+		self.left_bar_line.setPos(-self.left_bar_line.qt().sceneBoundingRect().width() / 2, self.get_bottom_y() - self.qt().y())
 
 		# draw final barline (just to test it)
 		self.right_bar_line = Musicitem("barlineFinal")
-		self.right_bar_line.qt().setTransform(QTransform().scale(1, (self.voices * Musicitem.EM + (self.voices - 1) * System.min_stave_spacing) / Musicitem.EM))
+		self.right_bar_line.qt().setTransform(QTransform().scale(1, (self.get_bottom_y() - self.qt().y()) / Musicitem.EM))
 		self.qt().addToGroup(self.right_bar_line.qt())
 		self.set_end_bar_line()
 
@@ -294,11 +305,11 @@ class System(N_QGraphicsItemGroup):
 	
 	def set_normal_end_bar_line(self):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineSingle"))
-		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 2, (2 * self.voices - 1) * Musicitem.EM)
+		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 2, self.get_bottom_y() - self.qt().y())
 	
 	def set_end_bar_line(self):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineFinal"))
-		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 1.3, (2 * self.voices - 1) * Musicitem.EM)
+		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 1.3, self.get_bottom_y() - self.qt().y())
 
 	def get_bottom_y(self) -> float:
 		return self.qt().y() + self.staves[-1].qt().y() + Musicitem.EM
@@ -314,4 +325,18 @@ class System(N_QGraphicsItemGroup):
 
 		self.qt().addToGroup(self.right_bar_line.qt())
 		self.qt().addToGroup(self.left_bar_line.qt())
-		
+	
+	def get_height(self):
+		return self.get_bottom_y() - self.qt().y()
+
+	def get_center(self) -> QPointF:
+		return QPointF(self.qt().x() + self.width / 2, self.qt().y() + self.get_height() / 2)
+	
+	def get_closest_stave(self, mouse_pos: QPointF) -> Stave:
+		stave_distances = []
+		staves: List[Stave] = []
+		for stave in self.staves:
+			stave_distances.append(QLineF(stave.get_center(), mouse_pos).length())
+			staves.append(stave)
+
+		return staves[stave_distances.index(min(stave_distances))]
