@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog, QWidget
 from PyQt5.QtCore import Qt, pyqtSignal, QFileInfo
-from PyQt5.QtGui import QFont, QFontMetrics, QPainter
+from PyQt5.QtGui import QFont, QFontMetrics, QPainter, QPixmap
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
@@ -34,42 +34,10 @@ class App_Ui(Ui_MainWindow):
 		self.symbols_box_buttons: List[List[SymbolButton]] = [[] for _ in SymbolButton.SYMBOLS]
 		self.box_tabs_layouts: List[QHBoxLayout] = []
 
-		# setup welcome screen
-		self.in_welcome_screen = True
-		self.blur_effect = QGraphicsBlurEffect()
-		self.blur_effect.setBlurRadius(12)
-		self.centralwidget.setGraphicsEffect(self.blur_effect)
-		self.centralwidget.setEnabled(False)
-		self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-		self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
-
-		label_font = QFont()
-		label_font.setPointSize(20)
-		label_font.setBold(True)
-
-		self.welcome_label = QLabel("Willkommen!", app.window)
-		self.welcome_label.setFont(label_font)
-		self.welcome_label.setStyleSheet(f"color: {Settings.Gui.PRIMARY_COLOR}; background-color: transparent")
-
-		font_metrics = QFontMetrics(self.welcome_label.font())
-		text_width = font_metrics.boundingRect(self.welcome_label.text()).width() + 10
-		text_height = font_metrics.boundingRect(self.welcome_label.text()).height()
-		self.welcome_label.setFixedSize(text_width, text_height)
-
-		self.welcome_button_new = QPushButton("Neue Datei", app.window)
-		self.welcome_button_new.setDefault(True)
-
-		self.welcome_button_open = QPushButton("Datei öffnen", app.window)
-		self.welcome_button_new.setDefault(True)
-
-		edit_menu = self.menubar.findChild(QMenu, "menu_edit")
-		edit_menu.setEnabled(False)
-
-		self.action_save.setEnabled(False)
-		self.action_save_as.setEnabled(False)
-		self.action_export.setEnabled(False)
-
 		self.init_symbol_buttons()
+
+		# setup welcome screen
+		self.setup_welcome_screen(app)
 
 	def init_symbol_buttons(self):
 		# setup symbol buttons
@@ -102,6 +70,38 @@ class App_Ui(Ui_MainWindow):
 		self.action_save.setEnabled(True)
 		self.action_save_as.setEnabled(True)
 		self.action_export.setEnabled(True)
+
+	def setup_welcome_screen(self, app):
+		self.in_welcome_screen = True
+		self.blur_effect = QGraphicsBlurEffect()
+		self.blur_effect.setBlurRadius(12)
+		self.centralwidget.setGraphicsEffect(self.blur_effect)
+		self.centralwidget.setEnabled(False)
+		self.view.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+		self.view.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+
+		label_font = QFont()
+		label_font.setPointSize(20)
+		label_font.setBold(True)
+
+		self.welcome_label = QLabel("Willkommen!", app.window)
+		self.welcome_label.setFont(label_font)
+		self.welcome_label.setStyleSheet(f"color: {Settings.Gui.PRIMARY_COLOR}; background-color: transparent")
+
+		font_metrics = QFontMetrics(self.welcome_label.font())
+		text_width = font_metrics.boundingRect(self.welcome_label.text()).width() + 10
+		text_height = font_metrics.boundingRect(self.welcome_label.text()).height()
+		self.welcome_label.setFixedSize(text_width, text_height)
+
+		self.welcome_button_new = QPushButton("Neue Datei", app.window)
+		self.welcome_button_open = QPushButton("Datei öffnen", app.window)
+		self.welcome_button_new.setDefault(True)
+
+		edit_menu = self.menubar.findChild(QMenu, "menu_edit")
+		edit_menu.setEnabled(False)
+		self.action_save.setEnabled(False)
+		self.action_save_as.setEnabled(False)
+		self.action_export.setEnabled(False)
 
 class MainWindow(QMainWindow):
 	close_signal = pyqtSignal()
@@ -230,8 +230,6 @@ class App(QApplication):
 			self.ui.welcome_label.move((self.window.width() - self.ui.welcome_label.width()) / 2, (self.window.height() - self.ui.welcome_label.height()) / 2)
 			self.ui.welcome_button_new.move((self.window.width() - self.ui.welcome_button_new.width()) / 2 + self.ui.welcome_button_new.width() / 2 + 10, self.ui.welcome_label.y() + self.ui.welcome_label.height() + 20)
 			self.ui.welcome_button_open.move((self.window.width() - self.ui.welcome_button_open.width()) / 2 - self.ui.welcome_button_open.width() / 2 - 10, self.ui.welcome_label.y() + self.ui.welcome_label.height() + 20)
-	
 	def end_welcome_screen(self):
 		self.window.resizeEvent = None
 		self.ui.end_welcome_screen()
-

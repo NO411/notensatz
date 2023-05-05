@@ -1,9 +1,10 @@
+from PyQt5.QtWidgets import QGraphicsSceneMouseEvent
 from PyQt5.QtCore import QPointF
 from PyQt5.QtGui import QColor
 
 from notation_system import TimeSignature, System, KeySignature
 from typing import List
-from editing import Page, DocumentTextitem, Musicitem
+from edit_items import Page, DocumentTextitem, Musicitem, EditScene
 from settings import Settings
 
 class DocumentUi:
@@ -57,5 +58,4 @@ class DocumentUi:
 
 	def setup_edit(self):
 		self.edit_object = Musicitem("", QColor("#528bff"))
-		self.pages[0].qt().edit_object = self.edit_object
 		self.pages[0].qt().addItem(self.edit_object.qt())

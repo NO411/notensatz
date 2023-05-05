@@ -5,7 +5,7 @@ from PyQt5.QtCore import QPointF, Qt
 from typing import List
 
 from settings import Settings
-from editing import Musicitem
+from edit_items import Musicitem
 from fonts import get_symbol
 from qt_saving_layer import N_QGraphicsItemGroup, N_QGraphicsLineItem
 

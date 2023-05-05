@@ -6,7 +6,7 @@ from PyQt5.QtCore import QFileInfo, QUrl
 from app import App
 from document import DocumentUi
 from page_handling import PageHandler
-from editing import DocumentTextitem
+from edit_items import DocumentTextitem
 from settings import Settings
 
 import pickle
@@ -65,7 +65,7 @@ class SavingHander():
 			pickle.dump(self.app.document_ui, f)
 
 	def save_as(self):
-		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + self.app.file_extension, "*." + self.app.file_extension)
+		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + Settings.Document.FILE_EXTENSION, "*." + Settings.Document.FILE_EXTENSION)
 		if filename:
 			self.save_data(filename)
 			self.app.current_file_name = filename

@@ -41,4 +41,4 @@ class Settings:
 			"scrollbarSlider.activeBackground": "#4e5563",
 			"scrollbarSlider.hoverBackground": "#414855",
 		}
-		CORNER_SHAPE="rounded"
+		CORNER_SHAPE = "rounded"

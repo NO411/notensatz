@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMessageBox, QCheckBox
 
 from app import App
 from ui_misc import UiMiscHandler
-from editing import Page, DocumentTextitem
+from edit_items import Page, DocumentTextitem
 from document import DocumentUi
 from notation_system import TimeSignature, KeySignature
 from fonts import real_font_size
@@ -17,6 +17,7 @@ class PageHandler():
 
 	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text=""):
 		new_page = Page(page_number)
+		new_page.qt().app = self.app
 
 		if (new_first_page):
 			if (heading_text == ""):

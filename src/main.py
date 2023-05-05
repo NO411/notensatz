@@ -6,11 +6,16 @@ from app import App
 from ui_misc import UiMiscHandler
 from saving import SavingHander
 from page_handling import PageHandler
+from edit_items import EditScene
+from editing import custom_move
 
 __author__ = "Noah Weiler"
 
 def main():
 	app = App()
+
+	# enable editing logic
+	EditScene.custom_move = custom_move
 
 	# modules
 	ui_misc = UiMiscHandler(app)

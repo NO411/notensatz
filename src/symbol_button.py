@@ -70,6 +70,7 @@ class SymbolButton(QPushButton):
 			[TimeSignature(time_sig_table[0], time_sig_table[1]).gen_unicode_combi(), description]
 			for description, time_sig_table in TimeSignature.signatures_map.items()
 		],
+		"N-Tolen": [],
 		# misc
 		"Sonstige": [
 			["repeatDots", "Wiederholung"],
