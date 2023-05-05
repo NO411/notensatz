@@ -59,4 +59,3 @@ class UiMiscHandler():
 			for button_ in buttons:
 				if (not (button_.group_key == button.group_key and button_.n_symbol == button.n_symbol) and button_.isChecked()):
 					button_.setChecked(False)
-		

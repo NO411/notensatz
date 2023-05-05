@@ -6,6 +6,7 @@ from settings import Settings
 # global jsons
 font_metadata = None
 glyphnames = None
+icons = None
 
 def get_unicode(smufl_name: str):
 	return int(glyphnames[smufl_name]["codepoint"][2:], 16)
@@ -22,26 +23,31 @@ def get_symbol(smufl_name: Union[str, List[str]]):
 def get_specification(key1, key2):
 	return font_metadata[key1][key2]
 
+def get_icon(key: str):
+	return str(chr(int(icons[key]["unicode"], 16)))
+
 def load_fonts():
-	global font_metadata, glyphnames
+	global font_metadata, glyphnames, icons
 
 	# Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
-	font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/Bravura.otf")
+	QFontDatabase().addApplicationFont("../assets/fonts/bravura/otfs/Bravura.otf")
 	# Times New Roman font, see <https://freefontsfamily.com/times-new-roman-font-free/#google_vignette>
 	# (should be included in Windows anyways)
-	text_font_loaded = QFontDatabase().addApplicationFont("../assets/bravura_font/redist/otf/times new roman.ttf")
+	QFontDatabase().addApplicationFont("../assets/fonts/times_new_roman/otfs/times new roman.ttf")
+
+	# Font Awesome 6, see <https://fontawesome.com/download>
+	QFontDatabase().addApplicationFont("../assets/fonts/fontawesome/otfs/Font Awesome Solid.otf")
 
 	# json file for specifications like measurements
-	font_metadata_file = open("../assets/bravura_font/redist/bravura_metadata.json")
-	font_metadata = load(font_metadata_file)
-	font_metadata_file.close()
+	with open("../assets/fonts/bravura/metadata/bravura_metadata.json", "r") as f:
+		font_metadata = load(f)
 
 	# needed for symbol unicodes
-	glyphnames_file = open("glyphnames.json")
-	glyphnames = load(glyphnames_file)
-	# example:
-	# print(glyphnames["noteHalfUp"])
-	glyphnames_file.close()
+	with open("../assets/fonts/bravura/metadata/glyphnames.json", "r") as f:
+		glyphnames = load(f)
+
+	with open("../assets/fonts/fontawesome/metadata/icons.json", "r") as f:
+		icons = load(f)
 
 # get em, which all other specifications depend on
 def get_one_em(pt: float):

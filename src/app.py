@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog, QWidget
 from PyQt5.QtCore import Qt, pyqtSignal, QFileInfo
-from PyQt5.QtGui import QFont, QFontMetrics, QPainter, QPixmap
+from PyQt5.QtGui import QFont, QFontMetrics, QPainter
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
@@ -48,7 +48,8 @@ class App_Ui(Ui_MainWindow):
 			self.box_tabs_layouts.append(QHBoxLayout(tab_widget))
 			self.box_tabs_layouts[n_group].setContentsMargins(3, 3, 3, 3)
 			self.box_tabs_layouts[n_group].setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
-			for n_symbol, _ in enumerate(group):
+
+			for n_symbol, _ in enumerate(group["buttons"]):
 				box_button = SymbolButton(tab_widget, group_key, n_symbol)
 
 				self.box_tabs_layouts[n_group].addWidget(box_button)
