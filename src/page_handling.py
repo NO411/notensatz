@@ -8,6 +8,7 @@ from notation_system import TimeSignature, KeySignature
 from fonts import real_font_size
 from symbol_button import SymbolButton
 from settings import Settings
+from editing import on_button_pressed
 
 class PageHandler():
 	def __init__(self, app: App, ui_misc: UiMiscHandler):
@@ -201,4 +202,4 @@ class PageHandler():
 
 	def symbol_button_pressed(self, button: SymbolButton):
 		self.ui_misc.unselect_buttons(button)
-		self.app.document_ui.edit_object.change_text(SymbolButton.SYMBOLS[button.group_key][button.n_symbol][0])
+		on_button_pressed(self.app, button)

@@ -54,8 +54,8 @@ class UiMiscHandler():
 			self.app.ui.zoom_in_button.setEnabled(True)
 
 	# remove selection from selected button if an other button is pressed
-	def unselect_buttons(self, button: SymbolButton):
+	def unselect_buttons(self, button: SymbolButton = None):
 		for buttons in self.app.ui.symbols_box_buttons:
 			for button_ in buttons:
-				if (not (button_.group_key == button.group_key and button_.n_symbol == button.n_symbol) and button_.isChecked()):
+				if (button is None or not (button_.group_key == button.group_key and button_.n_symbol == button.n_symbol) and button_.isChecked()):
 					button_.setChecked(False)
