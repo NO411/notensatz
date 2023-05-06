@@ -15,7 +15,7 @@ class Musicitem(N_QGraphicsTextItem):
 	# -> stave lines spacing = em / 4
 	EM = get_one_em(Settings.Symbols.FONTSIZE)
 
-	def __init__(self, symbol: Union[str, List[str]] = "", color: QColor  = Qt.black):
+	def __init__(self, symbol: Union[str, List[str]] = "", color: QColor = Qt.black):
 		super().__init__(Fixed_QGraphicsTextItem(""))
 
 		self.change_text(symbol)
@@ -33,13 +33,17 @@ class Musicitem(N_QGraphicsTextItem):
 		self.qt().setPlainText(text)
 
 class EditScene(QGraphicsScene):
-    # defined by document.py and assembled by main.py
-    def custom_move(self, event: QGraphicsSceneMouseEvent): ...
-	# will access self.app (App instance)
+	# defined by document.py and assembled by main.py
+	def custom_move(self, event: QGraphicsSceneMouseEvent): ...
+	def custom_pressed(self, event: QGraphicsSceneMouseEvent): ...
+	# will access self.app (App instance) added by page_handling
 
-    def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
-        self.custom_move(event)
-        super().mouseMoveEvent(event)
+	def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
+		self.custom_move(event)
+		super().mouseMoveEvent(event)
+	def mousePressEvent(self, event: QGraphicsSceneMouseEvent):
+		self.custom_pressed(event)
+		super().mousePressEvent(event)
 
 class Page(N_QGraphicsScene):
 	def __init__(self, page_number: int):

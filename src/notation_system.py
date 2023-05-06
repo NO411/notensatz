@@ -73,7 +73,6 @@ class Note:
 class NoteGroup:
 	def __init__(self):
 		self.first_voice: List[Note] = []
-		self.second_voice: List[Note] = []
 
 class KeySignature:
 	signatures_map = {
@@ -130,7 +129,6 @@ class Bar(N_QGraphicsItemGroup):
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
 	All positions are relative to the parent from here on!\n
-	in general:\n
 	0 = bottom line\n
 	0.5 = first space from the bottom \n
 	1 = 2nd line from the bottom\n
@@ -233,7 +231,7 @@ class Stave(N_QGraphicsItemGroup):
 	def get_closest_line(self, mouse_pos: QPointF) -> int:
 		step = Musicitem.EM / 4
 		n = (self.qt().sceneBoundingRect().y() + Musicitem.EM - mouse_pos.y()) / step
-		# with multiplying with two, rounding and the dividing again, we get 0.5 steps 
+		# with multiplying by two, rounding and the dividing again, we get 0.5 steps 
 		n *= 2
 		return bound(round(n) / 2, -10, 10)
 

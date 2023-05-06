@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsSceneMouseEvent
-from PyQt5.QtCore import QPointF
+from PyQt5.QtCore import QPointF, Qt
 from PyQt5.QtGui import QTransform
 
 from app import App
@@ -32,6 +32,9 @@ def edit_update(mouse_pos: QPointF, app: App, selected_button: SymbolButton):
 		y = current_stave.qt().sceneBoundingRect().y() + Musicitem.EM - current_line * (Musicitem.EM / 4)
 		current_edit_obj.setPos(bound(mouse_pos.x(), current_system.qt().x(), Settings.Layout.WIDTH - Settings.Layout.MARGIN), y)
 
+def edit_pressed(mouse_pos: QPointF, app: App, selected_button: SymbolButton):
+	...
+
 def on_button_pressed(app: App, pressed_button: SymbolButton):
 	for buttons in app.ui.symbols_box_buttons:
 		for button in buttons:
@@ -40,11 +43,18 @@ def on_button_pressed(app: App, pressed_button: SymbolButton):
 				button.setChecked(False)
 	app.document_ui.pages[app.current_page].edit_object.change_text()
 
-def custom_move(self: EditScene, event: QGraphicsSceneMouseEvent):
+def get_selected_button(app: App) -> SymbolButton:
 	selected_button: SymbolButton = None
-	for buttons in self.app.ui.symbols_box_buttons:
+	for buttons in app.ui.symbols_box_buttons:
 			for button in buttons:
 				if (button.isChecked()):
 					selected_button = button
 					break
-	edit_update(event.scenePos(), self.app, selected_button)
+	return selected_button
+					
+def custom_move(self: EditScene, event: QGraphicsSceneMouseEvent):
+	edit_update(event.scenePos(), self.app, get_selected_button(self.app))
+
+def custom_pressed(self: EditScene, event: QGraphicsSceneMouseEvent):
+	if (event.button() == Qt.LeftButton):
+		edit_pressed(event.scenePos(), self.app, get_selected_button(self.app))
