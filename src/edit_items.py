@@ -2,37 +2,18 @@ from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsRectItem
 from PyQt5.QtGui import QBrush, QFont, QPen, QColor
 from PyQt5.QtCore import Qt
 
-from fonts import real_font_size, get_symbol, get_one_em
+from fonts import real_font_size
 from qt_saving_layer import Fixed_QGraphicsTextItem, N_QGraphicsScene, N_QGraphicsRectItem, N_QGraphicsTextItem
-from typing import List, Union
+from notation_system import Musicitem, System, Stave
 from settings import Settings
 
-# important: the vertical center of every music (text) item is the bottom line of the 5 lines of a stave
-# also important: always use sceneBoundingRect which will update when transforming the item
-class Musicitem(N_QGraphicsTextItem):
-	"""Always scale and transform with QTransform, which can be pickled."""
-	# em space (typically width of "M", here height of one bar line)
-	# -> stave lines spacing = em / 4
-	EM = get_one_em(Settings.Symbols.FONTSIZE)
-
-	def __init__(self, symbol: Union[str, List[str]] = "", color: QColor = Qt.black):
-		super().__init__(Fixed_QGraphicsTextItem(""))
-
-		self.change_text(symbol)
-		self.qt().setFont(QFont("Bravura", real_font_size(Settings.Symbols.FONTSIZE)))
-		self.qt().setDefaultTextColor(color)
-
-	def setPos(self, ax: float, ay: float):
-		"""overwrite function to achieve bottom stave line matching"""
-		super().qt().setPos(ax, ay - self.qt().sceneBoundingRect().height() / 2)
-
-	def change_text(self, symbol: Union[str, List[str]] = ""):
-		text = ""
-		if (symbol != ""):
-			text = get_symbol(symbol)
-		self.qt().setPlainText(text)
-
 class EditScene(QGraphicsScene):
+	def __init__(self, x: float, y: float, width: float, height: float):
+		super().__init__(x, y, width, height)
+		self.current_system: System = None
+		self.current_stave: Stave = None
+		self.current_line: int = None
+
 	# defined by document.py and assembled by main.py
 	def custom_move(self, event: QGraphicsSceneMouseEvent): ...
 	def custom_pressed(self, event: QGraphicsSceneMouseEvent): ...
@@ -45,10 +26,14 @@ class EditScene(QGraphicsScene):
 		self.custom_pressed(event)
 		super().mousePressEvent(event)
 
+	def setup_edit(self):
+		self.edit_object = Musicitem("", QColor("#528bff"))
+		self.addItem(self.edit_object.qt())
+		self.edit_object.qt().setZValue(1)
+
 class Page(N_QGraphicsScene):
 	def __init__(self, page_number: int):
 		super().__init__(EditScene(0, 0, Settings.Layout.WIDTH, Settings.Layout.HEIGHT))
-
 		# real page number, not an index
 		self.page_number = page_number
 		self.qt().page_number = self.page_number
@@ -67,7 +52,7 @@ class Page(N_QGraphicsScene):
 			self.page_number_text = DocumentTextitem(False, str(page_number), real_font_size(10), Settings.Layout.MARGIN / 2, align, Settings.Layout.MARGIN, False)
 			self.qt().addItem(self.page_number_text.qt())
 
-		self.setup_edit()
+		self.qt().setup_edit()
 
 	def update_page_text(self):
 		self.page_number_text.alignment = "right"
@@ -77,16 +62,12 @@ class Page(N_QGraphicsScene):
 		self.page_number_text.qt().setPlainText(str(self.page_number))
 		self.page_number_text.align()
 
-	def setup_edit(self):
-		self.edit_object = Musicitem("", QColor("#528bff"))
-		self.qt().addItem(self.edit_object.qt())
-		self.edit_object.qt().setZValue(1)
-
 	def reassemble(self):
 		self.qt().addItem(self.rect.qt())
 		if (self.page_number > 1):
 			self.qt().addItem(self.page_number_text.qt())
 
+		self.qt().setup_edit()
 
 class DocumentTextitem(N_QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):

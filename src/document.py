@@ -2,10 +2,14 @@ from PyQt5.QtCore import QPointF, QLineF
 
 from notation_system import TimeSignature, System, KeySignature
 from typing import List
-from edit_items import Page, DocumentTextitem, Musicitem, EditScene
+from edit_items import Page, DocumentTextitem
 from settings import Settings
 
 class DocumentUi:
+	"""
+	members which should be saved in file: obj.member\n
+	members like editing objects, which should not be saved in file: obj.qt().member
+	"""
 	def __init__(self):
 		# table of all pages (those include the scenes)
 		self.pages: List[Page] = []
@@ -59,7 +63,7 @@ class DocumentUi:
 		systems: List[System] = []
 		for system in self.systems:
 			if (system.page_index == current_page):
-				system_distances.append(QLineF(system.get_center(), mouse_pos).length())
+				system_distances.append(QLineF(QPointF(0, system.get_center().y()), mouse_pos).length())
 				systems.append(system)
 
 		return systems[system_distances.index(min(system_distances))]

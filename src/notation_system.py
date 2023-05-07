@@ -1,14 +1,40 @@
 from PyQt5.QtWidgets import QGraphicsLineItem, QGraphicsItemGroup
-from PyQt5.QtGui import QPen, QTransform
+from PyQt5.QtGui import QPen, QTransform, QFont, QColor
 from PyQt5.QtCore import QPointF, Qt, QLineF
 
-from typing import List
+from typing import List, Union
 
 from settings import Settings
-from edit_items import Musicitem
-from fonts import get_symbol
-from qt_saving_layer import N_QGraphicsItemGroup, N_QGraphicsLineItem
+from fonts import real_font_size, get_symbol, get_one_em
+from qt_saving_layer import N_QGraphicsItemGroup, N_QGraphicsLineItem, Fixed_QGraphicsTextItem, N_QGraphicsTextItem
 from misc import bound
+from copy import deepcopy
+
+# important: the vertical center of every music (text) item is the bottom line of the 5 lines of a stave
+# also important: always use sceneBoundingRect which will update when transforming the item
+class Musicitem(N_QGraphicsTextItem):
+	"""Always scale and transform with QTransform, which can be pickled."""
+	# em space (typically width of "M", here height of one bar line)
+	# -> stave lines spacing = em / 4
+	EM = get_one_em(Settings.Symbols.FONTSIZE)
+
+	def __init__(self, symbol: Union[str, List[str]] = "", color: QColor = Qt.black):
+		super().__init__(Fixed_QGraphicsTextItem(""))
+
+		self.change_text(symbol)
+		self.qt().setFont(QFont("Bravura", real_font_size(Settings.Symbols.FONTSIZE)))
+		self.qt().setDefaultTextColor(color)
+
+	def setPos(self, ax: float, ay: float):
+		"""overwrite function to achieve bottom stave line matching"""
+		super().qt().setPos(ax, ay - self.qt().sceneBoundingRect().height() / 2)
+
+	def change_text(self, symbol: Union[str, List[str]] = ""):
+		text = ""
+		if (symbol != ""):
+			text = get_symbol(symbol)
+		self.qt().setPlainText(text)
+
 
 class TimeSignature:
 	signatures_map = {
@@ -106,6 +132,8 @@ class KeySignature:
 		self.type = self.signatures_map[key_signature][1]
 
 class Bar(N_QGraphicsItemGroup):
+	MIN_BAR_DIST = Musicitem.EM * 1
+
 	def __init__(self, time_signature: TimeSignature):
 		super().__init__(QGraphicsItemGroup())
 
@@ -137,7 +165,6 @@ class Stave(N_QGraphicsItemGroup):
 	"""
 
 	line_pen = QPen(Qt.black, 3)
-
 
 	clefs = {
 		"Violinschlüssel": {
@@ -204,11 +231,34 @@ class Stave(N_QGraphicsItemGroup):
 
 	def create_first_bar(self, first_system: bool, start_x: float, time_signature: TimeSignature):
 		self.bars.append(Bar(time_signature))
-		self.qt().addToGroup(self.bars[-1].qt())
-		self.bars[-1].qt().setPos(start_x + 0.25 * Musicitem.EM, 0)
+		self.qt().addToGroup(self.bars[0].qt())
+		self.bars[0].qt().setPos(start_x + 0.25 * Musicitem.EM, 0)
 
 		if (first_system):
-			self.bars[-1].show_time_signature()
+			self.bars[0].show_time_signature()
+
+	def add_bar(self, bar_line: Musicitem, first_stave: bool):
+		x = bar_line.qt().scenePos().x() + bar_line.qt().sceneBoundingRect().width() / 2
+		system_x = x - self.qt().scenePos().x()
+
+		i = len(self.bars)
+
+		for i_, bar in enumerate(self.bars):
+			if (bar.qt().scenePos().x() > x):
+				i = i_
+				break
+
+		new_bar = Bar(self.bars[i - 1].time_signature)
+		if (first_stave):
+			new_bar.left_bar_line = deepcopy(bar_line)
+			new_bar.left_bar_line.qt().setDefaultTextColor(Qt.black)
+			new_bar.qt().addToGroup(new_bar.left_bar_line.qt())
+			new_bar.left_bar_line.qt().setPos(-new_bar.left_bar_line.qt().sceneBoundingRect().width() / 2, new_bar.left_bar_line.qt().scenePos().y() - self.qt().scenePos().y())
+
+		self.bars.insert(i, new_bar)
+		self.qt().addToGroup(new_bar.qt())
+		new_bar.qt().setPos(system_x, 0)
+
 
 	def reassemble(self):
 		for line in self.lines:
@@ -226,11 +276,11 @@ class Stave(N_QGraphicsItemGroup):
 			bar.qt().setPos(bar.pos)
 
 	def get_center(self) -> QPointF:
-		return QPointF(self.qt().sceneBoundingRect().x() + self.width / 2, self.qt().sceneBoundingRect().y() + Musicitem.EM / 2)
+		return QPointF(self.qt().scenePos().x() + self.width / 2, self.qt().scenePos().y() + Musicitem.EM / 2)
 
 	def get_closest_line(self, mouse_pos: QPointF) -> int:
 		step = Musicitem.EM / 4
-		n = (self.qt().sceneBoundingRect().y() + Musicitem.EM - mouse_pos.y()) / step
+		n = (self.qt().scenePos().y() + Musicitem.EM - mouse_pos.y()) / step
 		# with multiplying by two, rounding and the dividing again, we get 0.5 steps 
 		n *= 2
 		return bound(round(n) / 2, -10, 10)
@@ -238,10 +288,11 @@ class Stave(N_QGraphicsItemGroup):
 class System(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
 	All positions are relative to the parent from here on!\n
-	To add an item, first add it and then set a relative position!"""
+	To add an item, first add it and then set a relative position!\n
+	Never ever use sceneBoundingRect.y/x()!!"""
 
 	min_stave_spacing = Musicitem.EM * 1.2
-	system_spacing = Musicitem.EM * 1.5
+	system_spacing = Musicitem.EM * 1.7
 	def __init__(self, page_index: int, voices: int, pos: QPointF, clefs_tabel: List[str], key_signature: KeySignature, with_piano: bool, time_signature: TimeSignature, first_system: bool = False):
 		super().__init__(QGraphicsItemGroup())
 
@@ -259,11 +310,13 @@ class System(N_QGraphicsItemGroup):
 			# create all staves using list comprehension
 			Stave(clefs_tabel[n], self.width, self.key_signature) for n in range(voices)
 		]
+
+		self.first_system = first_system
+
 		for n, stave in enumerate(self.staves):
 			self.qt().addToGroup(stave.qt())
 			stave.qt().setPos(0, n * (Musicitem.EM + System.min_stave_spacing))
-
-		self.first_system = first_system
+			stave.create_first_bar(self.first_system, self.get_start_x(), time_signature)
 
 		# setup the left bar line
 		self.left_bar_line = Musicitem("barlineSingle")
@@ -279,9 +332,6 @@ class System(N_QGraphicsItemGroup):
 
 		if (self.with_piano and self.voices > 1):
 			self.addbrace()
-
-		for stave in self.staves:
-			stave.create_first_bar(self.first_system, self.get_start_x(), time_signature)
 
 	def addbrace(self):
 		self.brace = Musicitem("brace")

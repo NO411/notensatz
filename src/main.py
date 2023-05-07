@@ -7,7 +7,7 @@ from ui_misc import UiMiscHandler
 from saving import SavingHander
 from page_handling import PageHandler
 from edit_items import EditScene
-from editing import custom_move, on_button_pressed, custom_pressed
+from editing import custom_move, unselect_buttons, custom_pressed
 
 __author__ = "Noah Weiler"
 
@@ -53,7 +53,7 @@ def main():
 
 	for buttons in app.ui.symbols_box_buttons:
 		for symbol_button in buttons:
-			symbol_button.clicked.connect(lambda: on_button_pressed(app, symbol_button.sender()))
+			symbol_button.clicked.connect(lambda: unselect_buttons(app, symbol_button.sender()))
 
 	# welcome screen buttons:
 	app.ui.welcome_button_new.clicked.connect(app.new_doc_dialog.show)

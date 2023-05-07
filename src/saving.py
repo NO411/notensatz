@@ -8,6 +8,7 @@ from document import DocumentUi
 from page_handling import PageHandler
 from edit_items import DocumentTextitem
 from settings import Settings
+from editing import unselect_buttons
 
 import pickle
 import json
@@ -18,6 +19,9 @@ class SavingHander():
 		self.page_handling = page_handling
 
 	def export_to_pdf(self, filename):
+		# preparations for printing
+		unselect_buttons(self.app)
+
 		printer = QPrinter (QPrinter.HighResolution)
 		printer.setPageSize(QPrinter.A4)
 		printer.setOrientation(QPrinter.Portrait)

@@ -106,7 +106,8 @@ class SymbolButton(QPushButton):
 		"Werkzeuge": {
 			"font": "Awesome",
 			"buttons": [
-				["trash-can", "Symbol löschen"]
+				["trash-can", "Symbol löschen"],
+				["arrows-up-down-left-right", "Symbol bewegen"]
 			]
 		}
 	}

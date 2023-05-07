@@ -29,9 +29,9 @@ class PageHandler():
 				tempo_text = "Tempoangabe"
 
 			heading = DocumentTextitem(True, heading_text, real_font_size(20), Settings.Layout.MARGIN, "center", Settings.Layout.MARGIN, True)
-			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12), heading.qt().y() + heading.qt().boundingRect().height(), "center", Settings.Layout.MARGIN, False)
-			composer = DocumentTextitem(True, composer_text, real_font_size(12), sub_heading.qt().y() + sub_heading.qt().boundingRect().height(), "right", Settings.Layout.MARGIN, True)
-			tempo = DocumentTextitem(True, tempo_text, real_font_size(12), composer.qt().y() + composer.qt().boundingRect().height(), "left", 2 * Settings.Layout.MARGIN, True)
+			sub_heading = DocumentTextitem(True, sub_heading_text, real_font_size(12), heading.qt().y() + heading.qt().sceneBoundingRect().height(), "center", Settings.Layout.MARGIN, False)
+			composer = DocumentTextitem(True, composer_text, real_font_size(12), sub_heading.qt().y() + sub_heading.qt().sceneBoundingRect().height(), "right", Settings.Layout.MARGIN, True)
+			tempo = DocumentTextitem(True, tempo_text, real_font_size(12), composer.qt().y() + composer.qt().sceneBoundingRect().height(), "left", 2 * Settings.Layout.MARGIN, True)
 
 			new_page.qt().addItem(heading.qt())
 			new_page.qt().addItem(sub_heading.qt())
