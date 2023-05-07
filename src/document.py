@@ -56,7 +56,7 @@ class DocumentUi:
 		for system in self.systems:
 			system.reassemble()
 			self.pages[system.page_index].qt().addItem(system.qt())
-			system.qt().setPos(system.pos)
+			system.qt().setPos(system._pos)
 
 	def get_closest_system(self, mouse_pos: QPointF, current_page: int) -> System:
 		system_distances = []

@@ -7,6 +7,7 @@ from document import DocumentUi
 from notation_system import TimeSignature, KeySignature
 from fonts import real_font_size
 from settings import Settings
+from editing import unselect_buttons
 
 class PageHandler():
 	def __init__(self, app: App, ui_misc: UiMiscHandler):
@@ -16,7 +17,7 @@ class PageHandler():
 
 	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text=""):
 		new_page = Page(page_number)
-		new_page.qt().app = self.app
+		new_page.qt().setup_edit(self.app)
 
 		if (new_first_page):
 			if (heading_text == ""):
@@ -95,6 +96,9 @@ class PageHandler():
 
 		self.reconnect()
 
+		for page in self.app.document_ui.pages:
+			page.qt().setup_edit(self.app)
+
 	def setup_new_document(self, heading, sub_heading, composer, tempo):
 		# create new document with empty (apart from texts) page
 		self.app.document_ui = DocumentUi()
@@ -146,6 +150,8 @@ class PageHandler():
 		self.app.document_ui.pages[-1].qt().addItem(self.app.document_ui.systems[-1].qt())
 		self.set_last_system_page()
 
+		unselect_buttons(self.app)
+
 	def delete_last_system(self):
 		if (len(self.app.document_ui.systems) < 2):
 			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können das erste System nicht löschen.", QMessageBox.Yes, self.app.window)
@@ -177,6 +183,8 @@ class PageHandler():
 			self.delete_page()
 
 		self.set_last_system_page()
+
+		unselect_buttons(self.app)
 
 	def edit_text(self, text_field):
 		# "move" ui to text fields

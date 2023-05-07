@@ -140,6 +140,7 @@ class Bar(N_QGraphicsItemGroup):
 		self.time_signature = time_signature
 		self.note_groups = []
 		self.objects: List[Musicitem] = []
+		self.left_bar_line: Musicitem = None
 
 	def show_time_signature(self):
 		time_signature = Musicitem(self.time_signature.gen_unicode_combi())
@@ -148,11 +149,17 @@ class Bar(N_QGraphicsItemGroup):
 		time_signature.setPos(0, Musicitem.EM)
 		self.objects.append(time_signature)
 
+	def add_left_bar_line(self, bar_line: Musicitem, stave_y: float):
+		self.left_bar_line = deepcopy(bar_line)
+		self.left_bar_line.qt().setDefaultTextColor(Qt.black)
+		self.qt().addToGroup(self.left_bar_line.qt())
+		self.left_bar_line.qt().setPos(-self.left_bar_line.qt().sceneBoundingRect().width() / 2, self.left_bar_line.qt().scenePos().y() - stave_y)
+
 	def reassemble(self):
 		for obj in self.objects:
 			self.qt().addToGroup(obj.qt())
-
-	#def set_up(self, start_pos: QPointF, staves: List[Stave]):
+		if (self.left_bar_line != None):
+			self.qt().addToGroup(self.left_bar_line.qt())
 
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
@@ -250,15 +257,11 @@ class Stave(N_QGraphicsItemGroup):
 
 		new_bar = Bar(self.bars[i - 1].time_signature)
 		if (first_stave):
-			new_bar.left_bar_line = deepcopy(bar_line)
-			new_bar.left_bar_line.qt().setDefaultTextColor(Qt.black)
-			new_bar.qt().addToGroup(new_bar.left_bar_line.qt())
-			new_bar.left_bar_line.qt().setPos(-new_bar.left_bar_line.qt().sceneBoundingRect().width() / 2, new_bar.left_bar_line.qt().scenePos().y() - self.qt().scenePos().y())
+			new_bar.add_left_bar_line(bar_line, self.qt().scenePos().y())
 
 		self.bars.insert(i, new_bar)
 		self.qt().addToGroup(new_bar.qt())
 		new_bar.qt().setPos(system_x, 0)
-
 
 	def reassemble(self):
 		for line in self.lines:
@@ -268,12 +271,12 @@ class Stave(N_QGraphicsItemGroup):
 
 		for accidental in self.key_signature_accidentals:
 			self.qt().addToGroup(accidental.qt())
-		self.qt().setPos(self.pos)
+		self.qt().setPos(self._pos)
 
 		for bar in self.bars:
 			bar.reassemble()
 			self.qt().addToGroup(bar.qt())
-			bar.qt().setPos(bar.pos)
+			bar.qt().setPos(bar._pos)
 
 	def get_center(self) -> QPointF:
 		return QPointF(self.qt().scenePos().x() + self.width / 2, self.qt().scenePos().y() + Musicitem.EM / 2)
@@ -366,7 +369,7 @@ class System(N_QGraphicsItemGroup):
 		for n, stave in enumerate(self.staves):
 			stave.reassemble()
 			self.qt().addToGroup(stave.qt())
-			stave.qt().setPos(stave.pos)
+			stave.qt().setPos(stave._pos)
 
 		if (self.with_piano):
 			self.qt().addToGroup(self.brace.qt())

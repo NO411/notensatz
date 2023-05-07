@@ -26,10 +26,11 @@ class EditScene(QGraphicsScene):
 		self.custom_pressed(event)
 		super().mousePressEvent(event)
 
-	def setup_edit(self):
+	def setup_edit(self, app):
 		self.edit_object = Musicitem("", QColor("#528bff"))
 		self.addItem(self.edit_object.qt())
 		self.edit_object.qt().setZValue(1)
+		self.app = app
 
 class Page(N_QGraphicsScene):
 	def __init__(self, page_number: int):
@@ -52,8 +53,6 @@ class Page(N_QGraphicsScene):
 			self.page_number_text = DocumentTextitem(False, str(page_number), real_font_size(10), Settings.Layout.MARGIN / 2, align, Settings.Layout.MARGIN, False)
 			self.qt().addItem(self.page_number_text.qt())
 
-		self.qt().setup_edit()
-
 	def update_page_text(self):
 		self.page_number_text.alignment = "right"
 		if (self.page_number % 2 == 0):
@@ -63,11 +62,13 @@ class Page(N_QGraphicsScene):
 		self.page_number_text.align()
 
 	def reassemble(self):
+		# important: self.rect not self._rect
 		self.qt().addItem(self.rect.qt())
 		if (self.page_number > 1):
 			self.qt().addItem(self.page_number_text.qt())
 
-		self.qt().setup_edit()
+		# object was saved as QGraphicsScene, because all the editing stuff is not needed
+		self.qt().__class__ = EditScene
 
 class DocumentTextitem(N_QGraphicsTextItem):
 	def __init__(self, allow_interaction: bool, text: str, fontSize: float, y: float, alignment: str, align_spacing: float, bold: bool):
