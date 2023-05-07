@@ -14,7 +14,7 @@ class SymbolButton(QPushButton):
 		# notes
 		"Noten": {
 			"font": "Bravura",
-			"buttons": [# [unicode key, tooltip text]
+			"buttons": [# [unicode key, tooltip text (, item unicode key)]
 				# this key can also be a list
 				["noteWhole", "ganze Note"],
 				["noteHalfUp", "halbe Note"],
@@ -59,8 +59,8 @@ class SymbolButton(QPushButton):
 		"Pausen": {
 			"font": "Bravura",
 			"buttons": [
-				["restWholeLegerLine", "ganze Pause"],
-				["restHalfLegerLine", "halbe pause"],
+				["restWholeLegerLine", "ganze Pause", "restWhole"],
+				["restHalfLegerLine", "halbe pause", "restHalf"],
 				["restQuarter", "viertel Pause"],
 				["rest8th", "achtel Pause"],
 				["rest16th", "sechszehntel Pause"],
@@ -101,6 +101,7 @@ class SymbolButton(QPushButton):
 				["gClefChange", "Violinchlüssel (Wechsel)"],
 				["fClefChange", "Bassschlüssel (Wechsel)"],
 				["cClefChange", "C-Schlüssel (Wechsel)"],
+				["fermataAbove", "Fermate"]
 			],
 		},
 		"Werkzeuge": {

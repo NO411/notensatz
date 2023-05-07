@@ -35,6 +35,8 @@ class Musicitem(N_QGraphicsTextItem):
 			text = get_symbol(symbol)
 		self.qt().setPlainText(text)
 
+	def get_line_y(line: int):
+		return Musicitem.EM - line * (Musicitem.EM / 4)
 
 class TimeSignature:
 	signatures_map = {

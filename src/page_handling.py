@@ -192,6 +192,8 @@ class PageHandler():
 		self.app.ui.view.verticalScrollBar().setValue(self.app.ui.view.verticalScrollBar().minimum())
 		self.update_page_info_and_button_text()
 
+		unselect_buttons(self.app)
+
 		if (text_field == "heading"):
 			self.app.document_ui.heading.qt().setFocus()
 			self.app.ui.view.horizontalScrollBar().setValue(self.app.ui.view.horizontalScrollBar().maximum() / 2)
