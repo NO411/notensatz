@@ -7,7 +7,7 @@ from ui_misc import UiMiscHandler
 from saving import SavingHander
 from page_handling import PageHandler
 from edit_items import EditScene
-from editing import custom_move, unselect_buttons, custom_pressed
+from editing import custom_move, unselect_buttons, custom_pressed, setup_edit
 
 __author__ = "Noah Weiler"
 
@@ -17,6 +17,7 @@ def main():
 	# enable editing logic
 	EditScene.custom_move = custom_move
 	EditScene.custom_pressed = custom_pressed
+	EditScene.custom_setup_edit = setup_edit
 
 	# modules
 	ui_misc = UiMiscHandler(app)

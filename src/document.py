@@ -5,6 +5,8 @@ from typing import List
 from edit_items import Page, DocumentTextitem
 from settings import Settings
 
+from copy import deepcopy
+
 class DocumentUi:
 	"""
 	members which should be saved in file: obj.member\n
@@ -19,7 +21,7 @@ class DocumentUi:
 		self.composer: DocumentTextitem = None
 		self.tempo: DocumentTextitem = None
 
-	def setup(self, staves: int, time_signature: TimeSignature, with_piano: bool, clefs: List[str], key_signature: KeySignature):
+	def setup(self, staves: int, time_signature_name: str, with_piano: bool, clefs: List[str], key_signature: KeySignature):
 		# info: first page was already added by page_handling 
 		self.with_piano = with_piano
 		self.staves = staves
@@ -27,12 +29,12 @@ class DocumentUi:
 		self.key_signature = key_signature
 
 		top_spacing = self.tempo.qt().y() + self.tempo.qt().sceneBoundingRect().height() + Settings.Layout.MARGIN / 4
-		self.systems = [System(0, self.staves, QPointF(2 * Settings.Layout.MARGIN, top_spacing), self.clefs, self.key_signature, self.with_piano, time_signature, True)]
+		self.systems = [System(0, self.staves, QPointF(2 * Settings.Layout.MARGIN, top_spacing), self.clefs, self.key_signature, self.with_piano, TimeSignature(time_signature_name), True)]
 		self.pages[0].qt().addItem(self.systems[-1].qt())
 
 	def add_new_system(self) -> bool:
 		page_index = len(self.pages) - 1
-		last_time_sig = self.systems[-1].staves[0].bars[-1].time_signature
+		last_time_sig = deepcopy(self.systems[-1].staves[0].bars[-1].time_signature)
 		self.systems[-1].set_normal_end_bar_line()
 		self.systems.append(System(page_index, self.staves, QPointF(Settings.Layout.MARGIN, self.systems[-1].get_bottom_y() + System.system_spacing), self.clefs, self.key_signature, self.with_piano, last_time_sig, False))
 		if (self.systems[-1].get_bottom_y() > Settings.Layout.HEIGHT - Settings.Layout.MARGIN):

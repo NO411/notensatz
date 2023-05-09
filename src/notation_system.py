@@ -38,7 +38,7 @@ class Musicitem(N_QGraphicsTextItem):
 	def get_line_y(line: int):
 		return Musicitem.EM - line * (Musicitem.EM / 4)
 
-class TimeSignature:
+class TimeSignature(Musicitem):
 	signatures_map = {
 		"2/4-Takt": [2, 4],
         "2/2-Takt": [2, 2],
@@ -54,11 +54,19 @@ class TimeSignature:
         "9/8-Takt": [9, 8],
         "12/8-Takt": [12, 8],
 	}
+
+	BAR_LINE_DISTANCE = Musicitem.EM / 5
 	
-	def __init__(self, fundamental_beats: int, note_value: int = None):
-		self.fundamental_beats = fundamental_beats
-		self.note_value = note_value
+	def __init__(self, name: str):
+		self.fundamental_beats = TimeSignature.signatures_map[name][0]
+		self.note_value = TimeSignature.signatures_map[name][1]
+		super().__init__(self.gen_unicode_combi())
 	
+	def change_name(self, name: str):
+		self.fundamental_beats = TimeSignature.signatures_map[name][0]
+		self.note_value = TimeSignature.signatures_map[name][1]
+		self.change_text(self.gen_unicode_combi())
+
 	def gen_unicode_combi(self) -> List[str]:
 		combi_list = []
 		if (self.fundamental_beats > 9):
@@ -71,6 +79,7 @@ class TimeSignature:
 		else:
 			combi_list.extend(["timeSigCombDenominator", "timeSig" + str(self.note_value)])
 		return combi_list
+	
 	def join_unicode_combi(combi: List[str]):
 		return '_'.join(combi)
 
@@ -140,16 +149,19 @@ class Bar(N_QGraphicsItemGroup):
 		super().__init__(QGraphicsItemGroup())
 
 		self.time_signature = time_signature
+		self.time_signature_visible = False
+
 		self.note_groups = []
-		self.objects: List[Musicitem] = []
 		self.left_bar_line: Musicitem = None
 
-	def show_time_signature(self):
-		time_signature = Musicitem(self.time_signature.gen_unicode_combi())
-
-		self.qt().addToGroup(time_signature.qt())
-		time_signature.setPos(0, Musicitem.EM)
-		self.objects.append(time_signature)
+	def show_time_signature(self, new_time_sig_name: str = None):
+		if (new_time_sig_name != None):
+			self.time_signature.change_name(new_time_sig_name)
+		if (not self.time_signature_visible):
+			self.time_signature_visible = True
+			self.qt().addToGroup(self.time_signature.qt())
+		self.time_signature.setPos(TimeSignature.BAR_LINE_DISTANCE, Musicitem.EM)
+		print(self.time_signature)
 
 	def add_left_bar_line(self, bar_line: Musicitem, stave_y: float):
 		self.left_bar_line = deepcopy(bar_line)
@@ -158,8 +170,8 @@ class Bar(N_QGraphicsItemGroup):
 		self.left_bar_line.qt().setPos(-self.left_bar_line.qt().sceneBoundingRect().width() / 2, self.left_bar_line.qt().scenePos().y() - stave_y)
 
 	def reassemble(self):
-		for obj in self.objects:
-			self.qt().addToGroup(obj.qt())
+		if (self.time_signature_visible):
+			self.qt().addToGroup(self.time_signature.qt())
 		if (self.left_bar_line != None):
 			self.qt().addToGroup(self.left_bar_line.qt())
 
@@ -241,7 +253,7 @@ class Stave(N_QGraphicsItemGroup):
 	def create_first_bar(self, first_system: bool, start_x: float, time_signature: TimeSignature):
 		self.bars.append(Bar(time_signature))
 		self.qt().addToGroup(self.bars[0].qt())
-		self.bars[0].qt().setPos(start_x + 0.25 * Musicitem.EM, 0)
+		self.bars[0].qt().setPos(start_x, 0)
 
 		if (first_system):
 			self.bars[0].show_time_signature()
@@ -257,7 +269,7 @@ class Stave(N_QGraphicsItemGroup):
 				i = i_
 				break
 
-		new_bar = Bar(self.bars[i - 1].time_signature)
+		new_bar = Bar(deepcopy(self.bars[i - 1].time_signature))
 		if (first_stave):
 			new_bar.add_left_bar_line(bar_line, self.qt().scenePos().y())
 
@@ -321,7 +333,7 @@ class System(N_QGraphicsItemGroup):
 		for n, stave in enumerate(self.staves):
 			self.qt().addToGroup(stave.qt())
 			stave.qt().setPos(0, n * (Musicitem.EM + System.min_stave_spacing))
-			stave.create_first_bar(self.first_system, self.get_start_x(), time_signature)
+			stave.create_first_bar(self.first_system, self.get_start_x(), deepcopy(time_signature))
 
 		# setup the left bar line
 		self.left_bar_line = Musicitem("barlineSingle")
@@ -393,3 +405,13 @@ class System(N_QGraphicsItemGroup):
 			staves.append(stave)
 
 		return staves[stave_distances.index(min(stave_distances))]
+	
+	def get_closest_bar_n(self, mouse_pos: QPointF) -> int:
+		bar_distances = []
+		indexes: List[int] = []
+		# bars have all the same pos for one system
+		for n, bar in enumerate(self.staves[0].bars):
+			bar_distances.append(QLineF(QPointF(bar.qt().scenePos().x(), 0), mouse_pos).length())
+			indexes.append(n)
+
+		return indexes[bar_distances.index(min(bar_distances))]

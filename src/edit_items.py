@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsScene, QGraphicsRectItem, QGraphicsRectItem, QGraphicsSceneMouseEvent
-from PyQt5.QtGui import QBrush, QFont, QPen, QColor
+from PyQt5.QtGui import QBrush, QFont, QPen
 from PyQt5.QtCore import Qt
 
 from fonts import real_font_size
@@ -7,16 +7,21 @@ from qt_saving_layer import Fixed_QGraphicsTextItem, N_QGraphicsScene, N_QGraphi
 from notation_system import Musicitem, System, Stave
 from settings import Settings
 
+from typing import List
+
 class EditScene(QGraphicsScene):
 	def __init__(self, x: float, y: float, width: float, height: float):
 		super().__init__(x, y, width, height)
 		self.current_system: System = None
 		self.current_stave: Stave = None
 		self.current_line: int = None
+		self.current_bar_n: int = None
+		self.edit_objects: List[Musicitem] = []
 
 	# defined by document.py and assembled by main.py
 	def custom_move(self, event: QGraphicsSceneMouseEvent): ...
 	def custom_pressed(self, event: QGraphicsSceneMouseEvent): ...
+	def custom_setup_edit(self, app):...
 	# will access self.app (App instance) added by page_handling
 
 	def mouseMoveEvent(self, event: QGraphicsSceneMouseEvent):
@@ -27,10 +32,7 @@ class EditScene(QGraphicsScene):
 		super().mousePressEvent(event)
 
 	def setup_edit(self, app):
-		self.edit_object = Musicitem("", QColor("#528bff"))
-		self.addItem(self.edit_object.qt())
-		self.edit_object.qt().setZValue(1)
-		self.app = app
+		self.custom_setup_edit(app)
 
 class Page(N_QGraphicsScene):
 	def __init__(self, page_number: int):

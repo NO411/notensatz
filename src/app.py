@@ -14,6 +14,7 @@ from new_document import Ui_NewDocumentDialog
 from document import DocumentUi
 from symbol_button import SymbolButton
 from settings import Settings
+from notation_system import TimeSignature
 
 # intern imports
 from fonts import load_fonts
@@ -40,6 +41,11 @@ class App_Ui(Ui_MainWindow):
 		self.setup_welcome_screen(app)
 
 	def init_symbol_buttons(self):
+		SymbolButton.SYMBOLS["Taktarten"]["buttons"] = [
+			[TimeSignature(description).gen_unicode_combi(), description]
+			for description, _ in TimeSignature.signatures_map.items()
+		]
+
 		# setup symbol buttons
 		n_group = 0
 		for group_key, group in SymbolButton.SYMBOLS.items():

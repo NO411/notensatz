@@ -4,7 +4,7 @@ from app import App
 from ui_misc import UiMiscHandler
 from edit_items import Page, DocumentTextitem
 from document import DocumentUi
-from notation_system import TimeSignature, KeySignature
+from notation_system import KeySignature
 from fonts import real_font_size
 from settings import Settings
 from editing import unselect_buttons
@@ -17,7 +17,6 @@ class PageHandler():
 
 	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text=""):
 		new_page = Page(page_number)
-		new_page.qt().setup_edit(self.app)
 
 		if (new_first_page):
 			if (heading_text == ""):
@@ -122,11 +121,9 @@ class PageHandler():
 		)
 
 		# setup document (adding first system)
-		time_signature_key = self.app.new_doc_dialog_ui.time_signature_combo_box.currentText()
-		time_signature = TimeSignature(TimeSignature.signatures_map[time_signature_key][0], TimeSignature.signatures_map[time_signature_key][1])
 		self.app.document_ui.setup(
 			self.app.new_doc_dialog_ui.staves_spin_box.value(),
-			time_signature,
+			self.app.new_doc_dialog_ui.time_signature_combo_box.currentText(),
 			self.app.new_doc_dialog_ui.piano_checkbox.isChecked(),
 			self.app.new_doc_dialog_ui.get_clefs(),
 			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())

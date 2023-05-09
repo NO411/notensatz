@@ -83,13 +83,11 @@ class SymbolButton(QPushButton):
 		# time signatures
 		"Taktarten": {
 			"font": "Bravura",
-			"buttons": [
-				[TimeSignature(time_sig_table[0], time_sig_table[1]).gen_unicode_combi(), description]
-				for description, time_sig_table in TimeSignature.signatures_map.items()
-			],
+			"buttons": [],
 		},
 		"N-Tolen": {
 			"font": "Bravura",
+			# initialized by app.py init_symbol_buttons()
 			"buttons": [],
 		},
 		# misc
