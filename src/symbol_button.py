@@ -4,7 +4,6 @@ from PyQt5.QtCore import Qt
 
 from typing import List, Union
 
-from notation_system import TimeSignature
 from fonts import get_symbol, get_icon
 
 class SymbolButton(QPushButton):

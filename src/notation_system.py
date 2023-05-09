@@ -161,7 +161,6 @@ class Bar(N_QGraphicsItemGroup):
 			self.time_signature_visible = True
 			self.qt().addToGroup(self.time_signature.qt())
 		self.time_signature.setPos(TimeSignature.BAR_LINE_DISTANCE, Musicitem.EM)
-		print(self.time_signature)
 
 	def add_left_bar_line(self, bar_line: Musicitem, stave_y: float):
 		self.left_bar_line = deepcopy(bar_line)
