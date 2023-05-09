@@ -17,7 +17,8 @@ class PageHandler():
 
 	def create_empty_page(self, page_number: int, new_first_page=False, heading_text="", sub_heading_text="", composer_text="", tempo_text=""):
 		new_page = Page(page_number)
-
+		new_page.qt().setup_edit(self.app)
+		
 		if (new_first_page):
 			if (heading_text == ""):
 				heading_text = "Titel"

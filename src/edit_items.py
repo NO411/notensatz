@@ -18,6 +18,8 @@ class EditScene(QGraphicsScene):
 		self.current_bar_n: int = None
 		self.edit_objects: List[Musicitem] = []
 
+		self.setup = False
+
 	# defined by document.py and assembled by main.py
 	def custom_move(self, event: QGraphicsSceneMouseEvent): ...
 	def custom_pressed(self, event: QGraphicsSceneMouseEvent): ...
@@ -32,7 +34,11 @@ class EditScene(QGraphicsScene):
 		super().mousePressEvent(event)
 
 	def setup_edit(self, app):
-		self.custom_setup_edit(app)
+		if (not self.setup):
+			self.edit_objects: List[Musicitem] = []
+			self.custom_setup_edit(app)
+			
+			self.setup = True
 
 class Page(N_QGraphicsScene):
 	def __init__(self, page_number: int):
