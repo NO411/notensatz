@@ -86,7 +86,7 @@ class SavingHander():
 			data: DocumentUi = pickle.load(f)
 			self.app.document_ui = data
 			self.app.document_ui.reassemble()
-			self.page_handling.setup_document()
+			self.page_handling.setup_document(True)
 
 	def open_file(self):
 		filename, _ = QFileDialog.getOpenFileName(self.app.ui.centralwidget, "Notensatz öffnen", "", "*." + Settings.Document.FILE_EXTENSION)

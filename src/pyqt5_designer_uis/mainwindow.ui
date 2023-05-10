@@ -347,10 +347,13 @@
           <cursorShape>ArrowCursor</cursorShape>
          </property>
          <property name="minimum">
-          <number>1</number>
+          <number>10</number>
          </property>
          <property name="maximum">
-          <number>200</number>
+          <number>150</number>
+         </property>
+         <property name="singleStep">
+          <number>1</number>
          </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>

@@ -90,13 +90,15 @@ class PageHandler():
 		self.app.ui.action_edit_composer.triggered.connect(lambda : self.edit_text("composer"))
 		self.app.ui.action_edit_tempo.triggered.connect(lambda : self.edit_text("tempo"))
 
-	def setup_document(self):
+	def setup_document(self, opened_doc: bool = False):
 		self.app.set_scene(0)
 		self.update_page_info_and_button_text()
 
 		self.reconnect()
 
 		for page in self.app.document_ui.pages:
+			if (opened_doc):
+				page.qt().setup = False
 			page.qt().setup_edit(self.app)
 
 	def setup_new_document(self, heading, sub_heading, composer, tempo):
