@@ -45,9 +45,23 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 			
 			if (bar_x != None):
 				new_bar = scene.edit_objects[0]
-				new_bar.change_text("barlineSingle")
-				new_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_height() / Musicitem.EM))
-				new_bar.setPos(bar_x - new_bar.qt().sceneBoundingRect().width() / 2, scene.current_system.get_bottom_y())
+				if (not app.document_ui.with_piano):
+					new_bar.change_text("barlineSingle")
+					new_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_height() / Musicitem.EM))
+					new_bar.setPos(bar_x - new_bar.qt().sceneBoundingRect().width() / 2, scene.current_system.get_bottom_y())
+				else:
+					if (app.document_ui.staves > 2):
+						new_bar.change_text("barlineSingle")
+						new_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_other_voices_height() / Musicitem.EM))
+
+					# two bar lines, for each bar, one for piano and one for the other voices
+					# change pos of the new_bar even if not needed, it will be used by the add_bar algorithm
+					new_bar.setPos(bar_x - new_bar.qt().sceneBoundingRect().width() / 2, scene.current_system.get_bottom_other_voices_y())
+
+					piano_bar = scene.edit_objects[1]
+					piano_bar.change_text("barlineSingle")
+					piano_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_piano_height() / Musicitem.EM))
+					piano_bar.setPos(bar_x - new_bar.qt().sceneBoundingRect().width() / 2, scene.current_system.get_bottom_y())
 
 	elif (selected_button.group_key == "Noten" or selected_button.group_key == "Vorzeichen"):
 		# notes and accidentals positioning
@@ -83,7 +97,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 	if (selected_button.group_key == "Sonstige"):
 		if (selected_button.n_symbol == 1 and scene.edit_objects[0].qt().toPlainText() != ""):
 			for n, stave in enumerate(scene.current_system.staves):
-				stave.add_bar(scene.edit_objects[0], n == 0)
+				stave.add_bar(scene.edit_objects, app.document_ui.staves, n, app.document_ui.with_piano)
 
 	elif (selected_button.group_key == "Taktarten"):
 		for n, stave in enumerate(scene.current_system.staves):

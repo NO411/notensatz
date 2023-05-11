@@ -39,11 +39,17 @@ def main():
 
 	# menubar actions
 	app.ui.action_about.triggered.connect(app.aboutbox.show)
+	app.ui.action_about.triggered.connect(lambda: unselect_buttons(app))
 	app.ui.action_new.triggered.connect(lambda: saving.handle_close_event(app, app.new_doc_dialog.show))
+	app.ui.action_new.triggered.connect(lambda: unselect_buttons(app))
 	app.ui.action_open.triggered.connect(lambda: saving.handle_close_event(app, saving.open_file))
+	app.ui.action_open.triggered.connect(lambda: unselect_buttons(app))
 	app.ui.action_save_as.triggered.connect(saving.save_as)
+	app.ui.action_save_as.triggered.connect(lambda: unselect_buttons(app))
 	app.ui.action_save.triggered.connect(saving.save_file)
+	app.ui.action_save.triggered.connect(lambda: unselect_buttons(app))
 	app.ui.action_export.triggered.connect(saving.export)
+	app.ui.action_export.triggered.connect(lambda: unselect_buttons(app))
 
 	# buttons and other gui elements
 	app.ui.zoom_slider.valueChanged.connect(ui_misc.apply_zoom)

@@ -140,6 +140,15 @@
       <property name="cursor" stdset="0">
        <cursorShape>ArrowCursor</cursorShape>
       </property>
+      <property name="mouseTracking">
+       <bool>false</bool>
+      </property>
+      <property name="tabletTracking">
+       <bool>false</bool>
+      </property>
+      <property name="acceptDrops">
+       <bool>true</bool>
+      </property>
       <property name="autoFillBackground">
        <bool>false</bool>
       </property>

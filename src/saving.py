@@ -70,7 +70,7 @@ class SavingHander():
 
 	def save_as(self):
 		filename, _ = QFileDialog.getSaveFileName(self.app.ui.centralwidget, "Notensatz speichern", self.generate_filename() + "." + Settings.Document.FILE_EXTENSION, "*." + Settings.Document.FILE_EXTENSION)
-		if filename:
+		if (filename):
 			self.save_data(filename)
 			self.app.current_file_name = filename
 			self.app.current_file_saved = True

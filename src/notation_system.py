@@ -13,7 +13,9 @@ from copy import deepcopy
 # important: the vertical center of every music (text) item is the bottom line of the 5 lines of a stave
 # also important: always use sceneBoundingRect which will update when transforming the item
 class Musicitem(N_QGraphicsTextItem):
-	"""Always scale and transform with QTransform, which can be pickled."""
+	"""Always scale and transform with QTransform, which can be pickled.\n
+	Transform first, then position.
+	"""
 	# em space (typically width of "M", here height of one bar line)
 	# -> stave lines spacing = em / 4
 	EM = get_one_em(Settings.Symbols.FONTSIZE)
@@ -257,8 +259,8 @@ class Stave(N_QGraphicsItemGroup):
 		if (first_system):
 			self.bars[0].show_time_signature()
 
-	def add_bar(self, bar_line: Musicitem, first_stave: bool):
-		x = bar_line.qt().scenePos().x() + bar_line.qt().sceneBoundingRect().width() / 2
+	def add_bar(self, bar_lines: List[Musicitem], staves: int, stave_index: int, with_piano: bool):
+		x = bar_lines[0].qt().scenePos().x() + bar_lines[0].qt().sceneBoundingRect().width() / 2
 		system_x = x - self.qt().scenePos().x()
 
 		i = len(self.bars)
@@ -268,9 +270,13 @@ class Stave(N_QGraphicsItemGroup):
 				i = i_
 				break
 
+		# only add bar line once (check stave_index)
 		new_bar = Bar(deepcopy(self.bars[i - 1].time_signature))
-		if (first_stave):
-			new_bar.add_left_bar_line(bar_line, self.qt().scenePos().y())
+		if (with_piano and staves - 2 == stave_index):
+			new_bar.add_left_bar_line(bar_lines[1], self.qt().scenePos().y())
+
+		if ((not (with_piano and staves == 2)) and stave_index == 0):
+			new_bar.add_left_bar_line(bar_lines[0], self.qt().scenePos().y())
 
 		self.bars.insert(i, new_bar)
 		self.qt().addToGroup(new_bar.qt())
@@ -376,22 +382,32 @@ class System(N_QGraphicsItemGroup):
 		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 1.3, self.get_bottom_y() - self.qt().y())
 
 	def get_bottom_y(self) -> float:
-		return self.qt().y() + self.staves[-1].qt().y() + Musicitem.EM
-
-	def reassemble(self):
-		for n, stave in enumerate(self.staves):
-			stave.reassemble()
-			self.qt().addToGroup(stave.qt())
-			stave.qt().setPos(stave._pos)
-
-		if (self.with_piano):
-			self.qt().addToGroup(self.brace.qt())
-
-		self.qt().addToGroup(self.right_bar_line.qt())
-		self.qt().addToGroup(self.left_bar_line.qt())
+		return self.staves[-1].qt().scenePos().y() + Musicitem.EM
 	
-	def get_height(self):
+	def get_height(self) -> float:
 		return self.get_bottom_y() - self.qt().y()
+
+	# only call when with_piano = True
+	def get_bottom_other_voices_y(self) -> float:
+		y = None
+		if (len(self.staves) > 2):
+			y = self.staves[-3].qt().scenePos().y() + Musicitem.EM
+		else:
+			y = self.get_bottom_y()
+		return y
+	
+	# only call when with_piano = True
+	def get_other_voices_height(self) -> float:
+		height = None
+		if (len(self.staves) > 2):
+			height = self.get_bottom_other_voices_y() - self.qt().scenePos().y()
+		return (height)
+		
+	def get_piano_height(self) -> float:
+		height = None
+		if (len(self.staves) > 1):
+			height = self.staves[-1].qt().scenePos().y() + Musicitem.EM - self.staves[-2].qt().scenePos().y()
+		return height
 
 	def get_center(self) -> QPointF:
 		return QPointF(self.qt().x() + self.width / 2, self.qt().y() + self.get_height() / 2)
@@ -414,3 +430,15 @@ class System(N_QGraphicsItemGroup):
 			indexes.append(n)
 
 		return indexes[bar_distances.index(min(bar_distances))]
+	
+	def reassemble(self):
+		for n, stave in enumerate(self.staves):
+			stave.reassemble()
+			self.qt().addToGroup(stave.qt())
+			stave.qt().setPos(stave._pos)
+
+		if (self.with_piano):
+			self.qt().addToGroup(self.brace.qt())
+
+		self.qt().addToGroup(self.right_bar_line.qt())
+		self.qt().addToGroup(self.left_bar_line.qt())

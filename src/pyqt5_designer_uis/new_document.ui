@@ -48,6 +48,12 @@
         <layout class="QVBoxLayout" name="labels_layout">
          <item>
           <widget class="QLabel" name="heading_label">
+           <property name="font">
+            <font>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
            <property name="text">
             <string>Titel</string>
            </property>
@@ -217,8 +223,17 @@
        </item>
        <item>
         <widget class="QGroupBox" name="key_signature_group_box">
+         <property name="font">
+          <font>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+           <underline>false</underline>
+           <kerning>true</kerning>
+          </font>
+         </property>
          <property name="title">
-          <string>Tonart</string>
+          <string>Tonart *</string>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout_4">
           <item>
@@ -314,7 +329,7 @@
         </sizepolicy>
        </property>
        <property name="title">
-        <string>Stimmen</string>
+        <string>Stimmen *</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout">
         <item>
@@ -576,6 +591,13 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>* später nicht veränderbar</string>
+     </property>
+    </widget>
    </item>
    <item>
     <spacer name="verticalSpacer">

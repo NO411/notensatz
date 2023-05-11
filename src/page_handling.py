@@ -127,7 +127,8 @@ class PageHandler():
 		self.app.document_ui.setup(
 			self.app.new_doc_dialog_ui.staves_spin_box.value(),
 			self.app.new_doc_dialog_ui.time_signature_combo_box.currentText(),
-			self.app.new_doc_dialog_ui.piano_checkbox.isChecked(),
+			# important to check that it is also enabled (disabled when staves < 2)
+			self.app.new_doc_dialog_ui.piano_checkbox.isChecked() and self.app.new_doc_dialog_ui.piano_checkbox.isEnabled(),
 			self.app.new_doc_dialog_ui.get_clefs(),
 			KeySignature(self.app.new_doc_dialog_ui.key_signatures_combo_box.currentText())
 		)
