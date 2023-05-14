@@ -5,9 +5,9 @@ from PyQt5.QtCore import QPointF, Qt, QLineF
 from typing import List, Union
 
 from settings import Settings
-from fonts import real_font_size, get_symbol, get_one_em
+from fonts import real_font_size, get_symbol, get_one_em, get_specification
 from qt_saving_layer import N_QGraphicsItemGroup, N_QGraphicsLineItem, Fixed_QGraphicsTextItem, N_QGraphicsTextItem
-from misc import bound
+from misc import bound, bound_in_intervals
 from copy import deepcopy
 
 # important: the vertical center of every music (text) item is the bottom line of the 5 lines of a stave
@@ -19,6 +19,7 @@ class Musicitem(N_QGraphicsTextItem):
 	# em space (typically width of "M", here height of one bar line)
 	# -> stave lines spacing = em / 4
 	EM = get_one_em(Settings.Symbols.FONTSIZE)
+	MIN_OBJ_DIST = EM / 6
 
 	def __init__(self, symbol: Union[str, List[str]] = "", color: QColor = Qt.black):
 		super().__init__(Fixed_QGraphicsTextItem(""))
@@ -27,18 +28,50 @@ class Musicitem(N_QGraphicsTextItem):
 		self.qt().setFont(QFont("Bravura", real_font_size(Settings.Symbols.FONTSIZE)))
 		self.qt().setDefaultTextColor(color)
 
-	def setPos(self, ax: float, ay: float):
-		"""overwrite function to achieve bottom stave line matching"""
-		super().qt().setPos(ax, ay - self.qt().sceneBoundingRect().height() / 2)
-
 	def change_text(self, symbol: Union[str, List[str]] = ""):
+		self.key = symbol
 		text = ""
 		if (symbol != ""):
 			text = get_symbol(symbol)
 		self.qt().setPlainText(text)
 
-	def get_line_y(line: int):
+	def get_line_y(line: int) -> float:
 		return Musicitem.EM - line * (Musicitem.EM / 4)
+
+	def spec_to_px(spec) -> float:
+		return Musicitem.EM / 4 * spec
+
+	def get_qt_blank_space(self):
+		key_ = self.key
+		if (type(self.key) != str):
+			# for time signatures with more than one symbol
+			key_ = self.key[1]
+
+		box = get_specification("glyphBBoxes", key_)
+
+		qt_width = self.qt().sceneBoundingRect().width()
+		real_width = Musicitem.spec_to_px(box["bBoxNE"][0] - box["bBoxSW"][0])
+		real_width *= self.qt().transform().m11()
+		return (qt_width - real_width) / 2
+
+	def set_real_x(self, ax: float):
+		self.qt().setX(ax - self.get_qt_blank_space())
+
+	def set_real_y(self, ay: float):
+		"""get bottom stave line matching"""
+		self.qt().setY(ay - self.qt().sceneBoundingRect().height() / 2)
+
+	def set_real_pos(self, ax: float, ay: float):
+		"""left side of the symbol (x), relative to its bottom line position"""
+		self.set_real_x(ax)
+		self.set_real_y(ay)
+
+	def get_real_width(self):
+		return self.qt().sceneBoundingRect().width() - 2 * self.get_qt_blank_space()
+
+	def get_real_relative_x(self):
+		"""relative to its itemgroup"""
+		return self.qt().pos().x() + self.get_qt_blank_space()
 
 class TimeSignature(Musicitem):
 	signatures_map = {
@@ -57,13 +90,11 @@ class TimeSignature(Musicitem):
         "12/8-Takt": [12, 8],
 	}
 
-	BAR_LINE_DISTANCE = Musicitem.EM / 5
-	
 	def __init__(self, name: str):
 		self.fundamental_beats = TimeSignature.signatures_map[name][0]
 		self.note_value = TimeSignature.signatures_map[name][1]
 		super().__init__(self.gen_unicode_combi())
-	
+
 	def change_name(self, name: str):
 		self.fundamental_beats = TimeSignature.signatures_map[name][0]
 		self.note_value = TimeSignature.signatures_map[name][1]
@@ -75,24 +106,36 @@ class TimeSignature(Musicitem):
 			combi_list.extend(["timeSigCombNumerator", "timeSig" + str(self.fundamental_beats // 10), "timeSigCombNumerator", "timeSig" + str(self.fundamental_beats % 10)])
 		else:
 			combi_list.extend(["timeSigCombNumerator", "timeSig" + str(self.fundamental_beats)])
-		      
+
 		if (self.note_value > 9):
 			combi_list.extend(["timeSigCombDenominator", "timeSig" + str(self.note_value // 10), "timeSigCombDenominator", "timeSig" + str(self.note_value % 10)])
 		else:
 			combi_list.extend(["timeSigCombDenominator", "timeSig" + str(self.note_value)])
 		return combi_list
-	
+
 	def join_unicode_combi(combi: List[str]):
 		return '_'.join(combi)
+
+class Rest(N_QGraphicsItemGroup):
+	SYMBOLS = [
+		"restWhole",
+		"restHalf",
+		"restQuarter",
+		"rest8th",
+		"rest16th",
+		"rest32nd",
+		"rest64th",
+	]
+
+	def __init__(self):
+		super().__init__(QGraphicsItemGroup())
 
 class Note:
 	def __init__(self, pitch: int, duration: float = None):
 		# pitch from 1 - 88 (subcontra-a to c5)
-		# pitch 0 is a rest
 		self.pitch = pitch
 
 		# values: e.g. 0.25 for a quarter note
-		# -1 for whole rest
 		self.duration = duration
 		self.dotted = False
 
@@ -103,7 +146,7 @@ class Note:
 		# 2 = b
 		# 3 = ##
 		# 4 = bb
-		
+
 		self.accidental = -1
 		# ....
 		#self.articulation_sign = 0
@@ -145,8 +188,6 @@ class KeySignature:
 		self.type = self.signatures_map[key_signature][1]
 
 class Bar(N_QGraphicsItemGroup):
-	MIN_BAR_DIST = Musicitem.EM * 1
-
 	def __init__(self, time_signature: TimeSignature):
 		super().__init__(QGraphicsItemGroup())
 
@@ -162,19 +203,31 @@ class Bar(N_QGraphicsItemGroup):
 		if (not self.time_signature_visible):
 			self.time_signature_visible = True
 			self.qt().addToGroup(self.time_signature.qt())
-		self.time_signature.setPos(TimeSignature.BAR_LINE_DISTANCE, Musicitem.EM)
+		self.time_signature.set_real_pos(Musicitem.MIN_OBJ_DIST, Musicitem.EM)
 
 	def add_left_bar_line(self, bar_line: Musicitem, stave_y: float):
 		self.left_bar_line = deepcopy(bar_line)
 		self.left_bar_line.qt().setDefaultTextColor(Qt.black)
 		self.qt().addToGroup(self.left_bar_line.qt())
-		self.left_bar_line.qt().setPos(-self.left_bar_line.qt().sceneBoundingRect().width() / 2, self.left_bar_line.qt().scenePos().y() - stave_y)
+		self.left_bar_line.set_real_x(-self.left_bar_line.get_real_width())
+		self.left_bar_line.qt().setY(self.left_bar_line.qt().scenePos().y() - stave_y)
 
 	def reassemble(self):
 		if (self.time_signature_visible):
 			self.qt().addToGroup(self.time_signature.qt())
 		if (self.left_bar_line != None):
 			self.qt().addToGroup(self.left_bar_line.qt())
+
+	def find_places(self, potential_item: Musicitem, next_bar_x: float) -> List[List[float]]:
+		"""returns intervals of real Musicitem x-coordinates (not qt object position) including spacing, relative to (0, 0)"""
+		intervals = []
+		new_interval = [self.qt().scenePos().x() + Musicitem.MIN_OBJ_DIST, next_bar_x - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST]
+
+		if (self.time_signature_visible):
+			new_interval[0] += self.time_signature.get_real_width() + Musicitem.MIN_OBJ_DIST
+		if (new_interval[1] - new_interval[0] > potential_item.get_real_width()):
+			intervals.append(new_interval)
+		return intervals
 
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
@@ -185,8 +238,6 @@ class Stave(N_QGraphicsItemGroup):
 	...\n
 	e.g. -1 would be c (with g clef)\n
 	"""
-
-	line_pen = QPen(Qt.black, 3)
 
 	clefs = {
 		"Violinschlüssel": {
@@ -214,6 +265,7 @@ class Stave(N_QGraphicsItemGroup):
 	def __init__(self, clef_key: str, width: float, key_signature: KeySignature):
 		super().__init__(QGraphicsItemGroup())
 
+		self.line_pen = QPen(Qt.black, Musicitem.spec_to_px(get_specification("engravingDefaults", "staffLineThickness")))
 		# setup members
 		self.clef_key: str = clef_key
 		self.width = width
@@ -225,16 +277,17 @@ class Stave(N_QGraphicsItemGroup):
 		for i in range(5):
 			# first i is 0
 			# first line is the bottom line with index 0 in self.lines...
-			y = Musicitem.EM - i * 0.25 * Musicitem.EM
-			line = N_QGraphicsLineItem(QGraphicsLineItem(0, y, self.width, y))
-			line.qt().setPen(Stave.line_pen)
+			y = Musicitem.get_line_y(i)
+			# the line width creates an extra width
+			line = N_QGraphicsLineItem(QGraphicsLineItem(self.line_pen.width() / 2, y, self.width - self.line_pen.width(), y))
+			line.qt().setPen(self.line_pen)
 			self.lines.append(line)
 			self.qt().addToGroup(line.qt())
 
 		# add clef
 		self.clef = Musicitem(Stave.clefs[self.clef_key]["smufl_key"])
 		self.qt().addToGroup(self.clef.qt())
-		self.clef.setPos(0.05 * Musicitem.EM, Musicitem.EM - Musicitem.EM * 0.25 * Stave.clefs[self.clef_key]["line"])
+		self.clef.set_real_pos(Musicitem.MIN_OBJ_DIST, Musicitem.get_line_y(Stave.clefs[self.clef_key]["line"]))
 
 		self.key_signature_accidentals: List[Musicitem] = []
 		# add key signature
@@ -246,9 +299,11 @@ class Stave(N_QGraphicsItemGroup):
 				smufl_name = "accidentalFlat"
 			accidental = Musicitem(smufl_name)
 			self.qt().addToGroup(accidental.qt())
-			x = self.clef.qt().pos().x() + self.clef.qt().sceneBoundingRect().width() + i * (accidental.qt().sceneBoundingRect().width() - 0.1 * Musicitem.EM) + 0.1 * Musicitem.EM
-			y = Musicitem.EM - Musicitem.EM * 0.25 * (KeySignature.accidentals_positions[self.key_signature.type - 1][i] + Stave.clefs[clef_key]["accidental_shift"])
-			accidental.setPos(x, y)
+			x = self.clef.get_real_relative_x() + self.clef.get_real_width() + Musicitem.MIN_OBJ_DIST
+			if (i > 0):
+				x = self.key_signature_accidentals[i - 1].get_real_relative_x() + self.key_signature_accidentals[i - 1].get_real_width()
+			y = Musicitem.get_line_y(KeySignature.accidentals_positions[self.key_signature.type - 1][i] + Stave.clefs[clef_key]["accidental_shift"])
+			accidental.set_real_pos(x, y)
 			self.key_signature_accidentals.append(accidental)
 
 	def create_first_bar(self, first_system: bool, start_x: float, time_signature: TimeSignature):
@@ -260,7 +315,7 @@ class Stave(N_QGraphicsItemGroup):
 			self.bars[0].show_time_signature()
 
 	def add_bar(self, bar_lines: List[Musicitem], staves: int, stave_index: int, with_piano: bool):
-		x = bar_lines[0].qt().scenePos().x() + bar_lines[0].qt().sceneBoundingRect().width() / 2
+		x = bar_lines[0].get_real_relative_x() + bar_lines[0].get_real_width()
 		system_x = x - self.qt().scenePos().x()
 
 		i = len(self.bars)
@@ -303,9 +358,25 @@ class Stave(N_QGraphicsItemGroup):
 	def get_closest_line(self, mouse_pos: QPointF) -> int:
 		step = Musicitem.EM / 4
 		n = (self.qt().scenePos().y() + Musicitem.EM - mouse_pos.y()) / step
-		# with multiplying by two, rounding and the dividing again, we get 0.5 steps 
+		# with multiplying by two, rounding and the dividing again, we get 0.5 steps
 		n *= 2
 		return bound(round(n) / 2, -10, 10)
+
+	def get_closest_bar_n(self, mouse_pos: QPointF) -> int:
+		bar_line_intervals = []
+		for n, bar in enumerate(self.bars):
+			next_bar_x = 0
+			bar_x = bar.qt().scenePos().x()
+
+			if (n != len(self.bars) - 1):
+				next_bar_x = self.bars[n + 1].qt().scenePos().x()
+			else:
+				next_bar_x = Settings.Layout.WIDTH - Settings.Layout.MARGIN
+
+			bar_line_intervals.append([bar_x, next_bar_x])
+
+		# return the index of the closest interval / interval border
+		return bound_in_intervals(mouse_pos.x(), bar_line_intervals, True)
 
 class System(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
@@ -344,7 +415,7 @@ class System(N_QGraphicsItemGroup):
 		self.left_bar_line = Musicitem("barlineSingle")
 		self.left_bar_line.qt().setTransform(QTransform().scale(1, (self.get_bottom_y() - self.qt().y()) / Musicitem.EM))
 		self.qt().addToGroup(self.left_bar_line.qt())
-		self.left_bar_line.setPos(-self.left_bar_line.qt().sceneBoundingRect().width() / 2, self.get_bottom_y() - self.qt().y())
+		self.left_bar_line.set_real_pos(0, self.get_bottom_y() - self.qt().y())
 
 		# draw final barline (just to test it)
 		self.right_bar_line = Musicitem("barlineFinal")
@@ -362,7 +433,7 @@ class System(N_QGraphicsItemGroup):
 		# default brace: 1 EM
 		scale = (self.staves[-1].qt().y() - self.staves[-2].qt().y() + Musicitem.EM) / Musicitem.EM
 		self.brace.qt().setTransform(QTransform().scale(scale, scale))
-		self.brace.setPos(-self.brace.qt().sceneBoundingRect().width(), self.staves[-1].qt().y() + Musicitem.EM)
+		self.brace.set_real_pos(-self.brace.get_real_width() - Musicitem.EM / 16, self.staves[-1].qt().y() + Musicitem.EM)
 
 	def get_start_x(self):
 		staves_start_x = []
@@ -372,18 +443,18 @@ class System(N_QGraphicsItemGroup):
 			else:
 				staves_start_x.append(stave.clef.qt().sceneBoundingRect().width() + stave.clef.qt().pos().x())
 		return max(staves_start_x)
-	
+
 	def set_normal_end_bar_line(self):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineSingle"))
-		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 2, self.get_bottom_y() - self.qt().y())
-	
+		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width(), self.get_bottom_y() - self.qt().y())
+
 	def set_end_bar_line(self):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineFinal"))
-		self.right_bar_line.setPos(self.width - self.right_bar_line.qt().sceneBoundingRect().width() / 1.3, self.get_bottom_y() - self.qt().y())
+		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width(), self.get_bottom_y() - self.qt().y())
 
 	def get_bottom_y(self) -> float:
 		return self.staves[-1].qt().scenePos().y() + Musicitem.EM
-	
+
 	def get_height(self) -> float:
 		return self.get_bottom_y() - self.qt().y()
 
@@ -395,14 +466,14 @@ class System(N_QGraphicsItemGroup):
 		else:
 			y = self.get_bottom_y()
 		return y
-	
+
 	# only call when with_piano = True
 	def get_other_voices_height(self) -> float:
 		height = None
 		if (len(self.staves) > 2):
 			height = self.get_bottom_other_voices_y() - self.qt().scenePos().y()
 		return (height)
-		
+
 	def get_piano_height(self) -> float:
 		height = None
 		if (len(self.staves) > 1):
@@ -411,7 +482,7 @@ class System(N_QGraphicsItemGroup):
 
 	def get_center(self) -> QPointF:
 		return QPointF(self.qt().x() + self.width / 2, self.qt().y() + self.get_height() / 2)
-	
+
 	def get_closest_stave(self, mouse_pos: QPointF) -> Stave:
 		stave_distances = []
 		staves: List[Stave] = []
@@ -420,17 +491,7 @@ class System(N_QGraphicsItemGroup):
 			staves.append(stave)
 
 		return staves[stave_distances.index(min(stave_distances))]
-	
-	def get_closest_bar_n(self, mouse_pos: QPointF) -> int:
-		bar_distances = []
-		indexes: List[int] = []
-		# bars have all the same pos for one system
-		for n, bar in enumerate(self.staves[0].bars):
-			bar_distances.append(QLineF(QPointF(bar.qt().scenePos().x(), 0), mouse_pos).length())
-			indexes.append(n)
 
-		return indexes[bar_distances.index(min(bar_distances))]
-	
 	def reassemble(self):
 		for n, stave in enumerate(self.staves):
 			stave.reassemble()

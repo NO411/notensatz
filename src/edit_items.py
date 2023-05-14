@@ -14,8 +14,8 @@ class EditScene(QGraphicsScene):
 		super().__init__(x, y, width, height)
 		self.current_system: System = None
 		self.current_stave: Stave = None
-		self.current_line: int = None
 		self.current_bar_n: int = None
+		self.successful: bool = False
 		self.edit_objects: List[Musicitem] = []
 
 		self.setup = False

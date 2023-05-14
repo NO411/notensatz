@@ -8,13 +8,16 @@ font_metadata = None
 glyphnames = None
 icons = None
 
-def get_unicode(smufl_name: str):
+def get_unicode(smufl_name: str) -> int:
 	return int(glyphnames[smufl_name]["codepoint"][2:], 16)
+
+def unicode_to_string(u: int):
+	return str(chr(u))
 
 def get_symbol(smufl_name: Union[str, List[str]]):
 	ret = ""
 	if (type(smufl_name) == str):
-		ret = str(chr(get_unicode(smufl_name)))
+		ret = unicode_to_string(get_unicode(smufl_name))
 	else:
 		for part in smufl_name:
 			ret += str(chr(get_unicode(part)))

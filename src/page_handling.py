@@ -7,7 +7,6 @@ from document import DocumentUi
 from notation_system import KeySignature
 from fonts import real_font_size
 from settings import Settings
-from editing import unselect_buttons
 
 class PageHandler():
 	def __init__(self, app: App, ui_misc: UiMiscHandler):
@@ -151,8 +150,6 @@ class PageHandler():
 		self.app.document_ui.pages[-1].qt().addItem(self.app.document_ui.systems[-1].qt())
 		self.set_last_system_page()
 
-		unselect_buttons(self.app)
-
 	def delete_last_system(self):
 		if (len(self.app.document_ui.systems) < 2):
 			info_box = QMessageBox(QMessageBox.Information, "Information", "Sie können das erste System nicht löschen.", QMessageBox.Yes, self.app.window)
@@ -185,15 +182,11 @@ class PageHandler():
 
 		self.set_last_system_page()
 
-		unselect_buttons(self.app)
-
 	def edit_text(self, text_field):
 		# "move" ui to text fields
 		self.app.set_scene(0)
 		self.app.ui.view.verticalScrollBar().setValue(self.app.ui.view.verticalScrollBar().minimum())
 		self.update_page_info_and_button_text()
-
-		unselect_buttons(self.app)
 
 		if (text_field == "heading"):
 			self.app.document_ui.heading.qt().setFocus()

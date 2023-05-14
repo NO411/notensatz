@@ -58,8 +58,8 @@ class SymbolButton(QPushButton):
 		"Pausen": {
 			"font": "Bravura",
 			"buttons": [
-				["restWholeLegerLine", "ganze Pause", "restWhole"],
-				["restHalfLegerLine", "halbe pause", "restHalf"],
+				["restWholeLegerLine", "ganze Pause"],
+				["restHalfLegerLine", "halbe pause"],
 				["restQuarter", "viertel Pause"],
 				["rest8th", "achtel Pause"],
 				["rest16th", "sechszehntel Pause"],
