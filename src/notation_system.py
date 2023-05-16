@@ -41,16 +41,36 @@ class Musicitem(N_QGraphicsTextItem):
 	def spec_to_px(spec) -> float:
 		return Musicitem.EM / 4 * spec
 
+	def get_character_width(key):
+		box = get_specification("glyphBBoxes", key)
+		return Musicitem.spec_to_px(box["bBoxNE"][0] - box["bBoxSW"][0])
+
 	def get_qt_blank_space(self):
 		key_ = self.key
-		if (type(self.key) != str):
-			# for time signatures with more than one symbol
-			key_ = self.key[1]
-
-		box = get_specification("glyphBBoxes", key_)
-
+		real_width = 0
 		qt_width = self.qt().sceneBoundingRect().width()
-		real_width = Musicitem.spec_to_px(box["bBoxNE"][0] - box["bBoxSW"][0])
+
+		if (type(self.key) != str):
+			
+			
+			possible_widths = []
+
+			if (len(self.key) > 4):
+				# special case: time signature 12/8 (and others maybe added later)
+				if (self.key[2] == "timeSigCombNumerator"):
+					possible_widths.append(Musicitem.get_character_width(self.key[1]) + Musicitem.get_character_width(self.key[3]))
+					if (len(self.key) > 6 and self.key[6] == "timeSigCombDenominator"):
+						possible_widths.append(Musicitem.get_character_width(self.key[5]) + Musicitem.get_character_width(self.key[7]))
+				elif (self.key[4] == "timeSigCombDenominator"):
+					possible_widths.append(Musicitem.get_character_width(self.key[3]) + Musicitem.get_character_width(self.key[5]))
+			else:
+				possible_widths.append(Musicitem.get_character_width(self.key[1]))
+				possible_widths.append(Musicitem.get_character_width(self.key[3]))
+
+			real_width = max(possible_widths)
+		else:
+			real_width = Musicitem.get_character_width(key_)
+
 		real_width *= self.qt().transform().m11()
 		return (qt_width - real_width) / 2
 
@@ -279,7 +299,7 @@ class Stave(N_QGraphicsItemGroup):
 			# first line is the bottom line with index 0 in self.lines...
 			y = Musicitem.get_line_y(i)
 			# the line width creates an extra width
-			line = N_QGraphicsLineItem(QGraphicsLineItem(self.line_pen.width() / 2, y, self.width - self.line_pen.width(), y))
+			line = N_QGraphicsLineItem(QGraphicsLineItem(self.line_pen.width() / 2, y, self.width - self.line_pen.width() / 2, y))
 			line.qt().setPen(self.line_pen)
 			self.lines.append(line)
 			self.qt().addToGroup(line.qt())
@@ -446,7 +466,7 @@ class System(N_QGraphicsItemGroup):
 
 	def set_normal_end_bar_line(self):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineSingle"))
-		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width(), self.get_bottom_y() - self.qt().y())
+		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width() / 2, self.get_bottom_y() - self.qt().y())
 
 	def set_end_bar_line(self):
 		self.right_bar_line.qt().setPlainText(get_symbol("barlineFinal"))

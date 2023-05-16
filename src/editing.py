@@ -6,7 +6,7 @@ from app import App
 from edit_items import EditScene, Musicitem
 from symbol_button import SymbolButton
 from settings import Settings
-from misc import bound_in_intervals, bound
+from misc import bound_in_intervals
 from notation_system import Bar, Rest
 
 from typing import List
@@ -43,32 +43,43 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 	if (selected_button.group_key == "Sonstige"):
 		# barline
 		if (selected_button.n_symbol == 1):
+			new_bar = scene.edit_objects[0]
+			piano_bar = scene.edit_objects[1]
+			new_bar.change_text("barlineSingle")
+			piano_bar.change_text("barlineSingle")
+
 			#  positioning
-			bar_x = get_nearest_possible_pos(scene.current_stave.bars, mouse_pos, Musicitem.MIN_OBJ_DIST)
-			
-			if (bar_x != None):
-				new_bar = scene.edit_objects[0]
+			places = current_bar.find_places(scene.edit_objects[0], get_next_bar_x(scene))
+
+			if (len(places) >= 1):
+
+				bar_x = bound_in_intervals(mouse_pos.x(), places)
+
 				if (not app.document_ui.with_piano):
-					new_bar.change_text("barlineSingle")
+					
 					new_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_height() / Musicitem.EM))
 					new_bar.set_real_pos(bar_x, scene.current_system.get_bottom_y())
-
+					piano_bar.change_text()
 					scene.successful = True
 				else:
 					if (app.document_ui.staves > 2):
 						new_bar.change_text("barlineSingle")
 						new_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_other_voices_height() / Musicitem.EM))
+					else:
+						new_bar.change_text()
 
 					# two bar lines, for each bar, one for piano and one for the other voices
 					# change pos of the new_bar even if not needed, it will be used by the add_bar algorithm
 					new_bar.set_real_pos(bar_x, scene.current_system.get_bottom_other_voices_y())
 
-					piano_bar = scene.edit_objects[1]
-					piano_bar.change_text("barlineSingle")
 					piano_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_piano_height() / Musicitem.EM))
 					piano_bar.set_real_pos(bar_x, scene.current_system.get_bottom_y())
 
 					scene.successful = True
+					
+			else:
+				new_bar.change_text()
+				piano_bar.change_text()
 
 	elif (selected_button.group_key == "Noten"):
 		# notes positioning
@@ -82,9 +93,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 		if (selected_button.n_symbol <= 6):
 			scene.edit_objects[0].change_text(Rest.SYMBOLS[selected_button.n_symbol])
 
-			next_bar_x = Settings.Layout.WIDTH - Settings.Layout.MARGIN - scene.current_system.right_bar_line.get_real_width()
-			if (scene.current_bar_n != len(scene.current_stave.bars) - 1):
-				next_bar_x = scene.current_stave.bars[scene.current_bar_n + 1].qt().scenePos().x() - scene.current_system.staves[0].bars[scene.current_bar_n + 1].left_bar_line.get_real_width()
+			next_bar_x = get_next_bar_x(scene)
 
 			line = 2
 			if (selected_button.n_symbol == 0):
@@ -99,12 +108,25 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 	elif (selected_button.group_key == "Taktarten"):
 		bar_line_x = current_bar.qt().scenePos().x()
 
-		# time signature positioning
+		space = True
+
 		for n, stave in enumerate(scene.current_system.staves):
 			scene.edit_objects[n].change_text(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][0])
-			scene.edit_objects[n].set_real_pos(bar_line_x + Musicitem.MIN_OBJ_DIST, stave.qt().scenePos().y() + Musicitem.EM)
+			intervals = stave.bars[scene.current_bar_n].find_places(scene.edit_objects[n], get_next_bar_x(scene))
+			if ((len(intervals) == 0 or intervals[0][0] != stave.bars[scene.current_bar_n].qt().scenePos().x() + Musicitem.MIN_OBJ_DIST) and not stave.bars[scene.current_bar_n].time_signature_visible):
+				space = False
+				break
 
-		scene.successful = True
+		if (space):
+			# time signature positioning
+			for n, stave in enumerate(scene.current_system.staves):
+				scene.edit_objects[n].set_real_pos(bar_line_x + Musicitem.MIN_OBJ_DIST, stave.qt().scenePos().y() + Musicitem.EM)
+
+			scene.successful = True
+		
+		else:
+			for n, stave in enumerate(scene.current_system.staves):
+				scene.edit_objects[n].change_text()
 
 def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button: SymbolButton):
 	if (selected_button is None or scene.successful == False):
@@ -125,6 +147,12 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 	
 	# remove the selected item from the current pos
 	edit_update(scene, mouse_pos, app, selected_button)
+
+def get_next_bar_x(scene: EditScene) -> float:
+	next_bar_x = Settings.Layout.WIDTH - Settings.Layout.MARGIN - scene.current_system.right_bar_line.get_real_width()
+	if (scene.current_bar_n != len(scene.current_stave.bars) - 1):
+		next_bar_x = scene.current_stave.bars[scene.current_bar_n + 1].qt().scenePos().x() - scene.current_system.staves[0].bars[scene.current_bar_n + 1].left_bar_line.get_real_width()
+	return next_bar_x
 
 def get_nearest_possible_pos(bars: List[Bar], mouse_pos: QPointF, dist: float):
 	# keep distance to the other bar lines for a consistent look
