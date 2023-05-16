@@ -40,7 +40,63 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 	# just the line number
 	scene.current_line = scene.current_stave.get_closest_line(mouse_pos)
 
-	if (selected_button.group_key == "Sonstige"):
+	if (selected_button.n_symbol == "Noten"):
+		# notes positioning
+		#y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(scene.current_line)
+		#x_bound = get_nearest_possible_pos(scene.current_stave.bars, mouse_pos, Musicitem.EM / 2)
+		#current_edit_obj.setPos(x_bound, y)
+		...
+	elif (selected_button.n_symbol == "Artikulation"):
+		...
+	elif (selected_button.n_symbol == "Dynamik"):
+		...
+	elif (selected_button.group_key == "Pausen"):
+		if (selected_button.n_symbol <= 6):
+			scene.edit_objects[0].change_text(Rest.SYMBOLS[selected_button.n_symbol])
+
+			next_bar_x = get_next_bar_x(scene)
+
+			line = 2
+			if (selected_button.n_symbol == 0):
+				line = 3
+
+			places = current_bar.find_places(scene.edit_objects[0], next_bar_x)
+			if (len(places) >= 1):
+				rest_x = bound_in_intervals(mouse_pos.x(), places)
+				scene.edit_objects[0].set_real_pos(rest_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
+				scene.successful = True
+			else:
+				scene.edit_objects[0].change_text()
+	elif (selected_button.group_key == "Vorzeichen"):
+		...
+	
+	elif (selected_button.group_key == "Taktarten"):
+		bar_line_x = current_bar.qt().scenePos().x()
+
+		space = True
+
+		for n, stave in enumerate(scene.current_system.staves):
+			scene.edit_objects[n].change_text(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][0])
+			intervals = stave.bars[scene.current_bar_n].find_places(scene.edit_objects[n], get_next_bar_x(scene))
+			if ((len(intervals) == 0 or intervals[0][0] != stave.bars[scene.current_bar_n].qt().scenePos().x() + Musicitem.MIN_OBJ_DIST) and not stave.bars[scene.current_bar_n].time_signature_visible):
+				space = False
+				break
+
+		if (space):
+			# time signature positioning
+			for n, stave in enumerate(scene.current_system.staves):
+				scene.edit_objects[n].set_real_pos(bar_line_x + Musicitem.MIN_OBJ_DIST, stave.qt().scenePos().y() + Musicitem.EM)
+
+			scene.successful = True
+		
+		else:
+			for n, stave in enumerate(scene.current_system.staves):
+				scene.edit_objects[n].change_text()
+	
+	elif (selected_button.group_key == "N-Tolen"):
+		...
+
+	elif (selected_button.group_key == "Sonstige"):
 		# barline
 		if (selected_button.n_symbol == 1):
 			new_bar = scene.edit_objects[0]
@@ -81,71 +137,37 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 				new_bar.change_text()
 				piano_bar.change_text()
 
-	elif (selected_button.group_key == "Noten"):
+	elif (selected_button.group_key == "Werkzeuge"):
+		...
+	
+def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button: SymbolButton):
+	if (selected_button is None or scene.successful == False):
+		return
+	if (selected_button.n_symbol == "Noten"):
 		# notes positioning
 		#y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(scene.current_line)
 		#x_bound = get_nearest_possible_pos(scene.current_stave.bars, mouse_pos, Musicitem.EM / 2)
 		#current_edit_obj.setPos(x_bound, y)
 		...
-	elif (selected_button.group_key == "Vorzeichen"):
+	elif (selected_button.n_symbol == "Artikulation"):
+		...
+	elif (selected_button.n_symbol == "Dynamik"):
 		...
 	elif (selected_button.group_key == "Pausen"):
-		if (selected_button.n_symbol <= 6):
-			scene.edit_objects[0].change_text(Rest.SYMBOLS[selected_button.n_symbol])
-
-			next_bar_x = get_next_bar_x(scene)
-
-			line = 2
-			if (selected_button.n_symbol == 0):
-				line = 3
-
-			places = current_bar.find_places(scene.edit_objects[0], next_bar_x)
-			if (len(places) >= 1):
-				rest_x = bound_in_intervals(mouse_pos.x(), places)
-				scene.edit_objects[0].set_real_pos(rest_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
-				scene.successful = True
-			else:
-				scene.edit_objects[0].change_text()
-
-	elif (selected_button.group_key == "Taktarten"):
-		bar_line_x = current_bar.qt().scenePos().x()
-
-		space = True
-
-		for n, stave in enumerate(scene.current_system.staves):
-			scene.edit_objects[n].change_text(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][0])
-			intervals = stave.bars[scene.current_bar_n].find_places(scene.edit_objects[n], get_next_bar_x(scene))
-			if ((len(intervals) == 0 or intervals[0][0] != stave.bars[scene.current_bar_n].qt().scenePos().x() + Musicitem.MIN_OBJ_DIST) and not stave.bars[scene.current_bar_n].time_signature_visible):
-				space = False
-				break
-
-		if (space):
-			# time signature positioning
-			for n, stave in enumerate(scene.current_system.staves):
-				scene.edit_objects[n].set_real_pos(bar_line_x + Musicitem.MIN_OBJ_DIST, stave.qt().scenePos().y() + Musicitem.EM)
-
-			scene.successful = True
-		
-		else:
-			for n, stave in enumerate(scene.current_system.staves):
-				scene.edit_objects[n].change_text()
-
-def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button: SymbolButton):
-	if (selected_button is None or scene.successful == False):
-		return
-
-	# tools
-	...
-
-	# symbols
-	if (selected_button.group_key == "Sonstige"):
-		if (selected_button.n_symbol == 1 and scene.edit_objects[0].qt().toPlainText() != ""):
-			for n, stave in enumerate(scene.current_system.staves):
-				stave.add_bar(scene.edit_objects, app.document_ui.staves, n, app.document_ui.with_piano)
-
+		...
+	elif (selected_button.group_key == "Vorzeichen"):
+		...
 	elif (selected_button.group_key == "Taktarten"):
 		for n, stave in enumerate(scene.current_system.staves):
 			stave.bars[scene.current_bar_n].show_time_signature(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][1])
+	elif (selected_button.group_key == "N-Tolen"):
+		...
+	elif (selected_button.group_key == "Sonstige"):
+		if (selected_button.n_symbol == 1 and scene.edit_objects[0].qt().toPlainText() != ""):
+			for n, stave in enumerate(scene.current_system.staves):
+				stave.add_bar(scene.edit_objects, app.document_ui.staves, n, app.document_ui.with_piano)
+	elif (selected_button.group_key == "Werkzeuge"):
+		...
 	
 	# remove the selected item from the current pos
 	edit_update(scene, mouse_pos, app, selected_button)
