@@ -104,6 +104,8 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 				rest_x = bound_in_intervals(mouse_pos.x(), places)
 				scene.edit_objects[0].set_real_pos(rest_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
 				scene.successful = True
+			else:
+				scene.edit_objects[0].change_text()
 
 	elif (selected_button.group_key == "Taktarten"):
 		bar_line_x = current_bar.qt().scenePos().x()

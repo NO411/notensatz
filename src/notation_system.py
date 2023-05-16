@@ -465,11 +465,11 @@ class System(N_QGraphicsItemGroup):
 		return max(staves_start_x)
 
 	def set_normal_end_bar_line(self):
-		self.right_bar_line.qt().setPlainText(get_symbol("barlineSingle"))
-		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width() / 2, self.get_bottom_y() - self.qt().y())
+		self.right_bar_line.change_text("barlineSingle")
+		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width(), self.get_bottom_y() - self.qt().y())
 
 	def set_end_bar_line(self):
-		self.right_bar_line.qt().setPlainText(get_symbol("barlineFinal"))
+		self.right_bar_line.change_text("barlineFinal")
 		self.right_bar_line.set_real_pos(self.width - self.right_bar_line.get_real_width(), self.get_bottom_y() - self.qt().y())
 
 	def get_bottom_y(self) -> float:
