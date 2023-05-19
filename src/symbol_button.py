@@ -25,6 +25,20 @@ class SymbolButton(QPushButton):
 				["metAugmentationDot", "Punktierung"],
 			]
 		},
+		# rests
+		"Pausen": {
+			"font": "Bravura",
+			"buttons": [
+				["restWholeLegerLine", "ganze Pause"],
+				["restHalfLegerLine", "halbe pause"],
+				["restQuarter", "viertel Pause"],
+				["rest8th", "achtel Pause"],
+				["rest16th", "sechszehntel Pause"],
+				["rest32nd", "zweiunddreißigstel Pause"],
+				["rest64th", "vierundsechszigstel Pause"],
+				["metAugmentationDot", "Punktierung"],
+			],
+		},
 		# articulation
 		"Artikulation": {
 			"font": "Bravura",
@@ -52,20 +66,6 @@ class SymbolButton(QPushButton):
 				["dynamicFFF", "fortefortissimo"],
 				["dynamicCrescendoHairpin", "crescendo"],
 				["dynamicDiminuendoHairpin", "decrescendo"],
-			],
-		},
-		# rests
-		"Pausen": {
-			"font": "Bravura",
-			"buttons": [
-				["restWholeLegerLine", "ganze Pause"],
-				["restHalfLegerLine", "halbe pause"],
-				["restQuarter", "viertel Pause"],
-				["rest8th", "achtel Pause"],
-				["rest16th", "sechszehntel Pause"],
-				["rest32nd", "zweiunddreißigstel Pause"],
-				["rest64th", "vierundsechszigstel Pause"],
-				["metAugmentationDot", "Punktierung"],
 			],
 		},
 		# accidentals

@@ -6,8 +6,8 @@ from app import App
 from edit_items import EditScene, Musicitem
 from symbol_button import SymbolButton
 from settings import Settings
-from misc import bound_in_intervals, find_overlap_intervals
-from notation_system import Rest
+from misc import bound_in_intervals, find_overlap_intervals, bound
+from notation_system import Rest, Clef
 
 def setup_edit(self: EditScene, app: App):
 	self.app = app
@@ -92,7 +92,12 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 				scene.edit_objects[n].change_text()
 	
 	elif (selected_button.group_key == "N-Tolen"):
-		...
+		scene.edit_objects[0].change_text("tuplet" + str(selected_button.n_symbol + 2))
+		scene.edit_objects[0].set_real_pos(
+			bound(mouse_pos.x(), Settings.Layout.MARGIN, Settings.Layout.WIDTH - Settings.Layout.MARGIN - scene.edit_objects[0].get_real_width()),
+			bound(mouse_pos.y(), Settings.Layout.MARGIN - scene.edit_objects[0].get_real_height(), Settings.Layout.HEIGHT - Settings.Layout.MARGIN)
+		)
+		scene.successful = True
 
 	elif (selected_button.group_key == "Sonstige"):
 		# barline
@@ -137,6 +142,27 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 			else:
 				new_bar.change_text()
 				piano_bar.change_text()
+			
+		elif (1 < selected_button.n_symbol < 5):
+			scene.edit_objects[0].change_text(Clef.SYMBOLS[selected_button.n_symbol - 2]["smufl_key"])
+
+			next_bar_x = get_next_bar_x(scene)
+			
+			# determine line to put clef on
+			closest_line = scene.current_stave.get_closest_line(mouse_pos, 1)
+			dists = []
+			for line in Clef.SYMBOLS[selected_button.n_symbol - 2]["lines"]:
+				dists.append(abs(line - closest_line))
+			
+			line = Clef.SYMBOLS[selected_button.n_symbol - 2]["lines"][dists.index(min(dists))]
+
+			places = current_bar.find_places(scene.edit_objects[0], next_bar_x)
+			if (len(places) >= 1):
+				clef_x = bound_in_intervals(mouse_pos.x(), places)
+				scene.edit_objects[0].set_real_pos(clef_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
+				scene.successful = True
+			else:
+				scene.edit_objects[0].change_text()
 
 	elif (selected_button.group_key == "Werkzeuge"):
 		...
@@ -162,11 +188,13 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 		for n, stave in enumerate(scene.current_system.staves):
 			stave.bars[scene.current_bar_n].show_time_signature(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][1])
 	elif (selected_button.group_key == "N-Tolen"):
-		...
+		scene.current_stave.bars[scene.current_bar_n].add_tuplet(scene.edit_objects[0])
 	elif (selected_button.group_key == "Sonstige"):
 		if (selected_button.n_symbol == 1):
 			for n, stave in enumerate(scene.current_system.staves):
 				stave.add_bar(scene.edit_objects, app.document_ui.staves, n, app.document_ui.with_piano)
+		elif (1 < selected_button.n_symbol < 5):
+			scene.current_stave.bars[scene.current_bar_n].add_clef(scene.edit_objects[0], selected_button.n_symbol - 2)
 	elif (selected_button.group_key == "Werkzeuge"):
 		...
 	

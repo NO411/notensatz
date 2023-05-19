@@ -89,6 +89,10 @@ class Musicitem(N_QGraphicsTextItem):
 	def get_real_width(self):
 		return self.qt().sceneBoundingRect().width() - 2 * self.get_qt_blank_space()
 
+	def get_real_height(self):
+		box = get_specification("glyphBBoxes", self.key)
+		return Musicitem.spec_to_px(box["bBoxSW"][1] - box["bBoxNE"][1])
+
 	def get_real_relative_x(self):
 		"""relative to its itemgroup"""
 		return self.qt().pos().x() + self.get_qt_blank_space()
@@ -165,6 +169,28 @@ class Rest(N_QGraphicsItemGroup):
 	def get_real_relative_x(self):
 		return self.qt().pos().x() + self.rest.get_real_relative_x()
 
+class Clef(Musicitem):
+	SYMBOLS = [
+		{
+			"lines": [1],
+			"smufl_key": "gClefChange",
+		},
+		{
+			"lines": [3],
+			"smufl_key": "fClefChange",
+		},
+		{
+			"lines": [2, 3],
+			"smufl_key": "cClefChange",
+		},
+	]
+
+	def __init__(self, clef: Musicitem, n: int):
+		super().__init__()
+		self.change_text(Clef.SYMBOLS[n]["smufl_key"])
+		self.qt().setDefaultTextColor(Qt.black)
+		self.qt().setPos(clef.qt().pos())
+
 class Note:
 	def __init__(self, pitch: int, duration: float = None):
 		# pitch from 1 - 88 (subcontra-a to c5)
@@ -230,6 +256,7 @@ class Bar(N_QGraphicsItemGroup):
 		self.time_signature_visible = False
 
 		self.objects: List[Union[Musicitem, N_QGraphicsItemGroup]] = []
+		self.free_objects: List[Union[Musicitem, N_QGraphicsItemGroup]] = []
 		self.left_bar_line: Musicitem = None
 
 	def show_time_signature(self, new_time_sig_name: str = None):
@@ -298,6 +325,17 @@ class Bar(N_QGraphicsItemGroup):
 		self.qt().addToGroup(new_rest.qt())
 		self.add_object(new_rest)
 
+	def add_clef(self, clef: Musicitem, n: int):
+		new_clef = Clef(deepcopy(clef), n)
+		self.qt().addToGroup(new_clef.qt())
+		self.add_object(new_clef)
+
+	def add_tuplet(self, tuplet: Musicitem):
+		new_tuplet = deepcopy(tuplet)
+		new_tuplet.qt().setDefaultTextColor(Qt.black)
+		self.qt().addToGroup(new_tuplet.qt())
+		self.free_objects.append(new_tuplet)
+
 	def reassemble(self):
 		if (self.time_signature_visible):
 			self.qt().addToGroup(self.time_signature.qt())
@@ -309,6 +347,9 @@ class Bar(N_QGraphicsItemGroup):
 			# insert other types later
 			if (type(obj).__bases__[0] == N_QGraphicsItemGroup):
 				obj.reassemble()
+
+		for obj in self.free_objects:
+			self.qt().addToGroup(obj.qt())
 
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
@@ -439,12 +480,12 @@ class Stave(N_QGraphicsItemGroup):
 	def get_center(self) -> QPointF:
 		return QPointF(self.qt().scenePos().x() + self.width / 2, self.qt().scenePos().y() + Musicitem.EM / 2)
 
-	def get_closest_line(self, mouse_pos: QPointF) -> int:
+	def get_closest_line(self, mouse_pos: QPointF, steps: int = 2) -> int:
 		step = Musicitem.EM / 4
 		n = (self.qt().scenePos().y() + Musicitem.EM - mouse_pos.y()) / step
 		# with multiplying by two, rounding and the dividing again, we get 0.5 steps
-		n *= 2
-		return bound(round(n) / 2, -10, 10)
+		n *= steps
+		return bound(round(n) / steps, -10, 10)
 
 	def get_closest_bar_n(self, mouse_pos: QPointF) -> int:
 		bar_line_intervals = []

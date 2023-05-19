@@ -25,7 +25,7 @@ class App_Ui(Ui_MainWindow):
 		self.setupUi(app.window)
 
 		# this is for rendering staves correctly
-		self.view.setRenderHint(QPainter.Antialiasing)
+		self.view.setRenderHints(QPainter.Antialiasing | QPainter.SmoothPixmapTransform)
 
 		# other ui setups
 		# (seperately to not get overriden by the pyqt5 designer...)
