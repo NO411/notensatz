@@ -87,7 +87,16 @@ class SymbolButton(QPushButton):
 		"N-Tolen": {
 			"font": "Bravura",
 			# initialized by app.py init_symbol_buttons()
-			"buttons": [],
+			"buttons": [
+				["tuplet2", "Duole"],
+				["tuplet3", "Triole"],
+				["tuplet4", "Quartole"],
+				["tuplet5", "Quintole"],
+				["tuplet6", "Sextole"],
+				["tuplet7", "Septole"],
+				["tuplet8", "Oktole"],
+				["tuplet9", "Nonole"],
+			],
 		},
 		# misc
 		"Sonstige": {
