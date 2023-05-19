@@ -5,7 +5,7 @@ class UiMiscHandler():
 	enabled_button_stylesheet = "QPushButton {color: " + Settings.Gui.PRIMARY_COLOR + "}"
 	disabled_button_stylesheet = "QPushButton {color: " + Settings.Gui.CUSTOM_COLORS["border"] + "}"
 
-	def __init__(self, app:App):
+	def __init__(self, app: App):
 		self.app = app
 
 	# functionality for the zoom buttons and the slider

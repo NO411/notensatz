@@ -96,18 +96,18 @@ class Musicitem(N_QGraphicsTextItem):
 class TimeSignature(Musicitem):
 	signatures_map = {
 		"2/4-Takt": [2, 4],
-        "2/2-Takt": [2, 2],
-        "3/2-Takt": [3, 2],
-        "3/4-Takt": [3, 4],
-        "3/8-Takt": [3, 8],
-        "4/4-Takt": [4, 4],
-        "5/4-Takt": [5, 4],
-        "5/8-Takt": [5, 8],
-        "6/4-Takt": [6, 4],
-        "6/8-Takt": [6, 8],
-        "7/8-Takt": [7, 8],
-        "9/8-Takt": [9, 8],
-        "12/8-Takt": [12, 8],
+		"2/2-Takt": [2, 2],
+		"3/2-Takt": [3, 2],
+		"3/4-Takt": [3, 4],
+		"3/8-Takt": [3, 8],
+		"4/4-Takt": [4, 4],
+		"5/4-Takt": [5, 4],
+		"5/8-Takt": [5, 8],
+		"6/4-Takt": [6, 4],
+		"6/8-Takt": [6, 8],
+		"7/8-Takt": [7, 8],
+		"9/8-Takt": [9, 8],
+		"12/8-Takt": [12, 8],
 	}
 
 	def __init__(self, name: str):
@@ -147,8 +147,23 @@ class Rest(N_QGraphicsItemGroup):
 		"rest64th",
 	]
 
-	def __init__(self):
+	def __init__(self, rest: Musicitem):
 		super().__init__(QGraphicsItemGroup())
+		self.rest = rest
+		self.rest.qt().setDefaultTextColor(Qt.black)
+		self.qt().setPos(self.rest.qt().pos())
+		self.qt().addToGroup(self.rest.qt())
+		self.rest.qt().setPos(0, 0)
+	
+	def reassemble(self):
+		self.qt().addToGroup(self.rest.qt())
+		self.qt().setPos(self._pos)
+
+	def get_real_width(self):
+		return self.rest.get_real_width()
+	
+	def get_real_relative_x(self):
+		return self.qt().pos().x() + self.rest.get_real_relative_x()
 
 class Note:
 	def __init__(self, pitch: int, duration: float = None):
@@ -214,7 +229,7 @@ class Bar(N_QGraphicsItemGroup):
 		self.time_signature = time_signature
 		self.time_signature_visible = False
 
-		self.note_groups = []
+		self.objects: List[Union[Musicitem, N_QGraphicsItemGroup]] = []
 		self.left_bar_line: Musicitem = None
 
 	def show_time_signature(self, new_time_sig_name: str = None):
@@ -232,22 +247,68 @@ class Bar(N_QGraphicsItemGroup):
 		self.left_bar_line.set_real_x(-self.left_bar_line.get_real_width())
 		self.left_bar_line.qt().setY(self.left_bar_line.qt().scenePos().y() - stave_y)
 
+	def get_start(self) -> float:
+		total_start_x = self.qt().scenePos().x() + Musicitem.MIN_OBJ_DIST
+		if (self.time_signature_visible):
+			total_start_x += self.time_signature.get_real_width() + Musicitem.MIN_OBJ_DIST
+		return total_start_x
+	
+	def get_end(self, potential_item: Musicitem, next_bar_x: float) -> float:
+		return next_bar_x - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST
+
+	def find_places(self, potential_item: Musicitem, next_bar_x: float) -> List[List[float]]:
+		"""returns intervals of real Musicitem x-coordinates (not qt object position) including spacing, relative to (0, 0)"""
+		intervals = []
+
+		total_start_x = self.get_start()
+		total_end_x = self.get_end(potential_item, next_bar_x)
+
+		if (len(self.objects) >= 1):
+			first_end_x = self.objects[0].get_real_relative_x() + self.qt().scenePos().x() - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST 
+			if (first_end_x - total_start_x >= 0):
+				intervals.append([total_start_x, first_end_x])
+
+			for n, obj in enumerate(self.objects):
+				start_x = obj.get_real_relative_x() + self.qt().scenePos().x() + obj.get_real_width()  + Musicitem.MIN_OBJ_DIST
+				end_x = total_end_x
+
+				if (n < len(self.objects) - 1):
+					end_x = self.objects[n + 1].get_real_relative_x() + self.qt().scenePos().x() - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST
+
+				if (end_x - start_x >= 0):
+					intervals.append([start_x, end_x])
+		else:
+			if (total_end_x - total_start_x >= 0):
+				intervals.append([total_start_x, total_end_x])
+
+		return intervals
+	
+	def add_object(self, new_obj: Union[Musicitem, N_QGraphicsItemGroup]):
+		i = len(self.objects)
+
+		for i_, obj in enumerate(self.objects):
+			if (obj.get_real_relative_x() > new_obj.get_real_relative_x()):
+				i = i_
+				break
+
+		self.objects.insert(i, new_obj)
+
+	def add_rest(self, rest: Musicitem):
+		new_rest = Rest(deepcopy(rest))
+		self.qt().addToGroup(new_rest.qt())
+		self.add_object(new_rest)
+
 	def reassemble(self):
 		if (self.time_signature_visible):
 			self.qt().addToGroup(self.time_signature.qt())
 		if (self.left_bar_line != None):
 			self.qt().addToGroup(self.left_bar_line.qt())
 
-	def find_places(self, potential_item: Musicitem, next_bar_x: float) -> List[List[float]]:
-		"""returns intervals of real Musicitem x-coordinates (not qt object position) including spacing, relative to (0, 0)"""
-		intervals = []
-		new_interval = [self.qt().scenePos().x() + Musicitem.MIN_OBJ_DIST, next_bar_x - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST]
-
-		if (self.time_signature_visible):
-			new_interval[0] += self.time_signature.get_real_width() + Musicitem.MIN_OBJ_DIST
-		if (new_interval[1] - new_interval[0] > potential_item.get_real_width()):
-			intervals.append(new_interval)
-		return intervals
+		for obj in self.objects:
+			self.qt().addToGroup(obj.qt())
+			# insert other types later
+			if (type(obj).__bases__[0] == N_QGraphicsItemGroup):
+				obj.reassemble()
 
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
@@ -285,7 +346,8 @@ class Stave(N_QGraphicsItemGroup):
 	def __init__(self, clef_key: str, width: float, key_signature: KeySignature):
 		super().__init__(QGraphicsItemGroup())
 
-		self.line_pen = QPen(Qt.black, Musicitem.spec_to_px(get_specification("engravingDefaults", "staffLineThickness")))
+		line_pen = QPen(Qt.black, Musicitem.spec_to_px(get_specification("engravingDefaults", "staffLineThickness")))
+		
 		# setup members
 		self.clef_key: str = clef_key
 		self.width = width
@@ -299,8 +361,8 @@ class Stave(N_QGraphicsItemGroup):
 			# first line is the bottom line with index 0 in self.lines...
 			y = Musicitem.get_line_y(i)
 			# the line width creates an extra width
-			line = N_QGraphicsLineItem(QGraphicsLineItem(self.line_pen.width() / 2, y, self.width - self.line_pen.width() / 2, y))
-			line.qt().setPen(self.line_pen)
+			line = N_QGraphicsLineItem(QGraphicsLineItem(line_pen.width() / 2, y, self.width - line_pen.width() / 2, y))
+			line.qt().setPen(line_pen)
 			self.lines.append(line)
 			self.qt().addToGroup(line.qt())
 
@@ -334,6 +396,21 @@ class Stave(N_QGraphicsItemGroup):
 		if (first_system):
 			self.bars[0].show_time_signature()
 
+	def split_bar(self, bar_index: int):
+		# bar_index + 1 is the new (atm empty) bar (index)
+		remove_index = None
+		
+		for n, obj in enumerate(self.bars[bar_index].objects):
+			if (obj.get_real_relative_x() + self.bars[bar_index].qt().scenePos().x() > self.bars[bar_index + 1].qt().scenePos().x()):
+				if (remove_index is None):
+					remove_index = n
+				self.bars[bar_index].qt().removeFromGroup(obj.qt())
+				self.bars[bar_index + 1].qt().addToGroup(obj.qt())
+				self.bars[bar_index + 1].add_object(obj)
+
+		if (remove_index != None):
+			self.bars[bar_index].objects[:] = self.bars[bar_index].objects[:remove_index]
+			
 	def add_bar(self, bar_lines: List[Musicitem], staves: int, stave_index: int, with_piano: bool):
 		x = bar_lines[0].get_real_relative_x() + bar_lines[0].get_real_width()
 		system_x = x - self.qt().scenePos().x()
@@ -357,20 +434,7 @@ class Stave(N_QGraphicsItemGroup):
 		self.qt().addToGroup(new_bar.qt())
 		new_bar.qt().setPos(system_x, 0)
 
-	def reassemble(self):
-		for line in self.lines:
-			self.qt().addToGroup(line.qt())
-
-		self.qt().addToGroup(self.clef.qt())
-
-		for accidental in self.key_signature_accidentals:
-			self.qt().addToGroup(accidental.qt())
-		self.qt().setPos(self._pos)
-
-		for bar in self.bars:
-			bar.reassemble()
-			self.qt().addToGroup(bar.qt())
-			bar.qt().setPos(bar._pos)
+		self.split_bar(i - 1)
 
 	def get_center(self) -> QPointF:
 		return QPointF(self.qt().scenePos().x() + self.width / 2, self.qt().scenePos().y() + Musicitem.EM / 2)
@@ -397,6 +461,21 @@ class Stave(N_QGraphicsItemGroup):
 
 		# return the index of the closest interval / interval border
 		return bound_in_intervals(mouse_pos.x(), bar_line_intervals, True)
+
+	def reassemble(self):
+		for line in self.lines:
+			self.qt().addToGroup(line.qt())
+
+		self.qt().addToGroup(self.clef.qt())
+
+		for accidental in self.key_signature_accidentals:
+			self.qt().addToGroup(accidental.qt())
+		self.qt().setPos(self._pos)
+
+		for bar in self.bars:
+			bar.reassemble()
+			self.qt().addToGroup(bar.qt())
+			bar.qt().setPos(bar._pos)
 
 class System(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move it from one page (QGraphicsScene) to another.\n
