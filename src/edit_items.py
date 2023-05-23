@@ -15,6 +15,7 @@ class EditScene(QGraphicsScene):
 		self.current_system: System = None
 		self.current_stave: Stave = None
 		self.current_bar_n: int = None
+		self.current_line: int = None
 		self.successful: bool = False
 		self.edit_objects: List[Musicitem] = []
 

@@ -38,7 +38,7 @@ class Musicitem(N_QGraphicsTextItem):
 	def get_line_y(line: int) -> float:
 		return Musicitem.EM - line * (Musicitem.EM / 4)
 
-	def spec_to_px(spec) -> float:
+	def spec_to_px(spec: float) -> float:
 		return Musicitem.EM / 4 * spec
 
 	def get_character_width(key):
@@ -91,11 +91,25 @@ class Musicitem(N_QGraphicsTextItem):
 
 	def get_real_height(self):
 		box = get_specification("glyphBBoxes", self.key)
-		return Musicitem.spec_to_px(box["bBoxSW"][1] - box["bBoxNE"][1])
+		return Musicitem.spec_to_px(box["bBoxSW"][1] - box["bBoxNE"][1]) * self.qt().transform().m22()
 
 	def get_real_relative_x(self):
 		"""relative to its itemgroup"""
 		return self.qt().pos().x() + self.get_qt_blank_space()
+	
+	def get_real_relative_y(self):
+		return self.qt().y() + self.qt().sceneBoundingRect().height() / 2
+	
+
+def get_entire_extent(items: List[Musicitem]) -> float:
+	start_points = []
+	end_points = []
+
+	for item in items:
+		start_points.append(item.get_real_relative_x())
+		end_points.append(item.get_real_relative_x() + item.get_real_width())
+
+	return max(end_points) - min(start_points)
 
 class TimeSignature(Musicitem):
 	signatures_map = {
@@ -157,7 +171,6 @@ class Rest(N_QGraphicsItemGroup):
 		self.rest.qt().setDefaultTextColor(Qt.black)
 		self.qt().setPos(self.rest.qt().pos())
 		self.qt().addToGroup(self.rest.qt())
-		self.rest.qt().setPos(0, 0)
 	
 	def reassemble(self):
 		self.qt().addToGroup(self.rest.qt())
@@ -191,27 +204,80 @@ class Clef(Musicitem):
 		self.qt().setDefaultTextColor(Qt.black)
 		self.qt().setPos(clef.qt().pos())
 
-class Note:
-	def __init__(self, pitch: int, duration: float = None):
-		# pitch from 1 - 88 (subcontra-a to c5)
-		self.pitch = pitch
+class Note(N_QGraphicsItemGroup):
+	SYMBOLS = [
+		"noteheadWhole",
+		"noteheadHalf",
+		"noteheadBlack",
+	]
 
-		# values: e.g. 0.25 for a quarter note
-		self.duration = duration
-		self.dotted = False
+	# add Up / Down
+	FLAGS = [
+		"flag8th",
+		"flag16th",
+		"flag32nd",
+		"flag64th",
+	]
 
-		# sync this to the table in app.py
-		# -1 = nothing
-		# 0 = ♮
-		# 1 = #
-		# 2 = b
-		# 3 = ##
-		# 4 = bb
+	def __init__(self, notehead: Musicitem, stem: Musicitem, flag: Musicitem, leger_lines: List[Musicitem]):
+		super().__init__(QGraphicsItemGroup())
+	
+		self.notehead = notehead
+		self.notehead.qt().setDefaultTextColor(Qt.black)
+		self.qt().setPos(self.notehead.qt().pos())
+		self.qt().addToGroup(self.notehead.qt())
 
-		self.accidental = -1
-		# ....
-		#self.articulation_sign = 0
+		self.stem: Musicitem = None
+		self.flag: Musicitem = None
+		self.leger_lines: List[Musicitem] = leger_lines
 
+		if (stem.key != ""):
+			self.stem = stem
+			self.stem.qt().setDefaultTextColor(Qt.black)
+			self.qt().addToGroup(self.stem.qt())
+
+		if (flag.key != ""):
+			self.flag = flag
+			self.flag.qt().setDefaultTextColor(Qt.black)
+			self.qt().addToGroup(self.flag.qt())
+
+		for line in self.leger_lines:
+			line.qt().setDefaultTextColor(Qt.black)
+			self.qt().addToGroup(line.qt())
+	
+	def reassemble(self):
+		self.qt().addToGroup(self.notehead.qt())
+
+		if (self.stem != None):
+			self.qt().addToGroup(self.stem.qt())
+
+		if (self.flag != None):
+			self.qt().addToGroup(self.flag.qt())
+
+		for line in self.leger_lines:
+			self.qt().addToGroup(line.qt())
+
+		self.qt().setPos(self._pos)
+
+	def create_item_pool(self) -> Musicitem:
+		item_pool = [self.notehead]
+
+		if (self.stem != None):
+			item_pool.append(self.stem)
+
+		if (self.flag != None):
+			item_pool.append(self.flag)
+
+		item_pool.extend(self.leger_lines)
+		return item_pool
+
+	def get_real_width(self):
+		return get_entire_extent(self.create_item_pool())
+	
+	def get_real_relative_x(self):
+		rel_x = min(self.create_item_pool(), key=lambda item: item.get_real_relative_x()).get_real_relative_x()
+		return self.qt().pos().x() + rel_x
+	
 # notes that will appear above each other
 class NoteGroup:
 	def __init__(self):
@@ -280,18 +346,18 @@ class Bar(N_QGraphicsItemGroup):
 			total_start_x += self.time_signature.get_real_width() + Musicitem.MIN_OBJ_DIST
 		return total_start_x
 	
-	def get_end(self, potential_item: Musicitem, next_bar_x: float) -> float:
-		return next_bar_x - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST
+	def get_end(potential_items: List[Musicitem], next_bar_x: float) -> float:
+		return next_bar_x - get_entire_extent(potential_items) - Musicitem.MIN_OBJ_DIST
 
-	def find_places(self, potential_item: Musicitem, next_bar_x: float) -> List[List[float]]:
+	def find_places(self, potential_items: List[Musicitem], next_bar_x: float) -> List[List[float]]:
 		"""returns intervals of real Musicitem x-coordinates (not qt object position) including spacing, relative to (0, 0)"""
 		intervals = []
-
+		items_width = get_entire_extent(potential_items)
 		total_start_x = self.get_start()
-		total_end_x = self.get_end(potential_item, next_bar_x)
+		total_end_x = Bar.get_end(potential_items, next_bar_x)
 
 		if (len(self.objects) >= 1):
-			first_end_x = self.objects[0].get_real_relative_x() + self.qt().scenePos().x() - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST 
+			first_end_x = self.objects[0].get_real_relative_x() + self.qt().scenePos().x() - items_width - Musicitem.MIN_OBJ_DIST 
 			if (first_end_x - total_start_x >= 0):
 				intervals.append([total_start_x, first_end_x])
 
@@ -300,7 +366,7 @@ class Bar(N_QGraphicsItemGroup):
 				end_x = total_end_x
 
 				if (n < len(self.objects) - 1):
-					end_x = self.objects[n + 1].get_real_relative_x() + self.qt().scenePos().x() - potential_item.get_real_width() - Musicitem.MIN_OBJ_DIST
+					end_x = self.objects[n + 1].get_real_relative_x() + self.qt().scenePos().x() - items_width - Musicitem.MIN_OBJ_DIST
 
 				if (end_x - start_x >= 0):
 					intervals.append([start_x, end_x])
@@ -311,6 +377,8 @@ class Bar(N_QGraphicsItemGroup):
 		return intervals
 	
 	def add_object(self, new_obj: Union[Musicitem, N_QGraphicsItemGroup]):
+		self.qt().addToGroup(new_obj.qt())
+
 		i = len(self.objects)
 
 		for i_, obj in enumerate(self.objects):
@@ -322,12 +390,10 @@ class Bar(N_QGraphicsItemGroup):
 
 	def add_rest(self, rest: Musicitem):
 		new_rest = Rest(deepcopy(rest))
-		self.qt().addToGroup(new_rest.qt())
 		self.add_object(new_rest)
 
 	def add_clef(self, clef: Musicitem, n: int):
 		new_clef = Clef(deepcopy(clef), n)
-		self.qt().addToGroup(new_clef.qt())
 		self.add_object(new_clef)
 
 	def add_tuplet(self, tuplet: Musicitem):
@@ -335,6 +401,10 @@ class Bar(N_QGraphicsItemGroup):
 		new_tuplet.qt().setDefaultTextColor(Qt.black)
 		self.qt().addToGroup(new_tuplet.qt())
 		self.free_objects.append(new_tuplet)
+
+	def add_note(self, notehead: Musicitem, stem: Musicitem, flag: Musicitem, leger_lines: List[Musicitem]):
+		new_note = Note(deepcopy(notehead), deepcopy(stem), deepcopy(flag), [deepcopy(leger_line) for leger_line in leger_lines])
+		self.add_object(new_note)
 
 	def reassemble(self):
 		if (self.time_signature_visible):

@@ -24,7 +24,10 @@ def get_symbol(smufl_name: Union[str, List[str]]):
 	return ret
 
 def get_specification(key1, key2):
-	return font_metadata[key1][key2]
+	if (key1 in font_metadata):
+		if (key2 in font_metadata[key1]):
+			return font_metadata[key1][key2]
+	return None
 
 def get_icon(key: str):
 	return str(chr(int(icons[key]["unicode"], 16)))

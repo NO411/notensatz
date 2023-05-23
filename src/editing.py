@@ -7,7 +7,8 @@ from edit_items import EditScene, Musicitem
 from symbol_button import SymbolButton
 from settings import Settings
 from misc import bound_in_intervals, find_overlap_intervals, bound
-from notation_system import Rest, Clef
+from notation_system import Rest, Clef, Note, Bar
+from fonts import get_specification
 
 def setup_edit(self: EditScene, app: App):
 	self.app = app
@@ -38,15 +39,14 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 	# just the line number
 	scene.current_line = scene.current_stave.get_closest_line(mouse_pos)
 
-	if (selected_button.n_symbol == "Noten"):
-		# notes positioning
-		#y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(scene.current_line)
-		#x_bound = get_nearest_possible_pos(scene.current_stave.bars, mouse_pos, Musicitem.EM / 2)
-		#current_edit_obj.setPos(x_bound, y)
+	if (selected_button.group_key == "Noten"):
+		if (selected_button.n_symbol < 7):
+			note_edit_update(scene, mouse_pos, selected_button)
+		elif (selected_button.n_symbol == 7):
+			...
+	elif (selected_button.group_key == "Artikulation"):
 		...
-	elif (selected_button.n_symbol == "Artikulation"):
-		...
-	elif (selected_button.n_symbol == "Dynamik"):
+	elif (selected_button.group_key == "Dynamik"):
 		...
 	elif (selected_button.group_key == "Pausen"):
 		if (selected_button.n_symbol <= 6):
@@ -58,7 +58,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 			if (selected_button.n_symbol == 0):
 				line = 3
 
-			places = current_bar.find_places(scene.edit_objects[0], next_bar_x)
+			places = current_bar.find_places([scene.edit_objects[0]], next_bar_x)
 			if (len(places) >= 1):
 				rest_x = bound_in_intervals(mouse_pos.x(), places)
 				scene.edit_objects[0].set_real_pos(rest_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
@@ -75,7 +75,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 
 		for n, stave in enumerate(scene.current_system.staves):
 			scene.edit_objects[n].change_text(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][0])
-			intervals = stave.bars[scene.current_bar_n].find_places(scene.edit_objects[n], get_next_bar_x(scene))
+			intervals = stave.bars[scene.current_bar_n].find_places([scene.edit_objects[n]], get_next_bar_x(scene))
 			if ((len(intervals) == 0 or intervals[0][0] != stave.bars[scene.current_bar_n].qt().scenePos().x() + Musicitem.MIN_OBJ_DIST) and not stave.bars[scene.current_bar_n].time_signature_visible):
 				space = False
 				break
@@ -110,9 +110,9 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 			#  positioning
 			places_ = []
 			start = current_bar.get_start()
-			end = current_bar.get_end(scene.edit_objects[0], get_next_bar_x(scene))
+			end = Bar.get_end([scene.edit_objects[0]], get_next_bar_x(scene))
 			for stave in scene.current_system.staves:
-				places_.append(stave.bars[scene.current_bar_n].find_places(scene.edit_objects[0], get_next_bar_x(scene)))
+				places_.append(stave.bars[scene.current_bar_n].find_places([scene.edit_objects[0]], get_next_bar_x(scene)))
 
 			places = find_overlap_intervals(places_, [start, end])
 			if (len(places) > 0):
@@ -156,7 +156,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 			
 			line = Clef.SYMBOLS[selected_button.n_symbol - 2]["lines"][dists.index(min(dists))]
 
-			places = current_bar.find_places(scene.edit_objects[0], next_bar_x)
+			places = current_bar.find_places([scene.edit_objects[0]], next_bar_x)
 			if (len(places) >= 1):
 				clef_x = bound_in_intervals(mouse_pos.x(), places)
 				scene.edit_objects[0].set_real_pos(clef_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
@@ -166,19 +166,94 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 
 	elif (selected_button.group_key == "Werkzeuge"):
 		...
-	
+
+def note_edit_update(scene: EditScene, mouse_pos: QPointF, selected_button: SymbolButton):
+	note = scene.edit_objects[0]
+	items = [note]
+
+	# notes positioning
+	note.change_text(Note.SYMBOLS[2])
+	if (selected_button.n_symbol < 2):
+		note.change_text(Note.SYMBOLS[selected_button.n_symbol])
+
+	# add notehead
+	# note_x and all relative positions will be updated again
+	note_x = 0
+	note_y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(scene.current_line)
+	note.set_real_pos(note_x, note_y)
+
+	if (selected_button.n_symbol > 0):
+		# add stem
+		stem = scene.edit_objects[1]
+		items.append(stem)
+
+		stem.change_text("stem")
+		stem_spec = get_specification("glyphsWithAnchors", "noteheadBlack")
+		stem_x = note.get_real_relative_x() + note.get_real_width() - stem.get_real_width()
+		stem_y = note_y - Musicitem.spec_to_px(stem_spec["stemUpSE"][1])
+		correction = 0.045
+		
+		# flip stem
+		if (scene.current_line >= 2):
+			stem_x = note.get_real_relative_x()
+			stem_y = note_y - stem.get_real_height() - Musicitem.spec_to_px(stem_spec["stemDownNW"][1])
+			correction /= 2
+		
+		stem.set_real_pos(stem_x + Musicitem.spec_to_px(correction), stem_y)
+
+		# add flag
+		if (selected_button.n_symbol > 2):
+			flag_y = stem.get_real_relative_y() + stem.get_real_height()
+			direction = "Up"
+
+			# flip flag
+			if (scene.current_line >= 2):
+				direction = "Down"
+				flag_y = stem_y
+
+			flag = scene.edit_objects[2]
+			items.append(flag)
+			flag.change_text(Note.FLAGS[selected_button.n_symbol - 3] + direction)
+			flag.set_real_pos(stem_x, flag_y)
+
+	# add leger lines eventually
+	# bottom to top
+	interval = [int(min(4, scene.current_line)), int(max(0, scene.current_line))]
+	o = 3
+	# seems like metadata are not 100% correct
+	leger_correction = 0.07
+	for line in range(interval[0], interval[1] + 1):
+		if (line < 0 or line > 4):
+			leger_line = scene.edit_objects[o]
+			items.append(leger_line)
+			leger_line.change_text("legerLine")
+			leger_line_x = note.get_real_relative_x() - (leger_line.get_real_width() - note.get_real_width()) / 2
+			leger_line.set_real_pos(leger_line_x + Musicitem.spec_to_px(leger_correction), scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
+			o += 1
+
+	# check wether all items would fit together in the bar
+	places = scene.current_stave.bars[scene.current_bar_n].find_places(items, get_next_bar_x(scene))
+
+	# reposition everything
+	note_x = bound_in_intervals(mouse_pos.x(), places)
+	for item in items:
+		item.set_real_x(item.get_real_relative_x() + note_x)
+
+	scene.successful = True
+	if (len(places) == 0):
+		scene.successful = False
+		# clear everything
+		for obj in scene.edit_objects:
+			obj.change_text()
+
 def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button: SymbolButton):
 	if (selected_button is None or scene.successful == False):
 		return
-	if (selected_button.n_symbol == "Noten"):
-		# notes positioning
-		#y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(scene.current_line)
-		#x_bound = get_nearest_possible_pos(scene.current_stave.bars, mouse_pos, Musicitem.EM / 2)
-		#current_edit_obj.setPos(x_bound, y)
+	if (selected_button.group_key == "Noten"):
+		scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1], scene.edit_objects[2], [item for item in scene.edit_objects if item.key == "legerLine"])
+	elif (selected_button.group_key == "Artikulation"):
 		...
-	elif (selected_button.n_symbol == "Artikulation"):
-		...
-	elif (selected_button.n_symbol == "Dynamik"):
+	elif (selected_button.group_key == "Dynamik"):
 		...
 	elif (selected_button.group_key == "Pausen"):
 		scene.current_stave.bars[scene.current_bar_n].add_rest(scene.edit_objects[0])
