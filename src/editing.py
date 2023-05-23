@@ -236,11 +236,14 @@ def note_edit_update(scene: EditScene, mouse_pos: QPointF, selected_button: Symb
 
 	# reposition everything
 	note_x = bound_in_intervals(mouse_pos.x(), places)
-	for item in items:
-		item.set_real_x(item.get_real_relative_x() + note_x)
+	
+	if (note_x != None):
+		for item in items:
+			item.set_real_x(item.get_real_relative_x() + note_x)
 
-	scene.successful = True
-	if (len(places) == 0):
+		scene.successful = True
+
+	if (len(places) == 0 or note_x == None):
 		scene.successful = False
 		# clear everything
 		for obj in scene.edit_objects:
