@@ -224,9 +224,12 @@ def note_edit_update(scene: EditScene, mouse_pos: QPointF, selected_button: Symb
 	leger_correction = 0.07
 	for line in range(interval[0], interval[1] + 1):
 		if (line < 0 or line > 4):
+			line_type = "legerLine"
+			if (selected_button.n_symbol == 0):
+				line_type = "legerLineWide"
 			leger_line = scene.edit_objects[o]
 			items.append(leger_line)
-			leger_line.change_text("legerLine")
+			leger_line.change_text(line_type)
 			leger_line_x = note.get_real_relative_x() - (leger_line.get_real_width() - note.get_real_width()) / 2
 			leger_line.set_real_pos(leger_line_x + Musicitem.spec_to_px(leger_correction), scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
 			o += 1
@@ -253,7 +256,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 	if (selected_button is None or scene.successful == False):
 		return
 	if (selected_button.group_key == "Noten"):
-		scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1], scene.edit_objects[2], [item for item in scene.edit_objects if item.key == "legerLine"])
+		scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1], scene.edit_objects[2], [item for item in scene.edit_objects if item.key[:9] == "legerLine"])
 	elif (selected_button.group_key == "Artikulation"):
 		...
 	elif (selected_button.group_key == "Dynamik"):
