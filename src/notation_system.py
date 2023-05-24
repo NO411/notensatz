@@ -396,11 +396,11 @@ class Bar(N_QGraphicsItemGroup):
 		new_clef = Clef(deepcopy(clef), n)
 		self.add_object(new_clef)
 
-	def add_tuplet(self, tuplet: Musicitem):
-		new_tuplet = deepcopy(tuplet)
-		new_tuplet.qt().setDefaultTextColor(Qt.black)
-		self.qt().addToGroup(new_tuplet.qt())
-		self.free_objects.append(new_tuplet)
+	def add_free_item(self, item: Musicitem):
+		new_item = deepcopy(item)
+		new_item.qt().setDefaultTextColor(Qt.black)
+		self.qt().addToGroup(new_item.qt())
+		self.free_objects.append(new_item)
 
 	def add_note(self, notehead: Musicitem, stem: Musicitem, flag: Musicitem, leger_lines: List[Musicitem]):
 		new_note = Note(deepcopy(notehead), deepcopy(stem), deepcopy(flag), [deepcopy(leger_line) for leger_line in leger_lines])

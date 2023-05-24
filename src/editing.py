@@ -39,17 +39,17 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 	# just the line number
 	scene.current_line = scene.current_stave.get_closest_line(mouse_pos)
 
+	# TODO
+	# replace all 'free_position' calls with a more specific positioning algorithm
+
 	if (selected_button.group_key == "Noten"):
 		if (selected_button.n_symbol < 7):
 			note_edit_update(scene, mouse_pos, selected_button)
 		elif (selected_button.n_symbol == 7):
-			...
-	elif (selected_button.group_key == "Artikulation"):
-		...
-	elif (selected_button.group_key == "Dynamik"):
-		...
+			free_position(scene, mouse_pos, selected_button)
+
 	elif (selected_button.group_key == "Pausen"):
-		if (selected_button.n_symbol <= 6):
+		if (selected_button.n_symbol < 7):
 			scene.edit_objects[0].change_text(Rest.SYMBOLS[selected_button.n_symbol])
 
 			next_bar_x = get_next_bar_x(scene)
@@ -65,9 +65,15 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 				scene.successful = True
 			else:
 				scene.edit_objects[0].change_text()
+		elif (selected_button.n_symbol == 7):
+			free_position(scene, mouse_pos, selected_button)
+
+	elif (selected_button.group_key == "Artikulation"):
+		free_position(scene, mouse_pos, selected_button)
+	elif (selected_button.group_key == "Dynamik"):
+		free_position(scene, mouse_pos, selected_button)
 	elif (selected_button.group_key == "Vorzeichen"):
-		...
-	
+		free_position(scene, mouse_pos, selected_button)
 	elif (selected_button.group_key == "Taktarten"):
 		bar_line_x = current_bar.qt().scenePos().x()
 
@@ -163,9 +169,18 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 				scene.successful = True
 			else:
 				scene.edit_objects[0].change_text()
-
+		elif (selected_button.n_symbol == 0 or selected_button.n_symbol > 4):
+			free_position(scene, mouse_pos, selected_button)
 	elif (selected_button.group_key == "Werkzeuge"):
 		...
+
+def free_position(scene: EditScene, mouse_pos: QPointF, selected_button: SymbolButton):
+	scene.edit_objects[0].change_text(SymbolButton.SYMBOLS[selected_button.group_key]["buttons"][selected_button.n_symbol][0])
+	scene.edit_objects[0].set_real_pos(
+		bound(mouse_pos.x(), Settings.Layout.MARGIN, Settings.Layout.WIDTH - Settings.Layout.MARGIN - scene.edit_objects[0].get_real_width()),
+		bound(mouse_pos.y(), Settings.Layout.MARGIN - scene.edit_objects[0].get_real_height(), Settings.Layout.HEIGHT - Settings.Layout.MARGIN)
+	)
+	scene.successful = True
 
 def note_edit_update(scene: EditScene, mouse_pos: QPointF, selected_button: SymbolButton):
 	note = scene.edit_objects[0]
@@ -256,26 +271,39 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 	if (selected_button is None or scene.successful == False):
 		return
 	if (selected_button.group_key == "Noten"):
-		scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1], scene.edit_objects[2], [item for item in scene.edit_objects if item.key[:9] == "legerLine"])
-	elif (selected_button.group_key == "Artikulation"):
-		...
-	elif (selected_button.group_key == "Dynamik"):
-		...
+		if (selected_button.n_symbol < 7):
+			scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1], scene.edit_objects[2], [item for item in scene.edit_objects if item.key[:9] == "legerLine"])
+		elif (selected_button.n_symbol == 7):
+			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Pausen"):
-		scene.current_stave.bars[scene.current_bar_n].add_rest(scene.edit_objects[0])
+		if (selected_button.n_symbol < 7):
+			scene.current_stave.bars[scene.current_bar_n].add_rest(scene.edit_objects[0])
+		elif (selected_button.n_symbol == 7):
+			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+		
+	# --
+	# this will be specified in more detail later
+	elif (selected_button.group_key == "Artikulation"):
+		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+	elif (selected_button.group_key == "Dynamik"):
+		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Vorzeichen"):
-		...
+		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+	# --
+	
 	elif (selected_button.group_key == "Taktarten"):
 		for n, stave in enumerate(scene.current_system.staves):
 			stave.bars[scene.current_bar_n].show_time_signature(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][1])
 	elif (selected_button.group_key == "N-Tolen"):
-		scene.current_stave.bars[scene.current_bar_n].add_tuplet(scene.edit_objects[0])
+		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Sonstige"):
 		if (selected_button.n_symbol == 1):
 			for n, stave in enumerate(scene.current_system.staves):
 				stave.add_bar(scene.edit_objects, app.document_ui.staves, n, app.document_ui.with_piano)
 		elif (1 < selected_button.n_symbol < 5):
 			scene.current_stave.bars[scene.current_bar_n].add_clef(scene.edit_objects[0], selected_button.n_symbol - 2)
+		elif (selected_button.n_symbol == 0 or selected_button.n_symbol > 4):
+			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Werkzeuge"):
 		...
 	
