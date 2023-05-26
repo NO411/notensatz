@@ -135,18 +135,15 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 					scene.successful = True
 				else:
 					if (app.document_ui.staves > 2):
-						new_bar.change_text("barlineSingle")
 						new_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_other_voices_height() / Musicitem.EM))
+						new_bar.set_real_pos(bar_x, scene.current_system.get_bottom_other_voices_y())
 					else:
 						new_bar.change_text()
 
 					# two bar lines, for each bar, one for piano and one for the other voices
-					# change pos of the new_bar even if not needed, it will be used by the add_bar algorithm
-					new_bar.set_real_pos(bar_x, scene.current_system.get_bottom_other_voices_y())
 					piano_bar.qt().setTransform(QTransform().scale(1, scene.current_system.get_piano_height() / Musicitem.EM))
 					piano_bar.set_real_pos(bar_x, scene.current_system.get_bottom_y())
 					scene.successful = True
-					
 			else:
 				new_bar.change_text()
 				piano_bar.change_text()

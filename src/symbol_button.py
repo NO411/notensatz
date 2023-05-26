@@ -54,18 +54,17 @@ class SymbolButton(QPushButton):
 		"Dynamik": {
 			"font": "Bravura",
 			"buttons": [
-				["dynamicMP", "mezzopiano"],
-				["dynamicPiano", "piano"],
-				["dynamicPP", "pianissimo"],
 				["dynamicPPP", "pianopianissimo"],
-				["dynamicPF", "pianoforte"],
-				["dynamicFortePiano", "fortepiano"],
+				["dynamicPP", "pianissimo"],
+				["dynamicPiano", "piano"],
+				["dynamicMP", "mezzopiano"],
 				["dynamicMF", "mezzoforte"],
 				["dynamicForte", "forte"],
 				["dynamicFF", "fortissimo"],
 				["dynamicFFF", "fortefortissimo"],
 				["dynamicCrescendoHairpin", "crescendo"],
 				["dynamicDiminuendoHairpin", "decrescendo"],
+				["dynamicFortePiano", "fortepiano"],
 			],
 		},
 		# accidentals

@@ -548,7 +548,11 @@ class Stave(N_QGraphicsItemGroup):
 		self.bars.pop(bar_index)
 
 	def add_bar(self, bar_lines: List[Musicitem], staves: int, stave_index: int, with_piano: bool):
-		x = bar_lines[0].get_real_relative_x() + bar_lines[0].get_real_width()
+		orientation_bar_line = bar_lines[0]
+		if (orientation_bar_line.key == ""):
+			orientation_bar_line = bar_lines[1]
+
+		x = orientation_bar_line.get_real_relative_x() + orientation_bar_line.get_real_width()
 		system_x = x - self.qt().scenePos().x()
 
 		i = len(self.bars)
