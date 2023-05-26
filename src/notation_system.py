@@ -344,7 +344,6 @@ class Bar(N_QGraphicsItemGroup):
 		self.time_signature_visible = False
 
 		self.objects: List[Union[Musicitem, MusicitemGroup]] = []
-		self.free_objects: List[Union[Musicitem, MusicitemGroup]] = []
 		self.left_bar_line: Musicitem = None
 
 	def show_time_signature(self, new_time_sig_name: str = None):
@@ -357,7 +356,8 @@ class Bar(N_QGraphicsItemGroup):
 
 	def hide_time_signature(self):
 		self.time_signature_visible = False
-		self.qt().removeFromGroup(self.time_signature.qt())
+		self.time_signature.change_color(Qt.black)
+		# qt() object visually removed from scene by editing.py when calling this function
 
 	def add_left_bar_line(self, bar_line: Musicitem, stave_y: float):
 		self.left_bar_line = deepcopy(bar_line)
@@ -422,12 +422,6 @@ class Bar(N_QGraphicsItemGroup):
 		new_clef = Clef(deepcopy(clef), n)
 		self.add_object(new_clef)
 
-	def add_free_item(self, item: Musicitem):
-		new_item = deepcopy(item)
-		new_item.qt().setDefaultTextColor(Qt.black)
-		self.qt().addToGroup(new_item.qt())
-		self.free_objects.append(new_item)
-
 	def add_note(self, notehead: Musicitem, stem: Musicitem, flag: Musicitem, leger_lines: List[Musicitem]):
 		new_note = Note(deepcopy(notehead), deepcopy(stem), deepcopy(flag), [deepcopy(leger_line) for leger_line in leger_lines])
 		self.add_object(new_note)
@@ -441,11 +435,8 @@ class Bar(N_QGraphicsItemGroup):
 		for obj in self.objects:
 			self.qt().addToGroup(obj.qt())
 			# insert other types later
-			if (type(obj).__bases__[0] == N_QGraphicsItemGroup):
+			if (type(obj).__bases__[0] == MusicitemGroup):
 				obj.reassemble()
-
-		for obj in self.free_objects:
-			self.qt().addToGroup(obj.qt())
 
 class Stave(N_QGraphicsItemGroup):
 	"""This is a (N_)QGraphicsItemGroup to move all its members at once.\n
@@ -547,7 +538,15 @@ class Stave(N_QGraphicsItemGroup):
 
 		if (remove_index != None):
 			self.bars[bar_index].objects[:] = self.bars[bar_index].objects[:remove_index]
-			
+	
+	def delete_bar_head(self, bar_index: int):
+		for item in self.bars[bar_index].objects:
+			self.bars[bar_index].qt().removeFromGroup(item.qt())
+			self.bars[bar_index - 1].qt().addToGroup(item.qt())
+			self.bars[bar_index - 1].add_object(item)
+
+		self.bars.pop(bar_index)
+
 	def add_bar(self, bar_lines: List[Musicitem], staves: int, stave_index: int, with_piano: bool):
 		x = bar_lines[0].get_real_relative_x() + bar_lines[0].get_real_width()
 		system_x = x - self.qt().scenePos().x()
@@ -640,6 +639,8 @@ class System(N_QGraphicsItemGroup):
 			Stave(clefs_tabel[n], self.width, self.key_signature) for n in range(voices)
 		]
 
+		self.free_objects: List[Union[Musicitem, MusicitemGroup]] = []
+
 		self.first_system = first_system
 
 		for n, stave in enumerate(self.staves):
@@ -728,6 +729,12 @@ class System(N_QGraphicsItemGroup):
 
 		return staves[stave_distances.index(min(stave_distances))]
 
+	def add_free_item(self, item: Musicitem):
+		new_item = deepcopy(item)
+		new_item.qt().setDefaultTextColor(Qt.black)
+		self.qt().addToGroup(new_item.qt())
+		self.free_objects.append(new_item)
+
 	def reassemble(self):
 		for n, stave in enumerate(self.staves):
 			stave.reassemble()
@@ -739,3 +746,6 @@ class System(N_QGraphicsItemGroup):
 
 		self.qt().addToGroup(self.right_bar_line.qt())
 		self.qt().addToGroup(self.left_bar_line.qt())
+
+		for obj in self.free_objects:
+			self.qt().addToGroup(obj.qt())

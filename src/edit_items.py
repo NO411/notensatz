@@ -41,6 +41,14 @@ class EditScene(QGraphicsScene):
 
 	def setup_edit(self, app):
 		if (not self.setup):
+			self.current_system: System = None
+			self.last_system: System = None
+			self.current_stave: Stave = None
+			self.last_stave: Stave = None
+			self.current_bar_n: int = None
+			self.last_bar_n: int = None
+			self.current_line: int = None
+			self.successful: bool = False
 			self.edit_objects: List[Musicitem] = []
 			self.custom_setup_edit(app)
 			

@@ -3,12 +3,14 @@ from PyQt5.QtCore import QPointF, Qt, QRectF
 from PyQt5.QtGui import QTransform, QColor
 
 from app import App
-from edit_items import EditScene, Musicitem
+from edit_items import EditScene
 from symbol_button import SymbolButton
 from settings import Settings
 from misc import bound_in_intervals, find_overlap_intervals, bound
-from notation_system import Rest, Clef, Note, Bar
+from notation_system import Musicitem, MusicitemGroup, Rest, Clef, Note, Bar
 from fonts import get_specification
+
+from typing import List, Union
 
 def setup_edit(self: EditScene, app: App):
 	self.app = app
@@ -299,7 +301,7 @@ def delete_item_edit_update(scene: EditScene, mouse_pos: QPointF):
 		for item in last_bar.objects:
 			item.unselect_deleting()
 
-		for item in last_bar.free_objects:
+		for item in scene.last_system.free_objects:
 			item.unselect_deleting()
 
 	# select item if mousepos in bounding rect
@@ -316,6 +318,11 @@ def delete_item_edit_update(scene: EditScene, mouse_pos: QPointF):
 				for stave in scene.current_system.staves:	
 					if (stave.bars[n].left_bar_line != None):
 						stave.bars[n].left_bar_line.select_deleting()
+				
+				# and the time signature if visible, because (logically) it will be removed
+				for stave in scene.current_system.staves:
+					if (stave.bars[n].time_signature_visible):
+						stave.bars[n].time_signature.select_deleting()
 
 				set_last(scene)
 				return True
@@ -338,7 +345,7 @@ def delete_item_edit_update(scene: EditScene, mouse_pos: QPointF):
 			set_last(scene)
 			return True
 		
-	for item in current_bar.free_objects:
+	for item in scene.current_system.free_objects:
 		if (point_in_rect(mouse_pos, item.get_bounding_rect(), tolerance)):
 			item.select_deleting()
 
@@ -354,28 +361,28 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 		if (selected_button.n_symbol < 7):
 			scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1], scene.edit_objects[2], [item for item in scene.edit_objects if item.key[:9] == "legerLine"])
 		elif (selected_button.n_symbol == 7):
-			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+			scene.current_system.add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Pausen"):
 		if (selected_button.n_symbol < 7):
 			scene.current_stave.bars[scene.current_bar_n].add_rest(scene.edit_objects[0])
 		elif (selected_button.n_symbol == 7):
-			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+			scene.current_system.add_free_item(scene.edit_objects[0])
 		
 	# --
 	# this will be specified in more detail later
 	elif (selected_button.group_key == "Artikulation"):
-		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+		scene.current_system.add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Dynamik"):
-		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+		scene.current_system.add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Vorzeichen"):
-		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+		scene.current_system.add_free_item(scene.edit_objects[0])
 	# --
 	
 	elif (selected_button.group_key == "Taktarten"):
 		for n, stave in enumerate(scene.current_system.staves):
 			stave.bars[scene.current_bar_n].show_time_signature(SymbolButton.SYMBOLS["Taktarten"]["buttons"][selected_button.n_symbol][1])
 	elif (selected_button.group_key == "N-Tolen"):
-		scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+		scene.current_system.add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Sonstige"):
 		if (selected_button.n_symbol == 1):
 			for n, stave in enumerate(scene.current_system.staves):
@@ -383,7 +390,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 		elif (1 < selected_button.n_symbol < 5):
 			scene.current_stave.bars[scene.current_bar_n].add_clef(scene.edit_objects[0], selected_button.n_symbol - 2)
 		elif (selected_button.n_symbol == 0 or selected_button.n_symbol > 4):
-			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
+			scene.current_system.add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Werkzeuge"):
 		if (selected_button.n_symbol == 0):
 			delete_item_pressed(scene)
@@ -398,32 +405,45 @@ def delete_item_pressed(scene: EditScene):
 		last_bar = scene.last_stave.bars[scene.last_bar_n]
 
 		for stave in scene.last_system.staves:
-			for bar in stave.bars:
+			for n, bar in enumerate(stave.bars):
 				if (bar.left_bar_line != None and bar.left_bar_line.deleting):
-					bar.left_bar_line.unselect_deleting()
+					# remove bar "head" (barline and time signature)
+					remove_time_signature(n, scene)
+					for stave in scene.last_system.staves:
+						bar = stave.bars[n]
+						if (bar.left_bar_line != None):
+							scene.removeItem(bar.left_bar_line.qt())
+						stave.delete_bar_head(n)
+					break
 
 		for stave in scene.last_system.staves:
 			for n, bar in enumerate(stave.bars):
 				if (bar.time_signature_visible and bar.time_signature.deleting):
-					for stave in scene.last_system.staves:
-						stave.bars[n].hide_time_signature()
+					remove_time_signature(n, scene)
 					break
 		
-		index = None
-		for n, item in enumerate(last_bar.objects):
-			if (item.deleting):
-				last_bar.qt().removeFromGroup(item.qt())
-				index = n
-				break
-		
-		if (index != None):
-			last_bar.objects.pop(n)
+		check_removing(scene, last_bar.objects)
+		check_removing(scene, scene.current_system.free_objects)
 
-		for n, item in enumerate(last_bar.free_objects):
-			if (item.deleting):
-				last_bar.qt().removeFromGroup(item.qt())
-				last_bar.free_objects.pop(n)
-				break
+def remove_time_signature(n_bar: int, scene: EditScene):
+	for stave in scene.last_system.staves:
+		if (stave.bars[n_bar].time_signature_visible):
+			stave.bars[n_bar].hide_time_signature()
+			scene.removeItem(stave.bars[n_bar].time_signature.qt())
+
+def check_removing(scene: EditScene, items: List[Union[Musicitem, MusicitemGroup]]):
+	for n, item in enumerate(items):
+		if (item.deleting):
+			if (type(item).__bases__[0] == MusicitemGroup):
+				for item_ in item.qt().childItems():
+					scene.removeItem(item_)
+			else:
+				scene.removeItem(item.qt())
+			parent = item.qt().group()
+			if (parent):
+				parent.removeFromGroup(item.qt())
+			items.pop(n)
+			break
 
 def get_next_bar_x(scene: EditScene) -> float:
 	next_bar_x = Settings.Layout.WIDTH - Settings.Layout.MARGIN - scene.current_system.right_bar_line.get_real_width()
