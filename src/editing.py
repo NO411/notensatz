@@ -1,5 +1,5 @@
 from PyQt5.QtWidgets import QGraphicsSceneMouseEvent
-from PyQt5.QtCore import QPointF, Qt
+from PyQt5.QtCore import QPointF, Qt, QRectF
 from PyQt5.QtGui import QTransform, QColor
 
 from app import App
@@ -173,7 +173,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 			free_position(scene, mouse_pos, selected_button)
 	elif (selected_button.group_key == "Werkzeuge"):
 		if (selected_button.n_symbol == 0):
-			print(len(current_bar.objects))
+			scene.successful = delete_item_edit_update(scene, mouse_pos)
 		elif(selected_button.n_symbol == 1):
 			...
 
@@ -208,20 +208,20 @@ def note_edit_update(scene: EditScene, mouse_pos: QPointF, selected_button: Symb
 		stem.change_text("stem")
 		stem_spec = get_specification("glyphsWithAnchors", "noteheadBlack")
 		stem_x = note.get_real_relative_x() + note.get_real_width() - stem.get_real_width()
-		stem_y = note_y - Musicitem.spec_to_px(stem_spec["stemUpSE"][1])
+		stem_y = note_y - Musicitem.spec_to_px(stem_spec["stemUpSE"][1]) 
 		correction = 0.045
 		
 		# flip stem
 		if (scene.current_line >= 2):
 			stem_x = note.get_real_relative_x()
-			stem_y = note_y - stem.get_real_height() - Musicitem.spec_to_px(stem_spec["stemDownNW"][1])
+			stem_y = note_y + stem.get_real_height() - Musicitem.spec_to_px(stem_spec["stemDownNW"][1])
 			correction /= 2
 		
 		stem.set_real_pos(stem_x + Musicitem.spec_to_px(correction), stem_y)
 
 		# add flag
 		if (selected_button.n_symbol > 2):
-			flag_y = stem.get_real_relative_y() + stem.get_real_height()
+			flag_y = stem.get_real_relative_y() - stem.get_real_height()
 			direction = "Up"
 
 			# flip flag
@@ -270,6 +270,83 @@ def note_edit_update(scene: EditScene, mouse_pos: QPointF, selected_button: Symb
 		for obj in scene.edit_objects:
 			obj.change_text()
 
+def point_in_rect(point: QPointF, rect: QRectF, tolerance: float = 0):
+	return rect.x() - tolerance <= point.x() and rect.x() + rect.width() + tolerance >= point.x() and rect.y() - tolerance <= point.y() and rect.y() + rect.height() + tolerance >= point.y()
+
+def set_last(scene):
+	scene.last_bar_n = scene.current_bar_n
+	scene.last_stave = scene.current_stave
+	scene.last_system = scene.current_system
+
+def delete_item_edit_update(scene: EditScene, mouse_pos: QPointF):
+	current_bar = scene.current_stave.bars[scene.current_bar_n]
+	
+	# unselect last bar objects
+	# if not done, some things in bars will be left selected without being selected actually
+	if (scene.last_bar_n != None):
+		last_bar = scene.last_stave.bars[scene.last_bar_n]
+
+		for stave in scene.last_system.staves:
+			for bar in stave.bars:
+				if (bar.left_bar_line != None):
+					bar.left_bar_line.unselect_deleting()
+
+		for stave in scene.last_system.staves:
+			for bar in stave.bars:
+				if (bar.time_signature_visible):
+					bar.time_signature.unselect_deleting()
+
+		for item in last_bar.objects:
+			item.unselect_deleting()
+
+		for item in last_bar.free_objects:
+			item.unselect_deleting()
+
+	# select item if mousepos in bounding rect
+	# tolerance to make it more user friendly
+	tolerance = Musicitem.MIN_OBJ_DIST / 3
+
+	# we have 4 item storages in the bar which are all handled differently
+	for stave in scene.current_system.staves:
+		for n, bar in enumerate(stave.bars):
+			# check wether a barline is selected
+			if (bar.left_bar_line != None and point_in_rect(mouse_pos, bar.left_bar_line.get_bounding_rect(), tolerance)):
+
+				# then select all barlines
+				for stave in scene.current_system.staves:	
+					if (stave.bars[n].left_bar_line != None):
+						stave.bars[n].left_bar_line.select_deleting()
+
+				set_last(scene)
+				return True
+	
+	for stave in scene.current_system.staves:
+		# check wether a barline is selected
+		if (point_in_rect(mouse_pos, stave.bars[scene.current_bar_n].time_signature.get_bounding_rect(), tolerance) and stave.bars[scene.current_bar_n].time_signature_visible):
+
+			for stave in scene.current_system.staves:	
+				stave.bars[scene.current_bar_n].time_signature.select_deleting()
+
+			set_last(scene)
+			return True
+
+	for item in current_bar.objects:
+		# check wether mouse_pos collides
+		if (point_in_rect(mouse_pos, item.get_bounding_rect(), tolerance)):
+			item.select_deleting()
+
+			set_last(scene)
+			return True
+		
+	for item in current_bar.free_objects:
+		if (point_in_rect(mouse_pos, item.get_bounding_rect(), tolerance)):
+			item.select_deleting()
+
+			set_last(scene)
+			return True
+		
+	return False
+
 def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button: SymbolButton):
 	if (selected_button is None or scene.successful == False):
 		return
@@ -308,10 +385,45 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, selected_button
 		elif (selected_button.n_symbol == 0 or selected_button.n_symbol > 4):
 			scene.current_stave.bars[scene.current_bar_n].add_free_item(scene.edit_objects[0])
 	elif (selected_button.group_key == "Werkzeuge"):
-		...
+		if (selected_button.n_symbol == 0):
+			delete_item_pressed(scene)
+		elif(selected_button.n_symbol == 1):
+			...
 	
 	# remove the selected item from the current pos
 	edit_update(scene, mouse_pos, app, selected_button)
+
+def delete_item_pressed(scene: EditScene):
+	if (scene.last_bar_n != None):
+		last_bar = scene.last_stave.bars[scene.last_bar_n]
+
+		for stave in scene.last_system.staves:
+			for bar in stave.bars:
+				if (bar.left_bar_line != None and bar.left_bar_line.deleting):
+					bar.left_bar_line.unselect_deleting()
+
+		for stave in scene.last_system.staves:
+			for n, bar in enumerate(stave.bars):
+				if (bar.time_signature_visible and bar.time_signature.deleting):
+					for stave in scene.last_system.staves:
+						stave.bars[n].hide_time_signature()
+					break
+		
+		index = None
+		for n, item in enumerate(last_bar.objects):
+			if (item.deleting):
+				last_bar.qt().removeFromGroup(item.qt())
+				index = n
+				break
+		
+		if (index != None):
+			last_bar.objects.pop(n)
+
+		for n, item in enumerate(last_bar.free_objects):
+			if (item.deleting):
+				last_bar.qt().removeFromGroup(item.qt())
+				last_bar.free_objects.pop(n)
+				break
 
 def get_next_bar_x(scene: EditScene) -> float:
 	next_bar_x = Settings.Layout.WIDTH - Settings.Layout.MARGIN - scene.current_system.right_bar_line.get_real_width()

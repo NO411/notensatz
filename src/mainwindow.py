@@ -71,7 +71,6 @@ class Ui_MainWindow(object):
         brush = QtGui.QBrush(QtGui.QColor(40, 44, 52))
         brush.setStyle(QtCore.Qt.SolidPattern)
         self.view.setBackgroundBrush(brush)
-        self.view.setRenderHints(QtGui.QPainter.Antialiasing|QtGui.QPainter.HighQualityAntialiasing|QtGui.QPainter.SmoothPixmapTransform|QtGui.QPainter.TextAntialiasing)
         self.view.setDragMode(QtWidgets.QGraphicsView.RubberBandDrag)
         self.view.setObjectName("view")
         self.verticalLayout.addWidget(self.view)

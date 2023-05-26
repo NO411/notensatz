@@ -30,6 +30,7 @@ class Settings:
 	class Gui:
 		THEME = "dark"
 		PRIMARY_COLOR = "#528bff"
+		DELETE_COLOR = "#ff528b"
 		CUSTOM_COLORS = {
 			"primary": PRIMARY_COLOR,
 			"background": "#21252b",

@@ -22,17 +22,10 @@ class SavingHander():
 		# preparations for printing
 		unselect_buttons(self.app)
 
-		printer = QPrinter (QPrinter.HighResolution)
-		printer.setPageSize(QPrinter.A4)
-		printer.setOrientation(QPrinter.Portrait)
+		printer = QPrinter()
 		printer.setOutputFormat(QPrinter.PdfFormat)
 		printer.setOutputFileName(filename)
-
-		printer.setPageMargins(0, 0, 0, 0, QPrinter.DevicePixel)
-		printer.setColorMode(QPrinter.Color)
-		printer.setResolution(300)
-
-		p = QPainter(printer)
+		painter = QPainter(printer)
 
 		for i, page in enumerate(self.app.document_ui.pages):
 
@@ -41,10 +34,11 @@ class SavingHander():
 				if (type(item) == DocumentTextitem):
 					item.remove_highlight()
 
-			page.qt().render(p)
+			page.qt().render(painter)
 			if i != len(self.app.document_ui.pages) - 1:
 				printer.newPage()
-		p.end()
+
+		painter.end()
 
 	def generate_filename(self):
 		# generate a filename out of the heading and the composer and remove unwanted chars

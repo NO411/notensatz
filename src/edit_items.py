@@ -12,9 +12,14 @@ from typing import List
 class EditScene(QGraphicsScene):
 	def __init__(self, x: float, y: float, width: float, height: float):
 		super().__init__(x, y, width, height)
+
+		# status vars used by editing.py
 		self.current_system: System = None
+		self.last_system: System = None
 		self.current_stave: Stave = None
+		self.last_stave: Stave = None
 		self.current_bar_n: int = None
+		self.last_bar_n: int = None
 		self.current_line: int = None
 		self.successful: bool = False
 		self.edit_objects: List[Musicitem] = []

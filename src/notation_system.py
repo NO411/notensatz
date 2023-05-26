@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QGraphicsLineItem, QGraphicsItemGroup
+from PyQt5.QtWidgets import QGraphicsLineItem, QGraphicsItemGroup, QGraphicsRectItem
 from PyQt5.QtGui import QPen, QTransform, QFont, QColor
 from PyQt5.QtCore import QPointF, Qt, QLineF, QRectF
 
@@ -27,6 +27,8 @@ class Musicitem(N_QGraphicsTextItem):
 		self.change_text(symbol)
 		self.qt().setFont(QFont("Bravura", real_font_size(Settings.Symbols.FONTSIZE)))
 		self.qt().setDefaultTextColor(color)
+
+		self.deleting = False
 
 	def change_text(self, symbol: Union[str, List[str]] = ""):
 		self.key = symbol
@@ -94,7 +96,7 @@ class Musicitem(N_QGraphicsTextItem):
 			# time signatures
 			return Musicitem.EM
 		box = get_specification("glyphBBoxes", self.key)
-		return Musicitem.spec_to_px(box["bBoxSW"][1] - box["bBoxNE"][1]) * self.qt().transform().m22()
+		return Musicitem.spec_to_px(abs(box["bBoxSW"][1] - box["bBoxNE"][1])) * self.qt().transform().m22()
 
 	def get_real_x(self):
 		"""relative to its itemgroup"""
@@ -122,10 +124,21 @@ class Musicitem(N_QGraphicsTextItem):
 		else:
 			return QRectF(
 				self.get_real_x(),
-				self.get_real_y() - get_specification("glyphBBoxes", self.key)["bBoxNE"][1],
+				self.get_real_y() - Musicitem.spec_to_px(get_specification("glyphBBoxes", self.key)["bBoxNE"][1]) * self.qt().transform().m22(),
 				self.get_real_width(),
 				self.get_real_height()
 			)
+		
+	def change_color(self, color: QColor):
+		self.qt().setDefaultTextColor(color)
+
+	def select_deleting(self):
+		self.deleting = True
+		self.change_color(QColor(Settings.Gui.DELETE_COLOR))
+
+	def unselect_deleting(self):
+		self.deleting = False
+		self.change_color(Qt.black)
 
 def get_entire_extent(items: List[Musicitem]) -> float:
 	start_points = []
@@ -136,6 +149,54 @@ def get_entire_extent(items: List[Musicitem]) -> float:
 		end_points.append(item.get_real_relative_x() + item.get_real_width())
 
 	return max(end_points) - min(start_points)
+
+class MusicitemGroup(N_QGraphicsItemGroup):
+	def __init__(self, items: List[Musicitem]):
+		super().__init__(QGraphicsItemGroup())
+	
+		self.items: List[Musicitem] = items
+		self.qt().setPos(self.items[0].qt().pos())
+
+		for item in self.items:
+			item.qt().setDefaultTextColor(Qt.black)
+			self.qt().addToGroup(item.qt())
+
+		self.deleting = False
+	
+	def reassemble(self):
+		for item in self.items:
+			self.qt().addToGroup(item.qt())
+
+		self.qt().setPos(self._pos)
+
+	def get_real_width(self):
+		return get_entire_extent(self.items)
+	
+	def get_real_relative_x(self):
+		rel_x = min(self.items, key=lambda item: item.get_real_relative_x()).get_real_relative_x()
+		return self.qt().pos().x() + rel_x
+	
+	def get_bounding_rect(self) -> QRectF:
+		bounding_rects = [item.get_bounding_rect() for item in self.items]
+
+		left = min([rect.x() for rect in bounding_rects])
+		top = min([rect.y() for rect in bounding_rects])
+		right = max([rect.x() + rect.width() for rect in bounding_rects])
+		bottom = max([rect.y() + rect.height() for rect in bounding_rects])
+
+		return QRectF(left, top, right - left, bottom - top)
+	
+	def change_color(self, color: QColor):
+		for item in self.items:
+			item.qt().setDefaultTextColor(color)
+	
+	def select_deleting(self):
+		self.deleting = True
+		self.change_color(QColor(Settings.Gui.DELETE_COLOR))
+
+	def unselect_deleting(self):
+		self.deleting = False
+		self.change_color(Qt.black)
 
 class TimeSignature(Musicitem):
 	signatures_map = {
@@ -180,7 +241,7 @@ class TimeSignature(Musicitem):
 	def join_unicode_combi(combi: List[str]):
 		return '_'.join(combi)
 
-class Rest(N_QGraphicsItemGroup):
+class Rest(MusicitemGroup):
 	SYMBOLS = [
 		"restWhole",
 		"restHalf",
@@ -192,21 +253,7 @@ class Rest(N_QGraphicsItemGroup):
 	]
 
 	def __init__(self, rest: Musicitem):
-		super().__init__(QGraphicsItemGroup())
-		self.rest = rest
-		self.rest.qt().setDefaultTextColor(Qt.black)
-		self.qt().setPos(self.rest.qt().pos())
-		self.qt().addToGroup(self.rest.qt())
-	
-	def reassemble(self):
-		self.qt().addToGroup(self.rest.qt())
-		self.qt().setPos(self._pos)
-
-	def get_real_width(self):
-		return self.rest.get_real_width()
-	
-	def get_real_relative_x(self):
-		return self.qt().pos().x() + self.rest.get_real_relative_x()
+		super().__init__([rest])
 
 class Clef(Musicitem):
 	SYMBOLS = [
@@ -230,7 +277,7 @@ class Clef(Musicitem):
 		self.qt().setDefaultTextColor(Qt.black)
 		self.qt().setPos(clef.qt().pos())
 
-class Note(N_QGraphicsItemGroup):
+class Note(MusicitemGroup):
 	SYMBOLS = [
 		"noteheadWhole",
 		"noteheadHalf",
@@ -246,68 +293,17 @@ class Note(N_QGraphicsItemGroup):
 	]
 
 	def __init__(self, notehead: Musicitem, stem: Musicitem, flag: Musicitem, leger_lines: List[Musicitem]):
-		super().__init__(QGraphicsItemGroup())
-	
-		self.notehead = notehead
-		self.notehead.qt().setDefaultTextColor(Qt.black)
-		self.qt().setPos(self.notehead.qt().pos())
-		self.qt().addToGroup(self.notehead.qt())
-
-		self.stem: Musicitem = None
-		self.flag: Musicitem = None
-		self.leger_lines: List[Musicitem] = leger_lines
+		items = []
+		items.append(notehead)
+		items.extend(leger_lines)
 
 		if (stem.key != ""):
-			self.stem = stem
-			self.stem.qt().setDefaultTextColor(Qt.black)
-			self.qt().addToGroup(self.stem.qt())
+			items.append(stem)
 
 		if (flag.key != ""):
-			self.flag = flag
-			self.flag.qt().setDefaultTextColor(Qt.black)
-			self.qt().addToGroup(self.flag.qt())
+			items.append(flag)
 
-		for line in self.leger_lines:
-			line.qt().setDefaultTextColor(Qt.black)
-			self.qt().addToGroup(line.qt())
-	
-	def reassemble(self):
-		self.qt().addToGroup(self.notehead.qt())
-
-		if (self.stem != None):
-			self.qt().addToGroup(self.stem.qt())
-
-		if (self.flag != None):
-			self.qt().addToGroup(self.flag.qt())
-
-		for line in self.leger_lines:
-			self.qt().addToGroup(line.qt())
-
-		self.qt().setPos(self._pos)
-
-	def create_item_pool(self) -> Musicitem:
-		item_pool = [self.notehead]
-
-		if (self.stem != None):
-			item_pool.append(self.stem)
-
-		if (self.flag != None):
-			item_pool.append(self.flag)
-
-		item_pool.extend(self.leger_lines)
-		return item_pool
-
-	def get_real_width(self):
-		return get_entire_extent(self.create_item_pool())
-	
-	def get_real_relative_x(self):
-		rel_x = min(self.create_item_pool(), key=lambda item: item.get_real_relative_x()).get_real_relative_x()
-		return self.qt().pos().x() + rel_x
-	
-# notes that will appear above each other
-class NoteGroup:
-	def __init__(self):
-		self.first_voice: List[Note] = []
+		super().__init__(items)
 
 class KeySignature:
 	signatures_map = {
@@ -344,11 +340,11 @@ class Bar(N_QGraphicsItemGroup):
 	def __init__(self, time_signature: TimeSignature):
 		super().__init__(QGraphicsItemGroup())
 
-		self.time_signature = time_signature
+		self.time_signature: TimeSignature = time_signature
 		self.time_signature_visible = False
 
-		self.objects: List[Union[Musicitem, N_QGraphicsItemGroup]] = []
-		self.free_objects: List[Union[Musicitem, N_QGraphicsItemGroup]] = []
+		self.objects: List[Union[Musicitem, MusicitemGroup]] = []
+		self.free_objects: List[Union[Musicitem, MusicitemGroup]] = []
 		self.left_bar_line: Musicitem = None
 
 	def show_time_signature(self, new_time_sig_name: str = None):
@@ -358,6 +354,10 @@ class Bar(N_QGraphicsItemGroup):
 			self.time_signature_visible = True
 			self.qt().addToGroup(self.time_signature.qt())
 		self.time_signature.set_real_pos(Musicitem.MIN_OBJ_DIST, Musicitem.EM)
+
+	def hide_time_signature(self):
+		self.time_signature_visible = False
+		self.qt().removeFromGroup(self.time_signature.qt())
 
 	def add_left_bar_line(self, bar_line: Musicitem, stave_y: float):
 		self.left_bar_line = deepcopy(bar_line)
