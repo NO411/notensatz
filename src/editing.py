@@ -172,7 +172,10 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, selected_button:
 		elif (selected_button.n_symbol == 0 or selected_button.n_symbol > 4):
 			free_position(scene, mouse_pos, selected_button)
 	elif (selected_button.group_key == "Werkzeuge"):
-		...
+		if (selected_button.n_symbol == 0):
+			print(len(current_bar.objects))
+		elif(selected_button.n_symbol == 1):
+			...
 
 def free_position(scene: EditScene, mouse_pos: QPointF, selected_button: SymbolButton):
 	scene.edit_objects[0].change_text(SymbolButton.SYMBOLS[selected_button.group_key]["buttons"][selected_button.n_symbol][0])

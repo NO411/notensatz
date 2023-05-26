@@ -161,6 +161,12 @@
         </color>
        </brush>
       </property>
+      <property name="renderHints">
+       <set>QPainter::Antialiasing|QPainter::HighQualityAntialiasing|QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
+      </property>
+      <property name="dragMode">
+       <enum>QGraphicsView::RubberBandDrag</enum>
+      </property>
      </widget>
     </item>
     <item>
@@ -402,6 +408,7 @@
     <property name="title">
      <string>Hilfe</string>
     </property>
+    <addaction name="action_tutorial"/>
     <addaction name="action_doc"/>
     <addaction name="action_about"/>
    </widget>
@@ -494,6 +501,11 @@
   <action name="action_edit_tempo">
    <property name="text">
     <string>Tempoangabe ändern</string>
+   </property>
+  </action>
+  <action name="action_tutorial">
+   <property name="text">
+    <string>Anleitung</string>
    </property>
   </action>
  </widget>

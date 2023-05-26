@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsLineItem, QGraphicsItemGroup
 from PyQt5.QtGui import QPen, QTransform, QFont, QColor
-from PyQt5.QtCore import QPointF, Qt, QLineF
+from PyQt5.QtCore import QPointF, Qt, QLineF, QRectF
 
 from typing import List, Union
 
@@ -51,8 +51,8 @@ class Musicitem(N_QGraphicsTextItem):
 		qt_width = self.qt().sceneBoundingRect().width()
 
 		if (type(self.key) != str):
-			
-			
+			# time signatures
+
 			possible_widths = []
 
 			if (len(self.key) > 4):
@@ -90,16 +90,42 @@ class Musicitem(N_QGraphicsTextItem):
 		return self.qt().sceneBoundingRect().width() - 2 * self.get_qt_blank_space()
 
 	def get_real_height(self):
+		if (type(self.key) != str):
+			# time signatures
+			return Musicitem.EM
 		box = get_specification("glyphBBoxes", self.key)
 		return Musicitem.spec_to_px(box["bBoxSW"][1] - box["bBoxNE"][1]) * self.qt().transform().m22()
 
+	def get_real_x(self):
+		"""relative to its itemgroup"""
+		return self.qt().scenePos().x() + self.get_qt_blank_space()
+
 	def get_real_relative_x(self):
 		"""relative to its itemgroup"""
-		return self.qt().pos().x() + self.get_qt_blank_space()
+		return self.qt().x() + self.get_qt_blank_space()
 	
+	def get_real_y(self):
+		return self.qt().scenePos().y() + self.qt().sceneBoundingRect().height() / 2
+
 	def get_real_relative_y(self):
 		return self.qt().y() + self.qt().sceneBoundingRect().height() / 2
 	
+	def get_bounding_rect(self) -> QRectF:
+		if (type(self.key) != str):
+			# time signatures
+			return QRectF(
+				self.get_real_x(),
+				self.get_real_y() - Musicitem.EM,
+				self.get_real_width(),
+				Musicitem.EM
+			)
+		else:
+			return QRectF(
+				self.get_real_x(),
+				self.get_real_y() - get_specification("glyphBBoxes", self.key)["bBoxNE"][1],
+				self.get_real_width(),
+				self.get_real_height()
+			)
 
 def get_entire_extent(items: List[Musicitem]) -> float:
 	start_points = []
