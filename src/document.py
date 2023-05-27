@@ -31,10 +31,18 @@ class DocumentUi:
         self.clefs = clefs
         self.key_signature = key_signature
 
+        time_signature = TimeSignature(time_signature_name)
+        n = 0
+        for key, _ in TimeSignature.signatures_map.items():
+            if (time_signature_name == key):
+                time_signature.symbol = n
+                break
+            n += 1
+
         top_spacing = self.tempo.qt().y() + self.tempo.qt().sceneBoundingRect().height() + Settings.Layout.MARGIN / 4
         self.systems = [
             System(0, self.staves, QPointF(2 * Settings.Layout.MARGIN, top_spacing), self.clefs, self.key_signature,
-                   self.with_piano, TimeSignature(time_signature_name), True)]
+                   self.with_piano, time_signature, True)]
         self.pages[0].qt().addItem(self.systems[-1].qt())
 
     def add_new_system(self) -> bool:

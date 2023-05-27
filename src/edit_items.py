@@ -25,6 +25,10 @@ class EditScene(QGraphicsScene):
         self.successful: bool = False
         self.edit_objects: List[Musicitem] = []
 
+        self.moving: bool = False
+        self.moving_group: str = ""
+        self.moving_symbol: int = -1
+
         self.setup = False
 
     # defined by editing.py and assembled by main.py
@@ -55,6 +59,11 @@ class EditScene(QGraphicsScene):
             self.current_line: int = None
             self.successful: bool = False
             self.edit_objects: List[Musicitem] = []
+
+            self.moving: bool = False
+            self.moving_group: str = ""
+            self.moving_symbol: int = -1
+
             self.custom_setup_edit(app)
 
             self.setup = True

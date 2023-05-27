@@ -29,7 +29,11 @@ class Musicitem(N_QGraphicsTextItem):
         self.qt().setFont(QFont("Bravura", real_font_size(Settings.Symbols.FONTSIZE)))
         self.qt().setDefaultTextColor(color)
 
-        self.deleting = False
+        self.selected = False
+
+        # will be set by editing.py
+        self.group = ""
+        self.symbol = -1
 
     def change_text(self, symbol: Union[str, List[str]] = ""):
         self.key = symbol
@@ -137,12 +141,12 @@ class Musicitem(N_QGraphicsTextItem):
     def change_color(self, color: QColor):
         self.qt().setDefaultTextColor(color)
 
-    def select_deleting(self):
-        self.deleting = True
-        self.change_color(QColor(Settings.Gui.DELETE_COLOR))
+    def select(self, color: QColor):
+        self.selected = True
+        self.change_color(color)
 
-    def unselect_deleting(self):
-        self.deleting = False
+    def unselect(self):
+        self.selected = False
         self.change_color(Qt.black)
 
 
@@ -168,7 +172,11 @@ class MusicitemGroup(N_QGraphicsItemGroup):
             item.qt().setDefaultTextColor(Qt.black)
             self.qt().addToGroup(item.qt())
 
-        self.deleting = False
+        self.selected = False
+
+        # will be set by editing.py
+        self.group = ""
+        self.group = -1
 
     def reassemble(self):
         for item in self.items:
@@ -197,12 +205,12 @@ class MusicitemGroup(N_QGraphicsItemGroup):
         for item in self.items:
             item.qt().setDefaultTextColor(color)
 
-    def select_deleting(self):
-        self.deleting = True
-        self.change_color(QColor(Settings.Gui.DELETE_COLOR))
+    def select(self, color: QColor):
+        self.selected = True
+        self.change_color(color)
 
-    def unselect_deleting(self):
-        self.deleting = False
+    def unselect(self):
+        self.selected = False
         self.change_color(Qt.black)
 
 
@@ -370,6 +378,7 @@ class Bar(N_QGraphicsItemGroup):
             self.time_signature_visible = True
             self.qt().addToGroup(self.time_signature.qt())
         self.time_signature.set_real_pos(Musicitem.MIN_OBJ_DIST, Musicitem.EM)
+        return self.time_signature
 
     def hide_time_signature(self):
         self.time_signature_visible = False
@@ -437,15 +446,18 @@ class Bar(N_QGraphicsItemGroup):
     def add_rest(self, rest: Musicitem):
         new_rest = Rest(deepcopy(rest))
         self.add_object(new_rest)
+        return new_rest
 
     def add_clef(self, clef: Musicitem, n: int):
         new_clef = Clef(deepcopy(clef), n)
         self.add_object(new_clef)
+        return new_clef
 
     def add_note(self, notehead: Musicitem, stem: Musicitem, flag: Musicitem, leger_lines: List[Musicitem]):
         new_note = Note(deepcopy(notehead), deepcopy(stem), deepcopy(flag),
                         [deepcopy(leger_line) for leger_line in leger_lines])
         self.add_object(new_note)
+        return new_note
 
     def reassemble(self):
         if (self.time_signature_visible):
@@ -601,6 +613,9 @@ class Stave(N_QGraphicsItemGroup):
         new_bar.qt().setPos(system_x, 0)
 
         self.split_bar(i - 1)
+
+        # could be None
+        return new_bar.left_bar_line
 
     def get_center(self) -> QPointF:
         return QPointF(self.qt().scenePos().x() + self.width / 2, self.qt().scenePos().y() + Musicitem.EM / 2)
@@ -773,6 +788,7 @@ class System(N_QGraphicsItemGroup):
         new_item.qt().setDefaultTextColor(Qt.black)
         self.qt().addToGroup(new_item.qt())
         self.free_objects.append(new_item)
+        return new_item
 
     def reassemble(self):
         for n, stave in enumerate(self.staves):
