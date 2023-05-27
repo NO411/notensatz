@@ -22,7 +22,7 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle("Notensatz")
         MainWindow.setWindowOpacity(1.0)
         MainWindow.setAnimated(True)
-        MainWindow.setDockOptions(QtWidgets.QMainWindow.AllowTabbedDocks|QtWidgets.QMainWindow.AnimatedDocks)
+        MainWindow.setDockOptions(QtWidgets.QMainWindow.AllowTabbedDocks | QtWidgets.QMainWindow.AnimatedDocks)
         MainWindow.setUnifiedTitleAndToolBarOnMac(False)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
@@ -219,10 +219,12 @@ class Ui_MainWindow(object):
         self.delete_last_system_button.setText(_translate("MainWindow", "Letztes System löschen"))
         self.new_system_button.setText(_translate("MainWindow", "Neues System"))
         self.zoom_in_button.setText(_translate("MainWindow", "+"))
-        self.next_page_button.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#000000;\">Nächste Seite</span></p></body></html>"))
+        self.next_page_button.setToolTip(_translate("MainWindow",
+                                                    "<html><head/><body><p><span style=\" color:#000000;\">Nächste Seite</span></p></body></html>"))
         self.next_page_button.setWhatsThis(_translate("MainWindow", "<html><head/><body><p><br/></p></body></html>"))
         self.next_page_button.setText(_translate("MainWindow", "🡢"))
-        self.previous_page_button.setToolTip(_translate("MainWindow", "<html><head/><body><p><span style=\" color:#000000;\">Vorherige Seite</span></p></body></html>"))
+        self.previous_page_button.setToolTip(_translate("MainWindow",
+                                                        "<html><head/><body><p><span style=\" color:#000000;\">Vorherige Seite</span></p></body></html>"))
         self.previous_page_button.setText(_translate("MainWindow", "🡠"))
         self.zoom_label.setText(_translate("MainWindow", "0%"))
         self.zoom_out_button.setText(_translate("MainWindow", "-"))

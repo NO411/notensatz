@@ -151,7 +151,8 @@ class Ui_NewDocumentDialog(object):
         self.staves_spin_box.setProperty("value", 2)
         self.staves_spin_box.setObjectName("staves_spin_box")
         self.voices_top_layout.addWidget(self.staves_spin_box)
-        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.MinimumExpanding, QtWidgets.QSizePolicy.Minimum)
+        spacerItem1 = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.MinimumExpanding,
+                                            QtWidgets.QSizePolicy.Minimum)
         self.voices_top_layout.addItem(spacerItem1)
         self.piano_checkbox = QtWidgets.QCheckBox(self.voices_group_box)
         self.piano_checkbox.setLayoutDirection(QtCore.Qt.LeftToRight)
