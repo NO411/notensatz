@@ -441,6 +441,7 @@ def delete_item_pressed(scene: EditScene):
                         if (bar.left_bar_line != None):
                             scene.removeItem(bar.left_bar_line.qt())
                         stave.delete_bar_head(n)
+                    scene.last_bar_n = scene.current_bar_n
                     break
 
         for stave in scene.last_system.staves:
