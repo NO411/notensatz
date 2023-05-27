@@ -443,7 +443,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
         # needed by the "moving algorithm" (it actually uses the deleting algorithm)
         item.group = group
         item.symbol = symbol
-        
+
     if (scene.moving and not moving_set):
         scene.moving = False
         edit_update(scene, mouse_pos, app)
@@ -532,6 +532,7 @@ def unselect_buttons(app: App, pressed_button: SymbolButton = None):
 
     for page in app.document_ui.pages:
         reset_edit_objects(page.qt())
+        page.qt().moving = False
 
 
 def get_selected_button(app: App) -> SymbolButton:
