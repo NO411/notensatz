@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QGraphicsBlurEffect, QLabel, QPushButton, QMenu, QHBoxLayout, QApplication, QMainWindow, QDialog, QWidget
 from PyQt5.QtCore import Qt, pyqtSignal, QFileInfo
-from PyQt5.QtGui import QFont, QFontMetrics, QPainter
+from PyQt5.QtGui import QFont, QFontMetrics, QPainter, QIcon, QPixmap
 
 # from <https://pypi.org/project/pyqtdarktheme/>
 import qdarktheme
@@ -15,6 +15,7 @@ from document import DocumentUi
 from symbol_button import SymbolButton
 from settings import Settings
 from notation_system import TimeSignature
+from misc import get_abs_path
 
 # intern imports
 from fonts import load_fonts
@@ -130,8 +131,8 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 		settings = Settings.Document.DEFAULT_SETTINGS
 
 		# open saved document settings
-		if (QFileInfo(Settings.Document.SETTINGS_FILENAME).exists()):
-			with open(Settings.Document.SETTINGS_FILENAME, "r") as f:
+		if (QFileInfo(get_abs_path(__file__, Settings.Document.SETTINGS_FILENAME)).exists()):
+			with open(get_abs_path(__file__, Settings.Document.SETTINGS_FILENAME), "r") as f:
 				settings = json.load(f)
 			if (Settings.Document.DEFAULT_SETTINGS != settings):
 				self.save_settings_check_box.setChecked(True)
@@ -214,6 +215,14 @@ class App(QApplication):
 		self.aboutbox = QDialog()
 		self.new_doc_dialog = QDialog()
 
+		# set icons
+		icon = QIcon()
+		icon.addPixmap(QPixmap(get_abs_path(__file__, "../assets/icon.png")), QIcon.Normal, QIcon.Off)
+		self.window.setWindowIcon(icon)
+		self.aboutbox.setWindowIcon(icon)
+		self.new_doc_dialog.setWindowIcon(icon)
+
+		# resize event for welcome screen custom alignment
 		self.window.resizeEvent = self.window_resize
 
 		# setup uis

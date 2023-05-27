@@ -8,6 +8,7 @@ from saving import SavingHander
 from page_handling import PageHandler
 from edit_items import EditScene
 from editing import custom_move, unselect_buttons, custom_pressed, setup_edit
+from misc import get_abs_path
 
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtCore import QUrl
@@ -41,8 +42,8 @@ def main():
 	app.ui.view.horizontalScrollBar().setValue(app.ui.view.horizontalScrollBar().minimum())
 
 	# menubar actions
-	app.ui.action_tutorial.triggered.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile("../doc/Anleitung.pdf")))
-	app.ui.action_doc.triggered.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile("../doc/Dokumentation.pdf")))
+	app.ui.action_tutorial.triggered.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(get_abs_path(__file__, "../doc/Anleitung.pdf"))))
+	app.ui.action_doc.triggered.connect(lambda: QDesktopServices.openUrl(QUrl.fromLocalFile(get_abs_path(__file__, "../doc/Dokumentation.pdf"))))
 	app.ui.action_about.triggered.connect(app.aboutbox.show)
 	app.ui.action_about.triggered.connect(lambda: unselect_buttons(app))
 	app.ui.action_new.triggered.connect(lambda: saving.handle_close_event(app, app.new_doc_dialog.show))

@@ -9,6 +9,7 @@ from page_handling import PageHandler
 from edit_items import DocumentTextitem
 from settings import Settings
 from editing import unselect_buttons
+from misc import get_abs_path
 
 import pickle
 import json
@@ -112,5 +113,5 @@ class SavingHander():
 
 	def save_document_settings(self):
 		json_settings = json.dumps(self.app.new_doc_dialog_ui.get_settings(), indent="\t")
-		with open(Settings.Document.SETTINGS_FILENAME, "w") as f:
+		with open(get_abs_path(__file__, Settings.Document.SETTINGS_FILENAME), "w") as f:
 			f.write(json_settings)

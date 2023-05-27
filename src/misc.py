@@ -1,5 +1,11 @@
 from typing import List
-import math
+from math import floor
+
+from os import path
+
+def get_abs_path(current_file: str, relative_path: str) -> str:
+    """returns absolute path depending on relative path to the given current file"""
+    return path.join(path.dirname(path.abspath(current_file)), relative_path)
 
 def bound(x, lower, upper):
     return max(min(x, upper), lower)
@@ -30,7 +36,7 @@ def bound_in_intervals(x: float, intervals: List[List[float]], return_index: boo
     if (not return_index):
         return bounds[closest_index]
     else:
-        return math.floor(closest_index / 2)
+        return floor(closest_index / 2)
 
 def find_overlap_intervals(intervals: List[List[List[float]]], main_interval: List[float]):
 

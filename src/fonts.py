@@ -3,6 +3,8 @@ from json import load
 from typing import List, Union
 from settings import Settings
 
+from misc import get_abs_path
+
 # global jsons
 font_metadata = None
 glyphnames = None
@@ -36,23 +38,23 @@ def load_fonts():
 	global font_metadata, glyphnames, icons
 
 	# Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
-	QFontDatabase().addApplicationFont("../assets/fonts/bravura/otfs/Bravura.otf")
+	QFontDatabase().addApplicationFont(get_abs_path(__file__, "../assets/fonts/bravura/otfs/Bravura.otf"))
 	# Times New Roman font, see <https://freefontsfamily.com/times-new-roman-font-free/#google_vignette>
 	# (should be included in Windows anyways)
-	QFontDatabase().addApplicationFont("../assets/fonts/times_new_roman/otfs/times new roman.ttf")
+	QFontDatabase().addApplicationFont(get_abs_path(__file__, "../assets/fonts/times_new_roman/otfs/times new roman.ttf"))
 
 	# Font Awesome 6, see <https://fontawesome.com/download>
-	QFontDatabase().addApplicationFont("../assets/fonts/fontawesome/otfs/Font Awesome Solid.otf")
+	QFontDatabase().addApplicationFont(get_abs_path(__file__, "../assets/fonts/fontawesome/otfs/Font Awesome Solid.otf"))
 
 	# json file for specifications like measurements
-	with open("../assets/fonts/bravura/metadata/bravura_metadata.json", "r") as f:
+	with open(get_abs_path(__file__, "../assets/fonts/bravura/metadata/bravura_metadata.json"), "r") as f:
 		font_metadata = load(f)
 
 	# needed for symbol unicodes
-	with open("../assets/fonts/bravura/metadata/glyphnames.json", "r") as f:
+	with open(get_abs_path(__file__, "../assets/fonts/bravura/metadata/glyphnames.json"), "r") as f:
 		glyphnames = load(f)
 
-	with open("../assets/fonts/fontawesome/metadata/icons.json", "r") as f:
+	with open(get_abs_path(__file__, "../assets/fonts/fontawesome/metadata/icons.json"), "r") as f:
 		icons = load(f)
 
 # get em, which all other specifications depend on
