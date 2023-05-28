@@ -431,7 +431,11 @@ class Bar(N_QGraphicsItemGroup):
 
         return intervals
 
-    def add_object(self, new_obj: Union[Musicitem, N_QGraphicsItemGroup]):
+    def add_object(self, new_obj: Union[Musicitem, N_QGraphicsItemGroup], set_black: bool = False):
+        """new_obj must be a deepcopy of an edit item"""
+        if (set_black):
+            new_obj.qt().setDefaultTextColor(Qt.black)
+
         self.qt().addToGroup(new_obj.qt())
 
         i = len(self.objects)
@@ -442,6 +446,7 @@ class Bar(N_QGraphicsItemGroup):
                 break
 
         self.objects.insert(i, new_obj)
+        return new_obj
 
     def add_rest(self, rest: Musicitem):
         new_rest = Rest(deepcopy(rest))

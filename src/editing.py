@@ -10,6 +10,7 @@ from misc import bound_in_intervals, find_overlap_intervals, bound
 from notation_system import Musicitem, MusicitemGroup, Rest, Clef, Note, Bar
 from fonts import get_specification
 
+from copy import deepcopy
 from typing import List, Union
 
 
@@ -54,7 +55,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
 
     if (group == "Noten"):
         if (symbol < 7):
-            note_edit_update(scene, mouse_pos, group, symbol)
+            note_edit_update(scene, mouse_pos, symbol)
         elif (symbol == 7):
             free_position(scene, mouse_pos, group, symbol)
 
@@ -84,7 +85,23 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
     elif (group == "Dynamik"):
         free_position(scene, mouse_pos, group, symbol)
     elif (group == "Vorzeichen"):
-        free_position(scene, mouse_pos, group, symbol)
+        accidental = scene.edit_objects[0]
+        accidental.change_text(SymbolButton.SYMBOLS["Vorzeichen"]["buttons"][symbol][0])
+
+        y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(scene.current_line)
+
+        # check wether accidental would fit into the bar
+        places = scene.current_stave.bars[scene.current_bar_n].find_places([accidental], get_next_bar_x(scene))
+
+        # reposition everything
+        x = bound_in_intervals(mouse_pos.x(), places)
+
+        if (x != None):
+            accidental.set_real_pos(x, y)
+            scene.successful = True
+        else:
+            scene.edit_objects[0].change_text()
+
     elif (group == "Taktarten"):
         bar_line_x = current_bar.qt().scenePos().x()
 
@@ -207,7 +224,7 @@ def free_position(scene: EditScene, mouse_pos: QPointF, group = "", symbol = -1)
     scene.successful = True
 
 
-def note_edit_update(scene: EditScene, mouse_pos: QPointF, group = "", symbol = -1):
+def note_edit_update(scene: EditScene, mouse_pos: QPointF, symbol = -1):
     note = scene.edit_objects[0]
     items = [note]
 
@@ -409,7 +426,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
     elif (group == "Dynamik"):
         added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
     elif (group == "Vorzeichen"):
-        added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+        added_item.append(scene.current_stave.bars[scene.current_bar_n].add_object(deepcopy(scene.edit_objects[0]), True))
     # --
 
     elif (group == "Taktarten"):

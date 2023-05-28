@@ -73,10 +73,10 @@ class SymbolButton(QPushButton):
             "font": "Bravura",
             "buttons": [
                 ["accidentalSharp", "Kreuz"],
-                ["accidentalFlat", "b"],
                 ["accidentalDoubleSharp", "Doppelkreuz"],
-                ["accidentalNatural", "Auflösung"],
+                ["accidentalFlat", "b"],
                 ["accidentalDoubleFlat", "doppel b"],
+                ["accidentalNatural", "Auflösung"],
             ],
         },
         # time signatures
