@@ -193,11 +193,7 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
 
     def get_clefs(self):
         """returns a list of clefs, like "Violinschlüssel", "Bassschlüssel", "Altschlüssel" or "Tenorschlüssel" """
-        ret: list[str] = []
-        for combo_box in self.voices_combo_boxes:
-            if (combo_box.isEnabled()):
-                ret.append(combo_box.currentText())
-        return ret
+        return [combo_box.currentText() for combo_box in self.voices_combo_boxes if combo_box.isEnabled()]
 
 
 class App(QApplication):
