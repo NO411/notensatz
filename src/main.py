@@ -56,6 +56,9 @@ def main():
     app.ui.action_save.triggered.connect(lambda: unselect_buttons(app))
     app.ui.action_export.triggered.connect(saving.export)
     app.ui.action_export.triggered.connect(lambda: unselect_buttons(app))
+    app.ui.action_print.triggered.connect(saving.print_doc)
+    app.ui.action_print.triggered.connect(lambda: unselect_buttons(app))
+
 
     # buttons and other gui elements
     app.ui.zoom_slider.valueChanged.connect(ui_misc.apply_zoom)

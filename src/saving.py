@@ -1,4 +1,4 @@
-from PyQt5.QtPrintSupport import QPrinter
+from PyQt5.QtPrintSupport import QPrinter, QPrintDialog
 from PyQt5.QtGui import QPainter, QDesktopServices
 from PyQt5.QtWidgets import QFileDialog, QMessageBox
 from PyQt5.QtCore import QFileInfo, QUrl
@@ -19,13 +19,7 @@ class SavingHander():
         self.app = app
         self.page_handling = page_handling
 
-    def export_to_pdf(self, filename):
-        # preparations for printing
-        unselect_buttons(self.app)
-
-        printer = QPrinter()
-        printer.setOutputFormat(QPrinter.PdfFormat)
-        printer.setOutputFileName(filename)
+    def print_pages(self, printer: QPrinter):
         painter = QPainter(printer)
 
         for i, page in enumerate(self.app.document_ui.pages):
@@ -40,6 +34,17 @@ class SavingHander():
                 printer.newPage()
 
         painter.end()
+
+    def export_to_pdf(self, filename = ""):
+        # preparations for printing
+        unselect_buttons(self.app)
+
+        printer = QPrinter(QPrinter.HighResolution)
+
+        printer.setOutputFormat(QPrinter.PdfFormat)
+        printer.setOutputFileName(filename)
+
+        self.print_pages(printer)
 
     def generate_filename(self):
         # generate a filename out of the heading and the composer and remove unwanted chars
@@ -59,6 +64,14 @@ class SavingHander():
             # open pdf in extern viewer, if successfull
             if (QFileInfo(filename).exists()):
                 QDesktopServices.openUrl(QUrl.fromLocalFile(filename))
+
+    def print_doc(self):
+        printer = QPrinter(QPrinter.HighResolution)
+        dialog = QPrintDialog(printer, self.app.window)
+        
+        if (dialog.exec_() == QPrintDialog.Accepted):
+            self.print_pages(printer)
+
 
     def save_data(self, file_name):
         with open(file_name, "wb") as f:

@@ -79,6 +79,8 @@ class App_Ui(Ui_MainWindow):
         self.action_save.setEnabled(True)
         self.action_save_as.setEnabled(True)
         self.action_export.setEnabled(True)
+        self.action_print.setEnabled(True)
+
 
     def setup_welcome_screen(self, app):
         self.in_welcome_screen = True
@@ -111,6 +113,7 @@ class App_Ui(Ui_MainWindow):
         self.action_save.setEnabled(False)
         self.action_save_as.setEnabled(False)
         self.action_export.setEnabled(False)
+        self.action_print.setEnabled(False)
 
 
 class MainWindow(QMainWindow):
