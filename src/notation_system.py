@@ -20,7 +20,7 @@ class Musicitem(N_QGraphicsTextItem):
     # em space (typically width of "M", here height of one bar line)
     # -> stave lines spacing = em / 4
     EM = get_one_em(Settings.Symbols.FONTSIZE)
-    MIN_OBJ_DIST = EM / 6
+    MIN_OBJ_DIST = EM / 8
 
     def __init__(self, symbol: Union[str, List[str]] = "", color: QColor = Qt.black):
         super().__init__(Fixed_QGraphicsTextItem(""))
@@ -625,12 +625,12 @@ class Stave(N_QGraphicsItemGroup):
     def get_center(self) -> QPointF:
         return QPointF(self.qt().scenePos().x() + self.width / 2, self.qt().scenePos().y() + Musicitem.EM / 2)
 
-    def get_closest_line(self, mouse_pos: QPointF, steps: int = 2) -> int:
+    def get_closest_line(self, mouse_pos: QPointF, steps: int = 2, offset: float = 0) -> int:
         step = Musicitem.EM / 4
         n = (self.qt().scenePos().y() + Musicitem.EM - mouse_pos.y()) / step
         # with multiplying by two, rounding and the dividing again, we get 0.5 steps
         n *= steps
-        return bound(round(n) / steps, -10, 10)
+        return bound(round(n) / steps + offset, -10, 10)
 
     def get_closest_bar_n(self, mouse_pos: QPointF) -> int:
         bar_line_intervals = []

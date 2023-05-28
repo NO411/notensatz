@@ -57,7 +57,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
         if (symbol < 7):
             note_edit_update(scene, mouse_pos, symbol)
         elif (symbol == 7):
-            free_position(scene, mouse_pos, group, symbol)
+            position_dot(scene, mouse_pos)
 
     elif (group == "Pausen"):
         if (symbol < 7):
@@ -78,7 +78,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
             else:
                 scene.edit_objects[0].change_text()
         elif (symbol == 7):
-            free_position(scene, mouse_pos, group, symbol)
+            position_dot(scene, mouse_pos)
 
     elif (group == "Artikulation"):
         free_position(scene, mouse_pos, group, symbol)
@@ -93,14 +93,13 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
         # check wether accidental would fit into the bar
         places = scene.current_stave.bars[scene.current_bar_n].find_places([accidental], get_next_bar_x(scene))
 
-        # reposition everything
         x = bound_in_intervals(mouse_pos.x(), places)
 
         if (x != None):
             accidental.set_real_pos(x, y)
             scene.successful = True
         else:
-            scene.edit_objects[0].change_text()
+            accidental.change_text()
 
     elif (group == "Taktarten"):
         bar_line_x = current_bar.qt().scenePos().x()
@@ -183,7 +182,8 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
                 piano_bar.change_text()
 
         elif (1 < symbol < 5):
-            scene.edit_objects[0].change_text(Clef.SYMBOLS[symbol - 2]["smufl_key"])
+            clef = scene.edit_objects[0]
+            clef.change_text(Clef.SYMBOLS[symbol - 2]["smufl_key"])
 
             next_bar_x = get_next_bar_x(scene)
 
@@ -195,14 +195,13 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
 
             line = Clef.SYMBOLS[symbol - 2]["lines"][dists.index(min(dists))]
 
-            places = current_bar.find_places([scene.edit_objects[0]], next_bar_x)
+            places = current_bar.find_places([clef], next_bar_x)
             if (len(places) >= 1):
                 clef_x = bound_in_intervals(mouse_pos.x(), places)
-                scene.edit_objects[0].set_real_pos(clef_x,
-                                                   scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
+                clef.set_real_pos(clef_x, scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
                 scene.successful = True
             else:
-                scene.edit_objects[0].change_text()
+                clef.change_text()
         elif (symbol == 0 or symbol > 4):
             free_position(scene, mouse_pos, group, symbol)
     elif (group == "Werkzeuge"):
@@ -222,6 +221,25 @@ def free_position(scene: EditScene, mouse_pos: QPointF, group = "", symbol = -1)
               Settings.Layout.HEIGHT - Settings.Layout.MARGIN)
     )
     scene.successful = True
+
+
+def position_dot(scene: EditScene, mouse_pos: QPointF):
+    dot = scene.edit_objects[0]
+    dot.change_text("metAugmentationDot")
+
+    line = scene.current_stave.get_closest_line(mouse_pos, 1, 0.5)
+    y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line)
+
+    # check wether dot would fit into the bar
+    places = scene.current_stave.bars[scene.current_bar_n].find_places([dot], get_next_bar_x(scene))
+
+    x = bound_in_intervals(mouse_pos.x(), places)
+
+    if (x != None):
+        dot.set_real_pos(x, y)
+        scene.successful = True
+    else:
+        dot.change_text()
 
 
 def note_edit_update(scene: EditScene, mouse_pos: QPointF, symbol = -1):
@@ -288,8 +306,7 @@ def note_edit_update(scene: EditScene, mouse_pos: QPointF, symbol = -1):
             items.append(leger_line)
             leger_line.change_text(line_type)
             leger_line_x = note.get_real_relative_x() - (leger_line.get_real_width() - note.get_real_width()) / 2
-            leger_line.set_real_pos(leger_line_x + Musicitem.spec_to_px(leger_correction),
-                                    scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
+            leger_line.set_real_pos(leger_line_x + Musicitem.spec_to_px(leger_correction), scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(line))
             o += 1
 
     # check wether all items would fit together in the bar
@@ -407,26 +424,29 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
 
     if (group == "Noten"):
         if (symbol < 7):
-            added_item.append(scene.current_stave.bars[scene.current_bar_n].add_note(scene.edit_objects[0], scene.edit_objects[1],
-                                                                   scene.edit_objects[2],
-                                                                   [item for item in scene.edit_objects if
-                                                                    item.key[:9] == "legerLine"]))
+            note = scene.current_stave.bars[scene.current_bar_n].add_note(
+                scene.edit_objects[0],
+                scene.edit_objects[1],
+                scene.edit_objects[2],
+                [item for item in scene.edit_objects if item.key[:9] == "legerLine"]
+            )
+            added_item.append(note)
         elif (symbol == 7):
-            added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+            added_item.append(add_simple_item(scene))
     elif (group == "Pausen"):
         if (symbol < 7):
             added_item.append(scene.current_stave.bars[scene.current_bar_n].add_rest(scene.edit_objects[0]))
         elif (symbol == 7):
-            added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+            added_item.append(add_simple_item(scene))
 
     # --
     # this will be specified in more detail later
     elif (group == "Artikulation"):
-        added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+        added_item.append(add_free_item(scene))
     elif (group == "Dynamik"):
-        added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+        added_item.append(add_free_item(scene))
     elif (group == "Vorzeichen"):
-        added_item.append(scene.current_stave.bars[scene.current_bar_n].add_object(deepcopy(scene.edit_objects[0]), True))
+        added_item.append(add_simple_item(scene))
     # --
 
     elif (group == "Taktarten"):
@@ -434,7 +454,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
             added_item.append(stave.bars[scene.current_bar_n].show_time_signature(
                 SymbolButton.SYMBOLS["Taktarten"]["buttons"][symbol][1]))
     elif (group == "N-Tolen"):
-        added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+        added_item.append(add_free_item(scene))
     elif (group == "Sonstige"):
         if (symbol == 1):
             for n, stave in enumerate(scene.current_system.staves):
@@ -444,7 +464,7 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
         elif (1 < symbol < 5):
             added_item.append(scene.current_stave.bars[scene.current_bar_n].add_clef(scene.edit_objects[0], symbol - 2))
         elif (symbol == 0 or symbol > 4):
-            added_item.append(scene.current_system.add_free_item(scene.edit_objects[0]))
+            added_item.append(add_free_item(scene))
     elif (group == "Werkzeuge"):
         if (symbol == 0):
             delete_item_pressed(scene)
@@ -467,6 +487,14 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
     else:
         # remove the selected item from the current pos
         edit_update(scene, mouse_pos, app, group, symbol)
+
+
+def add_free_item(scene: EditScene):
+    return scene.current_system.add_free_item(scene.edit_objects[0])
+
+
+def add_simple_item(scene: EditScene):
+    return scene.current_stave.bars[scene.current_bar_n].add_object(deepcopy(scene.edit_objects[0]), True)
 
 
 def delete_item_pressed(scene: EditScene):
