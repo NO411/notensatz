@@ -174,6 +174,9 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
         self.piano_checkbox.setChecked(settings["piano_checkbox"])
         self.time_signature_combo_box.setCurrentIndex(settings["time_signature_combo_box"])
 
+        for n, index in enumerate(settings["clefs"]):
+            self.voices_combo_boxes[n].setCurrentIndex(index)
+
     def get_settings(self):
         settings = {
             "heading": self.heading_line_edit.text(),
@@ -182,13 +185,14 @@ class NewDocumentDialogUI(Ui_NewDocumentDialog):
             "tempo": self.tempo_line_edit.text(),
             "key_signature": self.key_signatures_combo_box.currentIndex(),
             "staves": self.staves_spin_box.value(),
+            "clefs": [combo_box.currentIndex() for combo_box in self.voices_combo_boxes if combo_box.isEnabled()],
             "piano_checkbox": self.piano_checkbox.isChecked(),
             "time_signature_combo_box": self.time_signature_combo_box.currentIndex(),
         }
         return settings
 
     def get_clefs(self):
-        """return a lsit of clefs, like "Violinschlüssel", "Bassschlüssel", "Altschlüssel" or "Tenorschlüssel" """
+        """returns a list of clefs, like "Violinschlüssel", "Bassschlüssel", "Altschlüssel" or "Tenorschlüssel" """
         ret: list[str] = []
         for combo_box in self.voices_combo_boxes:
             if (combo_box.isEnabled()):

@@ -20,6 +20,7 @@ class Settings:
             "tempo": "",
             "key_signature": 0,
             "staves": 2,
+            "clefs": [0, 0],
             "piano_checkbox": False,
             "time_signature_combo_box": 5,
         }

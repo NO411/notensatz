@@ -138,8 +138,26 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
         scene.successful = True
 
     elif (group == "Sonstige"):
+        # repeat sign
+        if (symbol == 0):
+            repeat = scene.edit_objects[0]
+            repeat.change_text("repeatDots")
+
+            y = scene.current_stave.qt().scenePos().y() + Musicitem.get_line_y(0)
+
+            # check wether repeat would fit into the bar
+            places = scene.current_stave.bars[scene.current_bar_n].find_places([repeat], get_next_bar_x(scene))
+
+            x = bound_in_intervals(mouse_pos.x(), places)
+
+            if (x != None):
+                repeat.set_real_pos(x, y)
+                scene.successful = True
+            else:
+                repeat.change_text()
+
         # barline
-        if (symbol == 1):
+        elif (symbol == 1):
             new_bar = scene.edit_objects[0]
             piano_bar = scene.edit_objects[1]
             new_bar.change_text("barlineSingle")
@@ -202,7 +220,7 @@ def edit_update(scene: EditScene, mouse_pos: QPointF, app: App, group = "", symb
                 scene.successful = True
             else:
                 clef.change_text()
-        elif (symbol == 0 or symbol > 4):
+        elif (symbol == 5):
             free_position(scene, mouse_pos, group, symbol)
     elif (group == "Werkzeuge"):
         if (symbol == 0):
@@ -456,14 +474,16 @@ def edit_pressed(scene: EditScene, mouse_pos: QPointF, app: App, group, symbol):
     elif (group == "N-Tolen"):
         added_item.append(add_free_item(scene))
     elif (group == "Sonstige"):
-        if (symbol == 1):
+        if (symbol == 0):
+            added_item.append(add_simple_item(scene))
+        elif (symbol == 1):
             for n, stave in enumerate(scene.current_system.staves):
                 barline = stave.add_bar(scene.edit_objects, app.document_ui.staves, n, app.document_ui.with_piano)
                 if (barline != None):
                     added_item.append(barline)
         elif (1 < symbol < 5):
             added_item.append(scene.current_stave.bars[scene.current_bar_n].add_clef(scene.edit_objects[0], symbol - 2))
-        elif (symbol == 0 or symbol > 4):
+        elif (symbol == 5):
             added_item.append(add_free_item(scene))
     elif (group == "Werkzeuge"):
         if (symbol == 0):
