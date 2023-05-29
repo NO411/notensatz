@@ -24,7 +24,7 @@ class Musicitem(N_QGraphicsTextItem):
 
     def __init__(self, symbol: Union[str, List[str]] = "", color: QColor = Qt.black):
         super().__init__(Fixed_QGraphicsTextItem(""))
-
+        self.qt().setTextInteractionFlags(Qt.TextEditorInteraction)
         self.change_text(symbol)
         self.qt().setFont(QFont("Bravura", real_font_size(Settings.Symbols.FONTSIZE)))
         self.qt().setDefaultTextColor(color)

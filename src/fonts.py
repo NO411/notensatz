@@ -43,9 +43,6 @@ def load_fonts():
 
     # Bravura font, see <https://github.com/steinbergmedia/bravura/releases> and <https://w3c.github.io/smufl/latest/index.html> documentation
     QFontDatabase().addApplicationFont("assets/fonts/bravura/otfs/Bravura.otf")
-    # Times New Roman font, see <https://freefontsfamily.com/times-new-roman-font-free/#google_vignette>
-    # (should be included in Windows anyways)
-    QFontDatabase().addApplicationFont("assets/fonts/times_new_roman/otfs/times new roman.ttf")
 
     # Font Awesome 6, see <https://fontawesome.com/download>
     QFontDatabase().addApplicationFont("assets/fonts/fontawesome/otfs/Font Awesome Solid.otf")
