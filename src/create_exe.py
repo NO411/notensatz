@@ -15,7 +15,6 @@ PyInstaller.__main__.run([
     "--add-data=src/document_settings.json;src",
     "--add-data=assets/icon.png;assets",
     "--add-data=assets/fonts/bravura/otfs/Bravura.otf;assets/fonts/bravura/otfs",
-    "--add-data=assets/fonts/times_new_roman/otfs/times new roman.ttf;assets/fonts/times_new_roman/otfs",
     "--add-data=assets/fonts/fontawesome/otfs/Font Awesome Solid.otf;assets/fonts/fontawesome/otfs",
     "--add-data=assets/fonts/bravura/metadata/bravura_metadata.json;assets/fonts/bravura/metadata",
     "--add-data=assets/fonts/bravura/metadata/glyphnames.json;assets/fonts/bravura/metadata",
